@@ -1,7 +1,12 @@
 import asyncio
 import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
+
+_BACKEND_DIR = Path(__file__).resolve().parents[1]
+if str(_BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_DIR))
 
 from pwdlib import PasswordHash
 from sqlalchemy import delete
@@ -204,19 +209,39 @@ async def sembrar(session: AsyncSession, reset: bool = False) -> bool:
     return True
 
 
+async def _imprimir_resumen() -> None:
+    async with async_session() as session:
+        bolsines = (await session.exec(select(Bolsin))).all()
+        grupos: dict[str, list[int]] = {}
+        for bolsin in bolsines:
+            if bolsin.sosEnviado() and bolsin.origen is not None:
+                grupos.setdefault(bolsin.origen.getCodigo(), []).append(
+                    bolsin.getNumeroBolsin()
+                )
+    print("Enviados por CM:")
+    for codigo in sorted(grupos):
+        numeros = ", ".join(str(n) for n in sorted(grupos[codigo]))
+        print(f"  {codigo}: {numeros}")
+
+
 async def seed(reset: bool = False) -> bool:
     await create_db_and_tables()
     async with async_session() as session:
         return await sembrar(session, reset)
 
 
-def main(argv: Optional[list[str]] = None) -> None:
-    argumentos = sys.argv[1:] if argv is None else argv
-    cargado = asyncio.run(seed("--reset" in argumentos))
+async def _ejecutar(reset: bool) -> None:
+    cargado = await seed(reset)
     if cargado:
         print("Datos semilla cargados.")
     else:
         print("La base ya tiene datos; use --reset para recargar.")
+    await _imprimir_resumen()
+
+
+def main(argv: Optional[list[str]] = None) -> None:
+    argumentos = sys.argv[1:] if argv is None else argv
+    asyncio.run(_ejecutar("--reset" in argumentos))
 
 
 if __name__ == "__main__":

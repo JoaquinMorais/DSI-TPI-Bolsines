@@ -144,3 +144,4 @@
 | 2026-11-25 | Autenticacion de las rutas de seguimiento: JWT vs usuario de desarrollo. | Se usa **`usuario_dev_dependency`** (`USUARIO_DEV`); el login JWT sigue disponible en `routes/auth.py`. |
 | 2026-11-25 | `GET /me`. | Se agrega en `routes/auth.py`; devuelve `{id, mail, nombre, apellido, rol, codigoCM}` del usuario de desarrollo. |
 | 2026-11-25 | Ubicacion de tests de rutas. | **`backend/tests/routes/`** con `TestClient`, `dependency_overrides` del usuario dev y GPS mockeado. |
+| 2026-11-25 | Ejecucion del seed: `python -m data.seed` vs `python -m backend.data.seed`. | Se soporta **`python -m backend.data.seed`** desde la raiz (bootstrap de `sys.path`), ademas de `python -m data.seed` en Docker. El seed imprime los Enviados por CM. Verificado contra la API GPS real: 110 con coordenadas reales, A1 404 y A3 con 111 sin ubicacion. |

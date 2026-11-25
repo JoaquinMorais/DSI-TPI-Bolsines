@@ -149,4 +149,7 @@ Regla de carga: `fechaHoraInicio` del cambio siguiente es igual a `fechaHoraFin`
    - Un solo `CambioEstado` con `fechaHoraFin` nula por bolsin.
    - Origen y destino de 101, 102, 103, 104 y 110 iguales a la API.
    - 111 no tiene equivalente en la API (escenario A3).
-5. Ejecucion: `docker compose exec backend python -m data.seed`, o localmente desde la raiz con `PYTHONPATH=backend python -m data.seed`.
+5. Ejecucion:
+   - Desde la raiz: `python -m backend.data.seed` (el script agrega `backend/` al `sys.path`). Con `--reset` para recargar.
+   - En Docker: `docker compose run --rm backend python -m data.seed` (o `docker compose exec backend ...` con el contenedor arriba).
+   - Al terminar imprime el resumen de bolsines Enviados por CM.
