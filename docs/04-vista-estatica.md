@@ -32,9 +32,9 @@ class GestorBuscarBolsines {
   - codigoBolsin: int[]
   + obtenerCodigoBolsinesEnviados(): int[]
   + crearIterador(elementos: Bolsin[]): IIterador
-  + opcionSeguirBolsines(usuario: Usuario): void
-  + tomarSeleccionBolsin(numeroBolsin: int): void
-  + tomarConfirmacionEnvioCorreo(confirma: bool): void
+  + opcionSeguirBolsines(usuario: Usuario): ResultadoSeguimiento
+  + tomarSeleccionBolsin(numeroBolsin: int): ResultadoSeleccion
+  + tomarConfirmacionEnvioCorreo(confirma: bool): ResultadoConfirmacion
   + cancelar(): void
   - enviarMailGCM(): bool
 }
@@ -137,6 +137,33 @@ class MapaBolsines {
   - marcadores: UbicacionBolsin[]
 }
 
+class Coordenada {
+  - latitud: float
+  - longitud: float
+}
+
+class SinUbicacion {
+  - numeroBolsin: int
+  - motivo: str
+}
+
+class ResultadoSeguimiento {
+  - codigoCM: str
+  - bolsines: Bolsin[]
+  - mapa: MapaBolsines
+  - sinUbicacion: SinUbicacion[]
+}
+
+class ResultadoSeleccion {
+  - bolsin: Bolsin
+  - ubicacion: UbicacionBolsin
+}
+
+class ResultadoConfirmacion {
+  - notificado: bool
+  - destinatario: str
+}
+
 ' Patron Iterator
 IAgregado <|.. GestorBuscarBolsines : realiza
 IIterador <|.. IteradorBolsin : realiza
@@ -161,6 +188,10 @@ GestorBuscarBolsines ..> InterfazCorreo
 InterfazGPSTracker ..> UbicacionBolsin
 InterfazGoogleMaps ..> MapaBolsines
 MapaBolsines ..> UbicacionBolsin
+MapaBolsines ..> Coordenada
+GestorBuscarBolsines ..> ResultadoSeguimiento
+GestorBuscarBolsines ..> ResultadoSeleccion
+GestorBuscarBolsines ..> ResultadoConfirmacion
 
 @enduml
 ```
@@ -195,9 +226,9 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | - | `codigoBolsin` | `int[]` | |
 | + | `obtenerCodigoBolsinesEnviados` | | `int[]` |
 | + | `crearIterador` | `elementos: Bolsin[]` | `IIterador` |
-| + | `opcionSeguirBolsines` | `usuario: Usuario` | `void` |
-| + | `tomarSeleccionBolsin` | `numeroBolsin: int` | `void` |
-| + | `tomarConfirmacionEnvioCorreo` | `confirma: bool` | `void` |
+| + | `opcionSeguirBolsines` | `usuario: Usuario` | `ResultadoSeguimiento` |
+| + | `tomarSeleccionBolsin` | `numeroBolsin: int` | `ResultadoSeleccion` |
+| + | `tomarConfirmacionEnvioCorreo` | `confirma: bool` | `ResultadoConfirmacion` |
 | + | `cancelar` | | `void` |
 | - | `enviarMailGCM` | | `bool` |
 

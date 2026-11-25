@@ -94,7 +94,7 @@ Reglas:
 
 El backend no dibuja mapas. `InterfazGoogleMaps` (`backend/integrations/google_maps/interfaz_google_maps.py`) prepara los datos y el frontend renderiza.
 
-`obtenerMapa(ubicaciones: UbicacionBolsin[]) -> MapaBolsines`, donde `MapaBolsines` es un schema de salida (`backend/schemas/seguimiento.py`):
+`obtenerMapa(ubicaciones: UbicacionBolsin[]) -> MapaBolsines`, donde `MapaBolsines` es un value object (`backend/models/mapa_bolsines.py`); `routes` lo serializa con `MapaBolsinesOut`:
 
 ```
 MapaBolsines

@@ -74,7 +74,12 @@ Puntos clave:
 | `RefreshToken` | `backend/models/refresh_token.py` | Entidad de sesion de auth. `idUser`, `tokenHash`, `expiresAt`. No es `Sesion` de los diagramas. Detalle en `docs/02-modelo-datos.md`. |
 | `UbicacionBolsin` | `backend/models/ubicacion_bolsin.py` | Value object: `numeroBolsin`, `latitud`, `longitud`, `fechaHoraUltimaActualizacion`. Lo produce la integracion GPS. |
 | `UbicacionNoDisponibleError` | `backend/integrations/gps_tracker/errores.py` | Excepcion del GPS que el gestor traduce a A3. |
-| `MapaBolsines` | `backend/schemas/seguimiento.py` | Schema de salida: `centro`, `zoom`, `marcadores`. Lo devuelve `obtenerMapa`. |
+| `MapaBolsines` | `backend/models/mapa_bolsines.py` | Value object: `centro`, `zoom`, `marcadores`. Lo devuelve `obtenerMapa`. |
+| `Coordenada` | `backend/models/mapa_bolsines.py` | Value object: `latitud`, `longitud`. |
+| `SinUbicacion` | `backend/models/resultados.py` | Value object: `numeroBolsin`, `motivo`. |
+| `ResultadoSeguimiento` | `backend/models/resultados.py` | Value object de salida del paso 1. |
+| `ResultadoSeleccion` | `backend/models/resultados.py` | Value object de salida de la seleccion. |
+| `ResultadoConfirmacion` | `backend/models/resultados.py` | Value object de salida de la confirmacion. |
 | `InterfazGPSTracker` | `backend/integrations/gps_tracker/interfaz_gps_tracker.py` | Interfaz con `getBolsinLocation(numeroBolsin, codigoCM)`. |
 | (impl. GPS XTR-4500L) | `backend/integrations/gps_tracker/gps_tracker_xtr4500l.py` | Implementacion usada en el CU 36 contra la API de la catedra. |
 | (impl. GPS NavTrack) | `backend/integrations/gps_tracker/gps_tracker_navtrack_qx7a.py` | Adaptador disponible, fuera del flujo del CU 36. |
@@ -206,6 +211,8 @@ backend/
     usuario.py                            # Usuario (mail, contrasena hasheada, verify_password)
     refresh_token.py                   # RefreshToken
     ubicacion_bolsin.py                # UbicacionBolsin (value object)
+    mapa_bolsines.py                   # Coordenada y MapaBolsines (value objects)
+    resultados.py                      # ResultadoSeguimiento/Seleccion/Confirmacion, SinUbicacion
     iterator/
       __init__.py
       i_agregado.py                    # IAgregado
