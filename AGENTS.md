@@ -33,7 +33,8 @@ docker-compose.yml        levanta backend y frontend
 .env.example              plantilla de variables (.env no se commitea)
 pytest.ini                pythonpath = backend, testpaths = backend/tests
 backend/
-  index.py                entrypoint FastAPI: app, CORS, include_router, composicion
+  main.py                 entrypoint FastAPI: app, CORS, include_router, composicion
+  index.py                alias de main (reexporta app, compatibilidad)
   Dockerfile
   requirements.txt        dependencias del backend
   config/                 settings, conexion a DB, composicion (composition root)
@@ -99,7 +100,7 @@ frontend/
 - No escribir codigo sin que el usuario lo pida explicitamente en la tarea.
 - Cada cambio debe mantener la estructura de carpetas de la seccion 3.
 - Antes de cerrar una tarea de codigo: ejecutar `pytest` desde la raiz del repositorio (`pytest.ini` apunta a `backend/`).
-- Levantar backend desde la raiz: `uvicorn index:app --app-dir backend --port 8020`. Con Docker: `docker compose up --build`.
+- Levantar backend desde la raiz: `uvicorn main:app --app-dir backend --port 8020`. Con Docker: `docker compose up --build`.
 - Un solo worker de uvicorn: el registro de gestores de casos de uso vive en memoria.
 - No commitear ni hacer push sin pedido explicito.
 - Cada tarea termina con un commit (salvo que el usuario pida lo contrario).

@@ -12,7 +12,7 @@ pytestmark = pytest.mark.integracion
 
 
 def _api_disponible() -> bool:
-    if not settings.GPS_API_KEY_XTR4500L:
+    if not settings.GPS_API_KEY:
         return False
     try:
         respuesta = httpx.get(f"{settings.GPS_BASE_URL}/health", timeout=2)
@@ -24,12 +24,12 @@ def _api_disponible() -> bool:
 @pytest.fixture(autouse=True)
 def _requiere_api() -> None:
     if not _api_disponible():
-        pytest.skip("API GPS no disponible o falta GPS_API_KEY_XTR4500L")
+        pytest.skip("API GPS no disponible o falta GPS_API_KEY")
 
 
 def _adaptador(api_key: str | None = None) -> GpsTrackerXtr4500l:
     return GpsTrackerXtr4500l(
-        settings.GPS_BASE_URL, api_key or settings.GPS_API_KEY_XTR4500L
+        settings.GPS_BASE_URL, api_key or settings.GPS_API_KEY
     )
 
 

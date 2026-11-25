@@ -61,6 +61,6 @@ Consulta permanente: `99-decisiones-y-dudas.md` (toda duda resuelta o pendiente 
 
 ```
 pytest                                  # desde la raiz; pytest.ini apunta a backend/
-uvicorn index:app --app-dir backend --port 8020
+uvicorn main:app --app-dir backend --port 8020
 docker compose up --build               # backend 8020 + frontend 3020
 ```

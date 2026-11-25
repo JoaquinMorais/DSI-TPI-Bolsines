@@ -142,7 +142,7 @@ Regla de carga: `fechaHoraInicio` del cambio siguiente es igual a `fechaHoraFin`
 
 ## 9. Procedimiento de carga (`backend/data/seed.py`)
 
-1. Crear el esquema con `create_all` sobre la base de `DB_URL`.
+1. Crear el esquema con `create_all` sobre la base de `DATABASE_URL`.
 2. Si ya hay filas en `Estado`, no hacer nada (idempotente). Con `--reset`, borrar y recargar. Solo para desarrollo.
 3. Insertar en este orden: `Estado`, `Rol`, `ComisionMedica`, `Usuario` (con hash de `SEED_PASSWORD_DEV`), `Empleado`, `Bolsin`, `CambioEstado`. Los bolsines referencian las CM por codigo, que el script resuelve a id.
 4. Verificaciones al final:

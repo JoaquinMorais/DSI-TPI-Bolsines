@@ -116,3 +116,12 @@
 | 2026-11-25 | `SECRET_KEY` sin valor en dev rompe los tokens. | Default de desarrollo largo (`dev-insecure-...`); en produccion va por `.env`. `ACCESS_TOKEN_MINUTES=30`, `REFRESH_DAYS=7`. |
 | 2026-11-25 | Mapeo de errores en `routes`: seleccion inexistente, correo caido, `idCU` vencido. | `422` si el bolsin no esta entre los enviados; `502` si el correo no sale (la sesion queda abierta); `404` si el `idCU` no existe o vencio. |
 | 2026-11-25 | El volumen de la base en `/app/data` tapaba `data/seed.py` dentro del contenedor. | El volumen `bolsines-data` se monta en `/app/db` y `DB_URL` (compose y `.env.example`) apunta a `/app/db/bolsines.db`. El codigo de `backend/data/` queda visible. |
+| 2026-11-25 | Entrypoint `index.py` (docs/01) vs `main.py` (pedido del equipo). | Se usa **`main.py`**. `index.py` queda como alias que reexporta `app` (compatibilidad con tests y Docker previo). Dockerfile usa `main:app`. |
+| 2026-11-25 | `DB_URL` vs `DATABASE_URL`. | Se renombra a **`DATABASE_URL`** en `settings.py` y en `config/database.py` (y compose). |
+| 2026-11-25 | Funciones de base: `get_db`/`create_db_and_tables` vs `get_session`/`crear_tablas`. | Se agregan **`get_session`** y **`crear_tablas`** como canonicas; `get_db`/`create_db_and_tables` quedan como alias para no romper imports existentes. |
+| 2026-11-25 | GPS: una `GPS_API_KEY` y `GPS_MODELO` en minusculas (`xtr4500l`/`navtrack`/`geopulse`) vs claves por modelo y nombres largos. | Se usa **`GPS_API_KEY`** unica y `GPS_MODELO` en minusculas. Solo `xtr4500l` esta implementado; `navtrack`/`geopulse` lanzan error de configuracion hasta implementarse. |
+| 2026-11-25 | `CORS_ORIGINS` default `5173` (pedido) vs `3020` (frontend/docs). | Default en settings **`http://localhost:5173`**; docker compose fija `CORS_ORIGINS=http://localhost:3020` para el frontend. |
+| 2026-11-25 | `USUARIO_DEV`. | Se agrega a `Settings` (default `eb.cba01@example.test`) y a `.env.example`. Por ahora informativo; el seed mantiene sus usuarios. |
+| 2026-11-25 | `.env.example` en la raiz vs en `backend/`. | Se crea **`backend/.env.example`** (lo lee `settings` desde `backend/.env`). Se mantiene el `.env.example` de la raiz para `docker compose`. |
+| 2026-11-25 | Requirements: pedido de 8 paquetes pinneados. | Se pinnean los 8 y se agregan las dependencias que el CU 36 ya usa: `aiosqlite`, `sqlalchemy[asyncio]`, `PyJWT`, `pwdlib[argon2]`, `python-multipart`. |
+| 2026-11-25 | Paquetes sin `__init__.py`. | Se agregan `__init__.py` en todas las carpetas de `backend/`. |

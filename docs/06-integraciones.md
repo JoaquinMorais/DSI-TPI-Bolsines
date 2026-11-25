@@ -146,21 +146,19 @@ Contenido del mail (CU 31): numero de bolsin, fecha y hora de ultima actualizaci
 
 ## 6. Configuracion
 
-Todas las variables se leen en `backend/config/settings.py` y se cargan desde `.env` (ver `.env.example`). Ningun modulo lee `os.environ` directamente.
+Todas las variables se leen en `backend/config/settings.py` y se cargan desde `backend/.env` (ver `backend/.env.example`). Para Docker, `docker-compose.yml` inyecta las variables desde el `.env` de la raiz. Ningun modulo lee `os.environ` directamente.
 
 | Variable | Uso | Default |
 |---|---|---|
-| `GPS_MODELO` | Modelo de dispositivo: `XTR-4500L`, `NAVTRACK-QX7A`, `GEOPULSE-MTR900` | `XTR-4500L` |
+| `GPS_MODELO` | Modelo de dispositivo: `xtr4500l`, `navtrack`, `geopulse` | `xtr4500l` |
 | `GPS_BASE_URL` | URL base de la API GPS | `http://localhost:8080` |
-| `GPS_API_KEY_XTR4500L` | API key del XTR-4500L (header `X-API-Key`) | vacio en el repo. Valor en `.env`. |
-| `GPS_API_KEY_NAVTRACK` | API key del NavTrack QX-7A | vacio. Solo si se usa ese modelo. |
-| `GPS_API_KEY_GEOPULSE` | API key del GeoPulse MTR-900 | vacio. Solo si se usa ese modelo. |
+| `GPS_API_KEY` | API key del modelo elegido (header `X-API-Key`) | vacio en el repo. Valor en `.env`. |
 | `CORREO_MODO` | `simulado` o `graph` | `simulado` |
 | `CORREO_ARCHIVO` | Archivo donde el correo simulado guarda los mensajes | vacio (solo log) |
 | `CORREO_TENANT_ID`, `CORREO_CLIENT_ID`, `CORREO_CLIENT_SECRET` | Credenciales de Microsoft Graph | vacio. Solo si `CORREO_MODO=graph`. |
 | `VITE_GOOGLE_MAPS_API_KEY` (frontend) | Clave de la API de Maps para el navegador | vacio. Restringida por dominio. |
 
-Ver `.env.example` (variables del backend). La clave de Maps va en `frontend/.env`, no en el de la raiz.
+Ver `backend/.env.example` (variables del backend). La clave de Maps va en `frontend/.env`.
 
 ## 7. Pendientes
 

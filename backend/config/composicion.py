@@ -1,15 +1,21 @@
+from config.settings import settings
 from integrations.correo.correo_simulado import CorreoSimulado
 from integrations.correo.interfaz_correo import InterfazCorreo
 from integrations.google_maps.google_maps_adapter import GoogleMapsAdapter
 from integrations.google_maps.interfaz_google_maps import InterfazGoogleMaps
 from integrations.gps_tracker.gps_tracker_xtr4500l import GpsTrackerXtr4500l
 from integrations.gps_tracker.interfaz_gps_tracker import InterfazGPSTracker
-from config.settings import settings
 from services.gestor_buscar_bolsines import GestorBuscarBolsines
 
 
 def crear_gps() -> InterfazGPSTracker:
-    return GpsTrackerXtr4500l(settings.GPS_BASE_URL, settings.GPS_API_KEY_XTR4500L)
+    modelo = settings.GPS_MODELO.strip().lower()
+    if modelo == "xtr4500l":
+        return GpsTrackerXtr4500l(settings.GPS_BASE_URL, settings.GPS_API_KEY)
+    raise ValueError(
+        f"GPS_MODELO '{settings.GPS_MODELO}' no implementado "
+        "(solo 'xtr4500l' por ahora)"
+    )
 
 
 def crear_maps() -> InterfazGoogleMaps:

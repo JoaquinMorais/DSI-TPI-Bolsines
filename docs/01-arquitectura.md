@@ -1,6 +1,6 @@
 # 01 - Arquitectura del backend (CU 36)
 
-El repositorio es un monorepo: el backend vive en `backend/` y el frontend en `frontend/`. `docs/` queda en la raiz. El backend se ejecuta desde la raiz con `uvicorn index:app --app-dir backend --port 8020`, y los imports son relativos a `backend/` (`from models import ...`).
+El repositorio es un monorepo: el backend vive en `backend/` y el frontend en `frontend/`. `docs/` queda en la raiz. El backend se ejecuta desde la raiz con `uvicorn main:app --app-dir backend --port 8020`, y los imports son relativos a `backend/` (`from models import ...`).
 
 ## 1. Diagrama de capas
 
@@ -195,9 +195,10 @@ backend/
   Dockerfile
   requirements.txt                     # dependencias del backend (sin versiones fijas todavia)
   .dockerignore
-  backend/index.py                             # entrypoint FastAPI: app, CORS, include_router, composicion
+  backend/main.py                              # entrypoint FastAPI: app, CORS, include_router, composicion
+  backend/index.py                             # alias de main (reexporta app, compatibilidad)
   backend/config/
-    settings.py                        # DB_URL, REFRESH_DAYS, COOKIE_SECURE, COOKIE_SAMESITE, GPS_*, CORREO_*
+    settings.py                        # DATABASE_URL, REFRESH_DAYS, COOKIE_*, GPS_*, CORREO_*, USUARIO_DEV
     database.py                        # engine SQLite async, create_all, db_dependency
     composicion.py                     # composition root: gestor con implementaciones reales o fakes
   backend/models/
@@ -291,4 +292,4 @@ frontend/
 - Variables del backend por `env_file: .env` (opcional). `.env.example` lista las claves sin secretos.
 - El frontend usa `VITE_API_URL=http://localhost:8020`: el navegador llama al backend, por eso no se usa el nombre del servicio.
 - CORS: `CORS_ORIGINS` (default `http://localhost:3020`).
-- Sin Docker: `uvicorn index:app --app-dir backend --port 8020` desde la raiz, y `npm run dev` dentro de `frontend/`.
+- Sin Docker: `uvicorn main:app --app-dir backend --port 8020` desde la raiz, y `npm run dev` dentro de `frontend/`.
