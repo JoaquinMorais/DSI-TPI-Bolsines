@@ -1,15 +1,26 @@
-import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Bolsines API")
+from config.database import create_db_and_tables
+from config.settings import settings
+from routes.auth import router as auth_router
+from routes.pantalla_buscar_bolsines import router as seguimiento_router
 
-# Origenes permitidos por CORS, separados por coma. Default: frontend en 3020.
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_db_and_tables()
+    yield
+
+
+app = FastAPI(title="Bolsines API", lifespan=lifespan)
+
 cors_origins = [
-    origin.strip()
-    for origin in os.getenv("CORS_ORIGINS", "http://localhost:3020").split(",")
-    if origin.strip()
+    origen.strip()
+    for origen in settings.CORS_ORIGINS.split(",")
+    if origen.strip()
 ]
 
 app.add_middleware(
@@ -19,6 +30,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
+app.include_router(seguimiento_router)
 
 
 @app.get("/health")

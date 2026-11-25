@@ -3,10 +3,12 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from config.database import db_dependency
 from config.settings import settings
+from models.empleado import Empleado
 from models.refresh_token import RefreshToken
 from models.usuario import Usuario
 from utils.security import (
@@ -78,7 +80,15 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
         )
-    user = await db.get(Usuario, int(payload["sub"]))
+    stmt = (
+        select(Usuario)
+        .where(Usuario.id == int(payload["sub"]))
+        .options(
+            selectinload(Usuario.empleado).selectinload(Empleado.rol),
+            selectinload(Usuario.empleado).selectinload(Empleado.comisionMedica),
+        )
+    )
+    user = (await db.exec(stmt)).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

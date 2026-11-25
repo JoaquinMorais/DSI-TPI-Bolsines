@@ -114,3 +114,4 @@
 | 2026-11-25 | El gestor devuelve `void` en 04, pero `routes` necesita los datos para la respuesta. | Devuelve value objects: `ResultadoSeguimiento`, `ResultadoSeleccion`, `ResultadoConfirmacion` (`models/resultados.py`). Actualizado en 04 y `.puml`. |
 | 2026-11-25 | Centro por defecto del mapa sin marcadores. | Se usa CABA (`-34.6037, -58.3816`) por ahora. Sigue pendiente de confirmar. |
 | 2026-11-25 | `SECRET_KEY` sin valor en dev rompe los tokens. | Default de desarrollo largo (`dev-insecure-...`); en produccion va por `.env`. `ACCESS_TOKEN_MINUTES=30`, `REFRESH_DAYS=7`. |
+| 2026-11-25 | Mapeo de errores en `routes`: seleccion inexistente, correo caido, `idCU` vencido. | `422` si el bolsin no esta entre los enviados; `502` si el correo no sale (la sesion queda abierta); `404` si el `idCU` no existe o vencio. |
