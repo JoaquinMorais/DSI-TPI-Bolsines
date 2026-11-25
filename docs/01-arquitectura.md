@@ -70,8 +70,8 @@ Puntos clave:
 | `ComisionMedica` | `backend/models/comision_medica.py` | Entidad SQLModel. `codigo`, `getCodigo`. |
 | `Empleado` | `backend/models/empleado.py` | Entidad SQLModel. `esTuCM`, `sosGCM`. Relacion 1 a 1 con `User` (`idUser` unico). Es el usuario de negocio logueado en el CU. |
 | `Rol` | `backend/models/rol.py` | Entidad SQLModel. `esGCM`. |
-| `User` | `backend/models/user.py` | Entidad de login (snake_case segun referencia). `id`, `mail`, `hashed_password` (o equivalente), `verify_password`. |
-| `RefreshToken` | `backend/models/refresh_token.py` | Entidad de sesion de auth. `id_user`, `token_hash`, `expires_at`. No es `Sesion` de los diagramas. |
+| `User` | `backend/models/user.py` | Entidad de login. `id`, `mail`, `hashedPassword`, `verify_password`. |
+| `RefreshToken` | `backend/models/refresh_token.py` | Entidad de sesion de auth. `idUser`, `tokenHash`, `expiresAt`. No es `Sesion` de los diagramas. Detalle en `docs/02-modelo-datos.md`. |
 | `UbicacionBolsin` | `backend/models/ubicacion_bolsin.py` | Value object: `numeroBolsin`, `latitud`, `longitud`, `fechaHoraUltimaActualizacion`. Lo produce la integracion GPS. |
 | `InterfazGPSTracker` | `backend/integrations/gps_tracker/interfaz_gps_tracker.py` | Interfaz con `getBolsinLocation(numeroBolsin, codigoCM)`. |
 | (impl. GPS) | `backend/integrations/gps_tracker/gps_tracker_xtr4500l.py` | Llamada HTTP real. Pendiente de URL y API key. |

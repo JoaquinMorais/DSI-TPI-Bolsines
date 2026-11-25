@@ -68,7 +68,7 @@ frontend/
 - Clases en PascalCase (ej.: `GestorBuscarBolsines`, `IteradorBolsin`, `CambioEstado`, `Estado`, `Bolsin`, `Remito`).
 - Atributos de dominio en camelCase (ej.: `numeroBolsin`, `fechaHoraInicio`).
 - Interfaces con prefijo I (`IIterador`, `IAgregado`, `InterfazGPSTracker`, `InterfazCorreo`).
-- Entidades y funciones de autenticacion (`User`, `RefreshToken`, `utils/auth.py`) siguen el codigo de referencia del equipo (snake_case: `id_user`, `token_hash`, `expires_at`). Esta excepcion queda registrada en `docs/99-decisiones-y-dudas.md`.
+- Columnas y atributos de todas las entidades (dominio y auth) en camelCase (`idUser`, `tokenHash`, `expiresAt`, `hashedPassword`). Las funciones de `utils/auth.py` mantienen el nombre del codigo de referencia. Ver `docs/02-modelo-datos.md`.
 
 ## 6. Patron Iterator (regla central)
 

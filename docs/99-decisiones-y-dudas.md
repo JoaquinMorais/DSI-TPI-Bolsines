@@ -22,7 +22,8 @@
 | 2026-11-25 | El modelo de dominio no tiene `Usuario` ni `Sesion` con contraseña; el código de referencia de auth usa `User` (mail, contraseña) y `RefreshToken`. | Se usa **`User`** como entidad de login, con `mail` y contraseña hasheada (`verify_password`). `RefreshToken` guarda el hash del refresh token. Reemplaza a `Usuario` y `Sesion` de los diagramas en el alcance de auth. |
 | 2026-11-25 | Relación entre `User` (login) y `Empleado` (dato de negocio con `Rol`). | **Relación 1 a 1**: `Empleado` tiene `idUser` único que referencia a `User.id`. |
 | 2026-11-25 | `Empleado` del dominio tiene atributo `email`, y `User` también tiene `mail`. | Se usa **`User.mail`** como único correo (login y notificaciones). `Empleado` no duplica el dato. |
-| 2026-11-25 | Convención de nombres en el código de referencia de auth (snake_case: `id_user`, `token_hash`, `expires_at`, `verify_password`) vs. camelCase de AGENTS.md §5. | Las entidades y funciones de auth (`User`, `RefreshToken`, `utils/auth.py`, `utils/security.py`) siguen el código de referencia en snake_case. Las entidades de dominio siguen camelCase. |
+| 2026-11-25 | Convención de nombres en el código de referencia de auth (snake_case: `id_user`, `token_hash`, `expires_at`, `verify_password`) vs. camelCase de AGENTS.md §5. | Primera decisión: entidades de auth en snake_case. **Superada** por la fila siguiente. Las funciones de `utils/auth.py` mantienen el nombre de referencia. |
+| 2026-11-25 | Columnas de las entidades de auth (`User`, `RefreshToken`) en snake_case vs. camelCase. | **camelCase en todas las columnas** (`idUser`, `tokenHash`, `expiresAt`, `hashedPassword`), decision del equipo. Se actualiza AGENTS.md §5. Detalle en `docs/02-modelo-datos.md`. |
 | 2026-11-25 | Dependencias para JWT, hash de contraseña, async y tests. | Se crea `requirements.txt` aprobado por el equipo: FastAPI, SQLModel, aiosqlite, uvicorn, PyJWT, pwdlib (argon2), python-multipart, pytest, pytest-asyncio, httpx. Las versiones se fijan con `pip freeze` después de instalar. |
 | 2026-11-25 | Estructura del repositorio: 2 repos (front y back) o monorepo. | **Monorepo.** `backend/` (Python, con `index.py`, `models/`, `services/`, etc.), `frontend/` (Vite + React + TS) y `docs/` en la raíz. |
 | 2026-11-25 | Ubicación de `docs/`. | **Raíz del monorepo.** Documenta el TP completo, no solo el backend. |
@@ -32,3 +33,14 @@
 | 2026-11-25 | Docker. | `docker-compose.yml` en la raíz levanta `backend` y `frontend`. La base SQLite va en el volumen `bolsines-data`. Las variables se cargan desde `.env` (no se commitea); `.env.example` lista las claves sin secretos. |
 | 2026-11-25 | Un solo worker de uvicorn. | Obligatorio: el registro de gestores de casos de uso vive en memoria (ver `docs/01-arquitectura.md` §4). |
 | 2026-11-25 | `README.md` con datos del equipo. | Se commitea como está (ejemplo por ahora). |
+| 2026-11-25 | `CambioEstado` (E2) vs `CambioEstadoBolsin` (E1, dominio). | Se usa **`CambioEstado`** (E2). Detalle en `docs/02-modelo-datos.md` §5. |
+| 2026-11-25 | `IAgregado.crearIterador` devuelve `IIterator` en el texto de E2 y `IIterador` en el diagrama. | Se usa **`IIterador`** (diagrama y AGENTS.md §6). |
+| 2026-11-25 | `Usuario` y `Sesion` (E1) no existen en el dominio. | Se usan **`User`** (login) y **`RefreshToken`** (sesion). `Sesion` no tiene tabla propia. |
+| 2026-11-25 | Origen y destino de `Bolsin`: E1 los tiene como asociacion; E2 no los modela. | Dos FK en `Bolsin` (`cmOrigenId`, `cmDestinoId`), con `foreign_keys` explicito en SQLModel. |
+| 2026-11-25 | `numeroPrecinto` no aparece en E1 ni E2; si en dominio y ERS. | Se agrega como `str \| None`. El string evita perder ceros a la izquierda. |
+| 2026-11-25 | Estados de Bolsin: E1 usa "Creado, Cerrado, Enviado, Recibido, De baja"; ERS usa "Recibido en CM destino". | Se usa el nombre de **E1**. |
+| 2026-11-25 | `numeroBolsin` aparece como atributo y como `getNumeroBolsin()` en E2. | Atributo publico; el getter devuelve el mismo valor. |
+| 2026-11-25 | `Empleado` tiene `email` en el dominio y el login necesita `mail`. | El correo es solo **`User.mail`**. `Empleado` no lo duplica. |
+| 2026-11-25 | `Remito` esta en E1 y dominio, pero no en el CU 36. | **Fuera** del modelo del CU 36. Se agrega cuando se implemente el CU 15. |
+| 2026-11-25 | `Estado` en E2 tiene `nombre` y `descripcion`; en dominio tiene ademas `ambito`. | Se usa **E2** (sin `ambito`). |
+| 2026-11-25 | Modelo del CU 36: remito, usuario y sesion. | **Confirmado**: Remito fuera del CU 36; `RefreshToken` cubre la sesion sin entidad `Sesion` aparte; `Empleado` 1 a 1 con `User`. |
