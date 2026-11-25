@@ -148,11 +148,20 @@ frontend/
       Header.tsx                # nombre del sistema + usuario (/auth/me)
       EstadoCarga.tsx
       EstadoError.tsx
+      EstadoVacio.tsx           # Empty State (A1/A2)
+      SkeletonLista.tsx         # carga
       MapaBolsines.tsx          # Leaflet/OSM + fix de iconos para Vite
       Header.test.tsx
+      EstadoVacio.test.tsx
+      EstadoError.test.tsx
     features/
       seguimiento/
-        index.ts                # punto de entrada de la feature (placeholder)
+        index.ts
+        ListaBolsines.tsx       # lista accesible (botones, aria-pressed)
+        FiltrosBolsines.tsx     # precinto + CM destino
+        AvisoSinUbicacion.tsx   # banner A3
+        ListaBolsines.test.tsx
+        FiltrosBolsines.test.tsx
     hooks/
       useUsuarioActual.ts       # useQuery('/auth/me')
       useIniciarSeguimiento.ts  # useMutation POST /seguimiento-bolsines
@@ -161,7 +170,8 @@ frontend/
       useCancelarSeguimiento.ts # useMutation DELETE .../{idCU}
     pages/
       HomePage.tsx
-      SeguimientoPage.tsx       # placeholder de la pantalla del CU 36
+      SeguimientoPage.tsx       # Master-Detail, filtros, mapa y estados A1-A3
+      SeguimientoPage.test.tsx
     types/
       auth.ts                   # TokenResponse, UsuarioActualOut, EmpleadoMeOut
       seguimiento.ts            # nombres iguales a los schemas del backend

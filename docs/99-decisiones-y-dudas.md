@@ -161,3 +161,8 @@
 | 2026-11-25 | Tipos del frontend: nombres cortos vs nombres de los schemas. | Se usan los **mismos nombres que `backend/schemas/`** (`SeguimientoCreadoResponse`, `MapaBolsinesOut`, `MarcadorOut`, `SeleccionBolsinRequest/Response`, `ConfirmacionCorreoRequest/Response`, `EmpleadoMeOut`, etc.). |
 | 2026-11-25 | Manejo de errores HTTP en el frontend. | `api/client.ts` lanza **`ApiError`** tipada con `codigo`, `mensaje` y `status`; parsea `{codigo, mensaje}` y usa `ERROR_HTTP`/`ERROR_DE_RED` cuando no hay JSON o falla la red. |
 | 2026-11-25 | Hooks de mutacion del CU 36. | `useIniciarSeguimiento`, `useSeleccionarBolsin` (`{idCU, numeroBolsin}`), `useConfirmarCorreo` (`{idCU, confirma}`) y `useCancelarSeguimiento` (`idCU`). |
+| 2026-11-25 | Seleccion en la pagina de seguimiento: solo resaltado o llamar `POST /seleccion`. | En esta etapa (pasos 1-6) la seleccion es **solo visual** (resalta lista y marcador). El `POST /seleccion` queda para el paso 7. |
+| 2026-11-25 | Ubicacion de componentes del CU 36. | Los especificos van en **`features/seguimiento/`** (lista, filtros, aviso A3); los genericos en `components/` (EstadoVacio, EstadoError, SkeletonLista, MapaBolsines). |
+| 2026-11-25 | Filtros de la pantalla. | Precinto **contiene (case-insensitive)** y CM destino **exacta**; se aplican a la lista y a los marcadores del mapa. |
+| 2026-11-25 | A3: alcance del banner. | Muestra **todos** los bolsines de `sinUbicacion` del caso de uso. |
+| 2026-11-25 | Verificacion de A1/A3 en el navegador. | Se cambia `USUARIO_DEV` del backend y se reinicia: `eb.cba02` (principal), `eb.cba01` (A3) y `eb.tuc01` (A1 404). |

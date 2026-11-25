@@ -7,13 +7,35 @@ import icono2x from "leaflet/dist/images/marker-icon-2x.png";
 import sombra from "leaflet/dist/images/marker-shadow.png";
 import type { MapaBolsinesOut } from "../types/seguimiento";
 
-L.Icon.Default.mergeOptions({
+const iconoBase = L.icon({
   iconUrl: icono,
   iconRetinaUrl: icono2x,
   shadowUrl: sombra,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
-export function MapaBolsines({ mapa }: { mapa: MapaBolsinesOut }) {
+const iconoSeleccionado = L.icon({
+  iconUrl: icono,
+  iconRetinaUrl: icono2x,
+  shadowUrl: sombra,
+  iconSize: [36, 59],
+  iconAnchor: [18, 59],
+  popupAnchor: [1, -48],
+  shadowSize: [50, 50],
+});
+
+export function MapaBolsines({
+  mapa,
+  seleccionado = null,
+  onSeleccionar,
+}: {
+  mapa: MapaBolsinesOut;
+  seleccionado?: number | null;
+  onSeleccionar?: (numeroBolsin: number) => void;
+}) {
   return (
     <MapContainer
       center={[mapa.centro.latitud, mapa.centro.longitud]}
@@ -28,6 +50,14 @@ export function MapaBolsines({ mapa }: { mapa: MapaBolsinesOut }) {
         <Marker
           key={marcador.numeroBolsin}
           position={[marcador.latitud, marcador.longitud]}
+          icon={
+            seleccionado === marcador.numeroBolsin
+              ? iconoSeleccionado
+              : iconoBase
+          }
+          eventHandlers={{
+            click: () => onSeleccionar?.(marcador.numeroBolsin),
+          }}
         >
           <Popup>Bolsin {marcador.numeroBolsin}</Popup>
         </Marker>
