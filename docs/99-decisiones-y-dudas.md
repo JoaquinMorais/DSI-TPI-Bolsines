@@ -153,3 +153,8 @@
 | 2026-11-25 | Mapa del frontend: Google Maps JS vs Leaflet/OpenStreetMap. | Se usa **Leaflet + react-leaflet (OSM)**: libre y sin API key. El backend entrega `centro`, `zoom` y `marcadores`; cambiar a Google Maps JS es reemplazar solo el componente de mapa. |
 | 2026-11-25 | Login del frontend: JWT real vs simulado. | El frontend usa **login simulado** (selector de usuario); el backend del CU 36 resuelve `USUARIO_DEV`. El login JWT existe en `routes/auth.py` pero no lo usan estas rutas. |
 | 2026-11-25 | Artefactos de UX (empatia, journey, board) no estan en el repo. | Se dejan **placeholders** en `docs/10-frontend.md` apuntando a `docs/imagenes/`; el equipo pega las imagenes. |
+| 2026-11-25 | `VITE_API_URL` default: 8000 (pedido) vs 8020 (backend del repo). | Se usa **`http://localhost:8020`** para que coincida con el backend y la verificacion funcione; queda en `frontend/.env.example`. |
+| 2026-11-25 | Tailwind: v3 (PostCSS) vs v4. | Se usa **Tailwind v3** con `postcss.config.js` y `tailwind.config.js` (estable y conocido). |
+| 2026-11-25 | Estructura del frontend. | Se sigue la pedida: `api/`, `components/`, `features/seguimiento/`, `pages/`, `hooks/`, `types/`, mas `lib/` y `test/`. |
+| 2026-11-25 | Header y usuario logueado. | `AppShell` + `Header` consultan **`GET /auth/me`** con TanStack Query; el backend resuelve `USUARIO_DEV`. |
+| 2026-11-25 | Tests del frontend. | **Vitest + Testing Library** (`jsdom`); test del Header con `fetch` mockeado. |

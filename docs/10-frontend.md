@@ -122,48 +122,46 @@ El exito del correo muestra un Toast con el destinatario enmascarado (`g***@domi
 
 ```
 frontend/
+  .env.example
   Dockerfile
   .dockerignore
   package.json
+  package-lock.json
   vite.config.ts
   tsconfig.json
+  tailwind.config.js
+  postcss.config.js
   index.html
   src/
-    main.tsx
-    App.tsx
-    router.tsx
+    main.tsx                    # QueryClientProvider + RouterProvider
+    router.tsx                  # rutas / y /seguimiento
+    index.css                   # Tailwind
+    vite-env.d.ts
     api/
-      cliente.ts                 # fetch a VITE_API_URL
-      seguimiento.ts             # POST/seleccion/confirmacion/DELETE
-      tipos.ts                   # Seguimiento, Mapa, Marcador, Bolsin, errores
-    state/
-      UsuarioContext.tsx         # login simulado / usuario actual
-    pages/
-      LoginPage.tsx
-      InicioPage.tsx
-      ConsultarSeguimientoPage.tsx
+      cliente.ts                # fetch a VITE_API_URL
+      auth.ts                   # GET /auth/me
     components/
-      PantallaShell.tsx          # layout, breadcrumbs, guard de sesion
-      ComisionMedicaBadge.tsx
-      MapaBolsines.tsx           # Leaflet + OpenStreetMap (reemplazable)
-      ListaBolsines.tsx
-      FiltrosBolsines.tsx
-      DetalleBolsin.tsx
-      DialogoConfirmacion.tsx
-      DialogoConfirmacionCorreo.tsx
-      AvisoSinUbicacion.tsx
-      EmptyState.tsx
-      ErrorState.tsx
-      Skeleton.tsx
-      Toast.tsx
+      AppShell.tsx              # layout base: header + contenido
+      Header.tsx                # nombre del sistema + usuario (/auth/me)
+      EstadoCarga.tsx
+      EstadoError.tsx
+      MapaBolsines.tsx          # Leaflet/OSM + fix de iconos para Vite
+      Header.test.tsx
+    features/
+      seguimiento/
+        index.ts                # punto de entrada de la feature (placeholder)
     hooks/
-      useSeguimiento.ts
-      useSeleccionBolsin.ts
-      useConfirmarCorreo.ts
-      useCancelarCaso.ts
+      useUsuarioActual.ts       # useQuery('/auth/me')
+    pages/
+      HomePage.tsx
+      SeguimientoPage.tsx       # placeholder de la pantalla del CU 36
+    types/
+      auth.ts                   # UsuarioActual
+      seguimiento.ts            # Seguimiento, Mapa, Marcador, Bolsin
     lib/
-      formato.ts                 # fechas y numeros
-  public/
+      formato.ts
+    test/
+      setup.ts                  # jest-dom
 ```
 
-Nota: la implementacion actual del frontend es minima (`App.tsx`, `api.ts`, `MapView.tsx`). Este documento define la estructura objetivo del CU 36.
+El layout base (`AppShell` + `Header`) muestra el nombre del sistema y los datos del usuario logueado consultando `GET /auth/me` con TanStack Query (con estado de carga y error).
