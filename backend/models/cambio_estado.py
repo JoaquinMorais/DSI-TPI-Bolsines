@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -10,8 +11,8 @@ if TYPE_CHECKING:
 
 class CambioEstado(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    fechaHoraInicio: datetime
-    fechaHoraFin: Optional[datetime] = None
+    fechaHoraInicio: datetime = Field(sa_column=Column(DateTime(timezone=False), nullable=False))
+    fechaHoraFin: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=False), nullable=True))
     bolsinId: int = Field(foreign_key="bolsin.id")
     estadoId: int = Field(foreign_key="estado.id")
 

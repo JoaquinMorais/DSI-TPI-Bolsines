@@ -13,3 +13,6 @@ __pycache__/
 # Node
 node_modules/
 frontend/dist/
+
+# TypeScript build info
+*.tsbuildinfo

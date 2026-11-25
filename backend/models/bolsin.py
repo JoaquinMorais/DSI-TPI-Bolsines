@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional
 
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
 class Bolsin(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     numeroBolsin: int = Field(unique=True, index=True)
-    fecha: datetime
+    fecha: datetime = Field(sa_column=Column(DateTime(timezone=False), nullable=False))
     numeroPrecinto: Optional[str] = None
     peso: int
     cmOrigenId: int = Field(foreign_key="comisionmedica.id")
