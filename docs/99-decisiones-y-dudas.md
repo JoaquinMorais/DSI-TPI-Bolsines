@@ -108,3 +108,4 @@
 | 2026-11-25 | SQLModel `table=True` no ejecuta validadores pydantic en `__init__`. | `Usuario.__init__` normaliza `mail` a minusculas (strip + lower). Se usa la `AsyncSession` de `sqlmodel.ext.asyncio.session` (tiene `.exec`) en `config/database.py`. |
 | 2026-11-25 | `InterfazGPSTracker.getBolsinLocation` en 04 figura sin async; el acceso HTTP es asincrono. | Se implementa como `async def` (y el gestor la `await`ea) para no bloquear el event loop. Se registra en 99. |
 | 2026-11-25 | 06 §2 decia que un error de autenticacion se tradujera a A3; §1.3 dice 401 = error de configuracion. | Prevalece §1.3: 404/red/5xx -> `UbicacionNoDisponibleError` (A3); 400/401/formato invalido -> `ErrorIntegracionGPS` (no A3). Se agrega `ErrorIntegracionGPS` en `errores.py`. |
+| 2026-11-25 | `InterfazCorreo.enviarMail` en 04 figura sync. | Se implementa `async def` (I/O), igual que el GPS. La implementacion simulada escribe log/archivo. |
