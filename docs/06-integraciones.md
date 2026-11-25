@@ -72,18 +72,22 @@ La API tiene 10 bolsines fijos (101 a 110). El set de datos (`docs/08-datos-semi
 
 ## 2. Manejo de errores (A3)
 
-Excepcion propia en `backend/integrations/gps_tracker/errores.py`:
+Excepciones propias en `backend/integrations/gps_tracker/errores.py`:
 
 ```
-class UbicacionNoDisponibleError(Exception)
+class UbicacionNoDisponibleError(Exception)   # A3
     numeroBolsin: int
+    motivo: str
+
+class ErrorIntegracionGPS(Exception)          # 400/401/5xx o respuesta invalida
     motivo: str
 ```
 
 Reglas:
-- Un adaptador lanza `UbicacionNoDisponibleError` cuando el GPS no informa ubicacion para un bolsin (A3 del CU 36), o cuando la respuesta es invalida.
-- Error de red o autenticacion: tambien se traduce a `UbicacionNoDisponibleError` para ese bolsin, con el motivo correspondiente. El gestor no ve excepciones HTTP.
-- El gestor captura `UbicacionNoDisponibleError` por bolsin, registra el bolsin como sin ubicacion y sigue con el resto. Si ninguno tiene ubicacion, la sesion queda abierta con `marcadores` vacios y todos los bolsines en `sinUbicacion` (ver `docs/05-vista-dinamica.md` §5 y `docs/07-api-rest.md` §4).
+- Un adaptador lanza `UbicacionNoDisponibleError` cuando recibe 404 (bolsin inexistente o codigo de CM que no coincide), que es el A3 del CU 36.
+- Error de red o respuesta 5xx: tambien se traduce a `UbicacionNoDisponibleError` para ese bolsin (transitorio).
+- 400 (parametro invalido), 401 (API key invalida) y respuesta con formato invalido: `ErrorIntegracionGPS`, que **no** es A3. El gestor no ve excepciones HTTP.
+- El gestor captura `UbicacionNoDisponibleError` por bolsin, registra el bolsin como sin ubicacion y sigue con el resto. `ErrorIntegracionGPS` no se captura por bolsin: es un error de configuracion/integracion. Si ninguno tiene ubicacion, la sesion queda abierta con `marcadores` vacios y todos los bolsines en `sinUbicacion` (ver `docs/05-vista-dinamica.md` §5 y `docs/07-api-rest.md` §4).
 - `routes` no captura esta excepcion: solo ve el resultado del gestor.
 
 ## 3. Google Maps
