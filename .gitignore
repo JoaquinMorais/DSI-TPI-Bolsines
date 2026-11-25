@@ -19,3 +19,6 @@ frontend/dist/
 
 # Correos simulados
 backend/data/*.log
+
+# Cobertura
+.coverage

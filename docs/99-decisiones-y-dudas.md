@@ -145,3 +145,8 @@
 | 2026-11-25 | `GET /me`. | Se agrega en `routes/auth.py`; devuelve `{id, mail, nombre, apellido, rol, codigoCM}` del usuario de desarrollo. |
 | 2026-11-25 | Ubicacion de tests de rutas. | **`backend/tests/routes/`** con `TestClient`, `dependency_overrides` del usuario dev y GPS mockeado. |
 | 2026-11-25 | Ejecucion del seed: `python -m data.seed` vs `python -m backend.data.seed`. | Se soporta **`python -m backend.data.seed`** desde la raiz (bootstrap de `sys.path`), ademas de `python -m data.seed` en Docker. El seed imprime los Enviados por CM. Verificado contra la API GPS real: 110 con coordenadas reales, A1 404 y A3 con 111 sin ubicacion. |
+| 2026-11-25 | Logica en rutas: refresh con DB y chequeo de rol de dominio. | El refresh pasa a `utils/auth.refrescar_sesion` y el chequeo de rol a `utils/auth.encargado_bolsines_dependency`. Las rutas solo traducen. |
+| 2026-11-25 | `ErrorDeApi` vivia en `routes/errores.py` y `utils` necesitaba usarlo. | Se mueve a **`utils/errores.py`** (cross-cutting); `main.py` y las rutas lo importan desde ahi. |
+| 2026-11-25 | `routes` importaba modelos (`Bolsin`, `MapaBolsines`, `UbicacionBolsin`, `Usuario`). | Se eliminan esos imports runtime; el mapeo usa atributos (duck typing). `routes` ya no importa `models`. |
+| 2026-11-25 | `docs/01` §5 prohibia a `routes` importar `config` y `services`, pero necesita sesion, fabrica y registro. | Se actualiza §5: `routes` puede importar `config.database`, `config.composicion`, `services.registro_casos_uso`/`services.errores` y `utils` solo para wiring; sigue sin logica de negocio. |
+| 2026-11-25 | Cobertura de tests. | Se agrega **`pytest-cov==7.1.0`**. Cobertura del codigo de la app: **89%**; suite 101 passed, 4 skipped. |

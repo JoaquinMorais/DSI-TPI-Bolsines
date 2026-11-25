@@ -11,6 +11,7 @@ from config.settings import settings
 from models.empleado import Empleado
 from models.refresh_token import RefreshToken
 from models.usuario import Usuario
+from utils.errores import ErrorDeApi
 from utils.security import (
     create_access_token,
     decode_access_token,
@@ -120,3 +121,34 @@ async def get_usuario_dev(db: db_dependency) -> Usuario:
 
 
 usuario_dev_dependency = Annotated[Usuario, Depends(get_usuario_dev)]
+
+
+async def refrescar_sesion(db, token: str) -> Usuario | None:
+    stmt = select(RefreshToken).where(RefreshToken.tokenHash == hash_token(token))
+    registro = (await db.exec(stmt)).first()
+    if registro is None:
+        return None
+    vencimiento = registro.expiresAt
+    if vencimiento.tzinfo is None:
+        vencimiento = vencimiento.replace(tzinfo=timezone.utc)
+    if vencimiento < datetime.now(timezone.utc):
+        return None
+    return await db.get(Usuario, registro.idUser)
+
+
+async def get_encargado_bolsines(usuario: usuario_dev_dependency) -> Usuario:
+    empleado = usuario.getEmpleado()
+    if (
+        empleado is None
+        or empleado.rol is None
+        or not empleado.rol.esEncargadoBolsines()
+    ):
+        raise ErrorDeApi(
+            403, "ROL_INSUFICIENTE", "Se requiere rol Encargado de Bolsines"
+        )
+    return usuario
+
+
+encargado_bolsines_dependency = Annotated[
+    Usuario, Depends(get_encargado_bolsines)
+]

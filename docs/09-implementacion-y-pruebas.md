@@ -142,27 +142,31 @@ Preguntas probables y respuesta corta:
 - *Por que `comprobarFiltro` dentro de `primero`/`siguiente`?* Asi `elementoActual` siempre devuelve un valido y el gestor no filtra.
 - *Que pasa con varios workers?* El estado en memoria se pierde. Se documenta como limitacion.
 
-## 6. Orden de implementacion sugerido
+## 6. Orden de implementacion
 
-Cada paso se verifica antes de pasar al siguiente.
+Estado: **pasos 1 a 17 completados**.
 
-1. Configuracion: `backend/config/settings.py` (pydantic-settings) y `backend/config/database.py` (engine async). Verificar: `settings` carga desde `.env`.
-2. Interfaces del iterador: `models/iterator/i_iterador.py` e `i_agregado.py` (ABC). Verificar: importan sin errores.
-3. `IteradorBolsin` con lista en memoria, sin base, con objetos simples. Verificar: tests de §4.1.
-4. Entidades sin relaciones: `Estado`, `ComisionMedica`, `Rol`. Verificar: `esEnviado`, `getCodigo`, `esGCM`, `esEncargadoBolsines`.
-5. `CambioEstado` y `Bolsin` con relaciones SQLModel. Verificar: tests de §4.2 con base en memoria.
-6. `Empleado` y `Usuario` (1 a 1). Verificar: relacion cargada con `selectinload`.
-7. `UbicacionBolsin` y `UbicacionNoDisponibleError`. Verificar: importacion.
-8. Adaptador GPS XTR-4500L con parseo puro. Verificar: tests de §4.5 sin red.
-9. Fakes de GPS y correo. Verificar: cumplen la interfaz.
-10. `GestorBuscarBolsines` con `IAgregado` y `registro_casos_uso`. Verificar: tests de §4.3.
-11. `utils/security.py` y `utils/auth.py` (login, `user_dependency`). Verificar: el login devuelve JWT y un token invalido da 401.
-12. `schemas/seguimiento.py` y `schemas/auth.py`. Verificar: `numeroBolsin > 0`.
-13. `routes/seguimiento_bolsines.py` y `routes/auth.py`, incluidos en `main.py`. Verificar: tests de §4.4 con `TestClient`.
-14. `data/seed.py`. Verificar: tests de §4.6 y `docker compose exec backend python -m data.seed`.
-15. Integracion real contra la API de la catedra. Verificar: tests de §3 con la API corriendo.
-16. Frontend minimo: login, lista de bolsines, filtro por precinto (A2) y mapa con marcadores. Verificar: flujo principal en el navegador. Va despues de cerrar el backend (pasos 1 a 15).
-17. Revision final: `pytest` desde la raiz, `docker compose up --build` y el checklist de §5.
+| # | Paso | Estado |
+|---|---|---|
+| 1 | Configuracion (`settings`, `database`) | Completado |
+| 2 | Interfaces del iterador | Completado |
+| 3 | `IteradorBolsin` en memoria | Completado |
+| 4 | Entidades `Estado`, `ComisionMedica`, `Rol` | Completado |
+| 5 | `CambioEstado` y `Bolsin` con relaciones | Completado |
+| 6 | `Empleado` y `Usuario` (1 a 1) | Completado |
+| 7 | `UbicacionBolsin` y errores del GPS | Completado |
+| 8 | Adaptador GPS XTR-4500L | Completado |
+| 9 | Fakes de GPS y correo | Completado |
+| 10 | `GestorBuscarBolsines` y registro de casos de uso | Completado |
+| 11 | `utils` de auth y seguridad | Completado |
+| 12 | Schemas Pydantic | Completado |
+| 13 | Rutas y `main.py` | Completado |
+| 14 | Seed | Completado |
+| 15 | Integracion real contra la API GPS | Completado (verificado contra la API de la catedra) |
+| 16 | Frontend minimo | Completado |
+| 17 | Revision final (pytest, compose, checklist) | Completado |
+
+Pendientes y decisiones distintas: ver `docs/99-decisiones-y-dudas.md` (Microsoft Graph, centro por defecto del mapa, clave de Maps del frontend y tests de integracion real que requieren API + key).
 
 ## 7. Decisiones tomadas para esta fase
 

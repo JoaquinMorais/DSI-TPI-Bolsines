@@ -145,8 +145,8 @@ Principio: las dependencias apuntan hacia adentro. Nada del nucleo conoce a la c
 
 | Desde \ hacia | config | models | backend/models/iterator | services | integrations | utils | routes | schemas |
 |---|---|---|---|---|---|---|---|---|
-| **backend/index.py** | si | no | no | si (solo composicion) | no | no | si | no |
-| **routes** | no | no | no | no | no | si (solo `user_dependency`) | - | si |
+| **backend/main.py** | si | no | no | si (solo composicion) | no | no | si | no |
+| **routes** | si (`database`, `composicion`) | no | no | si (`registro_casos_uso`, `errores`) | no | si (dependencias de auth) | - | si |
 | **schemas** | no | no | no | no | no | no | no | - |
 | **services** | si (`database`, `settings`) | si | si | - | si (solo interfaces) | no | no | no |
 | **models** | no | si (entre si) | si | no | no | no | no | no |
@@ -162,11 +162,11 @@ Reglas concretas:
 2. `backend/models/iterator` solo importa de `models`. Nunca de `services`.
 3. `services` llama a `integrations` solo a traves de las interfaces (`InterfazGPSTracker`, `InterfazCorreo`, etc.), nunca a las implementaciones concretas.
 4. `integrations` no importa `services`, `routes` ni `utils`. Puede importar `models` solo para value objects (ej. `UbicacionBolsin`) y `config.settings`.
-5. `routes` no importa `models`, `integrations` ni `config`. Recibe objetos del gestor y los convierte en schemas. Puede importar `backend/utils/auth.py` solo para `user_dependency` y para las funciones del login.
+5. `routes` no importa `models` ni `integrations`. Puede importar `config.database`, `config.composicion`, `services.registro_casos_uso`/`services.errores` y `utils` solo para el wiring (sesion, fabrica del gestor, registro, errores y dependencias de usuario). Sin logica de negocio: las reglas viven en `models`/`services`.
 6. `schemas` no importa nada del proyecto.
 7. `backend/utils/auth.py` puede importar `config`, `models` (`Usuario`, `RefreshToken`) y `backend/utils/security.py`. Ningun modulo de negocio (`services`, `models`) importa `utils`.
-8. `backend/config/composicion.py` es el unico modulo que importa `services` e `integrations` juntos. Solo lo importa `backend/index.py`.
-9. `index.py` es el unico punto que une `routes`, `config`, `utils` y la composicion.
+8. `backend/config/composicion.py` es el unico modulo que importa `services` e `integrations` juntos. Solo lo importa `backend/main.py`.
+9. `main.py` es el unico punto que une `routes`, `config`, `utils` y la composicion.
 10. Relaciones SQLModel (`Bolsin` <-> `CambioEstado` <-> `Estado`, `Empleado` <-> `Usuario`, `Empleado` -> `ComisionMedica`): se declaran con nombres en string. `backend/models/__init__.py` importa todas las clases en un orden fijo. Nunca se importan clases entre si a nivel de modulo en ambos sentidos.
 11. Si aparece un ciclo en revision, se corrige moviendo la dependencia a `backend/config/composicion.py` o a un tipo auxiliar. No se usan imports tardios para tapar ciclos.
 

@@ -9,7 +9,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from config.database import crear_tablas
 from config.settings import settings
 from routes.auth import router as auth_router
-from routes.errores import ErrorDeApi
+from utils.errores import ErrorDeApi
 from routes.seguimiento_bolsines import router as seguimiento_router
 
 

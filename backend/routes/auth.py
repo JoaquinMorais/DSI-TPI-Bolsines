@@ -1,21 +1,16 @@
-from datetime import datetime, timezone
-
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlmodel import select
 
 from config.database import db_dependency
-from models.refresh_token import RefreshToken
-from models.usuario import Usuario
 from schemas.auth import EmpleadoMeOut, TokenResponse
 from utils.auth import (
     REFRESH_COOKIE,
-    usuario_dev_dependency,
     authenticate_user,
     clear_refresh_cookie,
     issue_tokens,
+    refrescar_sesion,
+    usuario_dev_dependency,
 )
-from utils.security import hash_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -46,23 +41,10 @@ async def refresh(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Sin refresh token"
         )
-    stmt = select(RefreshToken).where(RefreshToken.tokenHash == hash_token(token))
-    registro = (await db.exec(stmt)).first()
-    if registro is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh invalido"
-        )
-    vencimiento = registro.expiresAt
-    if vencimiento.tzinfo is None:
-        vencimiento = vencimiento.replace(tzinfo=timezone.utc)
-    if vencimiento < datetime.now(timezone.utc):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh vencido"
-        )
-    usuario = await db.get(Usuario, registro.idUser)
+    usuario = await refrescar_sesion(db, token)
     if usuario is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario invalido"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh invalido"
         )
     return await issue_tokens(db, usuario, response)
 

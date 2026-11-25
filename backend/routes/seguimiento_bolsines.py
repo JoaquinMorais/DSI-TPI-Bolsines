@@ -5,11 +5,6 @@ from fastapi.responses import JSONResponse
 
 from config import composicion
 from config.database import db_dependency
-from models.bolsin import Bolsin
-from models.mapa_bolsines import MapaBolsines
-from models.ubicacion_bolsin import UbicacionBolsin
-from models.usuario import Usuario
-from routes.errores import ErrorDeApi
 from schemas.seguimiento import (
     BolsinSeguimientoOut,
     ConfirmacionCorreoRequest,
@@ -24,28 +19,16 @@ from schemas.seguimiento import (
 )
 from services import registro_casos_uso
 from services.errores import SinBolsinesEnviadosError
-from utils.auth import usuario_dev_dependency
+from utils.auth import encargado_bolsines_dependency
+from utils.errores import ErrorDeApi
 
 router = APIRouter(prefix="/seguimiento-bolsines", tags=["seguimiento"])
 
-ROL_REQUERIDO = "Se requiere rol Encargado de Bolsines"
 CASO_NO_ENCONTRADO = "El caso de uso no existe o vencio."
 CORREO_NO_ENVIADO = "No se pudo enviar el correo"
 
 
-def _verificar_rol(usuario: Usuario) -> None:
-    empleado = usuario.getEmpleado()
-    if (
-        empleado is None
-        or empleado.rol is None
-        or not empleado.rol.esEncargadoBolsines()
-    ):
-        raise ErrorDeApi(
-            status.HTTP_403_FORBIDDEN, "ROL_INSUFICIENTE", ROL_REQUERIDO
-        )
-
-
-def _bolsin_out(bolsin: Bolsin) -> BolsinSeguimientoOut:
+def _bolsin_out(bolsin) -> BolsinSeguimientoOut:
     destino = bolsin.obtenerCMDestino()
     return BolsinSeguimientoOut(
         numeroBolsin=bolsin.getNumeroBolsin(),
@@ -54,7 +37,7 @@ def _bolsin_out(bolsin: Bolsin) -> BolsinSeguimientoOut:
     )
 
 
-def _marcador_out(ubicacion: UbicacionBolsin) -> MarcadorOut:
+def _marcador_out(ubicacion) -> MarcadorOut:
     return MarcadorOut(
         numeroBolsin=ubicacion.numeroBolsin,
         latitud=ubicacion.latitud,
@@ -63,7 +46,7 @@ def _marcador_out(ubicacion: UbicacionBolsin) -> MarcadorOut:
     )
 
 
-def _mapa_out(mapa: MapaBolsines) -> MapaBolsinesOut:
+def _mapa_out(mapa) -> MapaBolsinesOut:
     return MapaBolsinesOut(
         centro=CoordenadaOut(
             latitud=mapa.centro.latitud, longitud=mapa.centro.longitud
@@ -81,7 +64,7 @@ def _mapa_vacio() -> MapaBolsinesOut:
     )
 
 
-def _enmascarar(mail: str | None) -> str | None:
+def _enmascarar(mail) -> str | None:
     if not mail or "@" not in mail:
         return None
     local, dominio = mail.split("@", 1)
@@ -90,9 +73,8 @@ def _enmascarar(mail: str | None) -> str | None:
 
 @router.post("")
 async def iniciar(
-    usuario: usuario_dev_dependency, db: db_dependency
+    usuario: encargado_bolsines_dependency, db: db_dependency
 ) -> JSONResponse:
-    _verificar_rol(usuario)
     gestor = composicion.crear_gestor(db, usuario)
     try:
         await gestor.opcionSeguirBolsines()
@@ -123,10 +105,9 @@ async def iniciar(
 async def seleccionar(
     idCU: UUID,
     datos: SeleccionBolsinRequest,
-    usuario: usuario_dev_dependency,
+    usuario: encargado_bolsines_dependency,
     db: db_dependency,
 ) -> SeleccionBolsinResponse:
-    _verificar_rol(usuario)
     gestor = registro_casos_uso.obtener(str(idCU))
     if gestor is None:
         raise ErrorDeApi(
@@ -156,10 +137,9 @@ async def seleccionar(
 async def confirmar(
     idCU: UUID,
     datos: ConfirmacionCorreoRequest,
-    usuario: usuario_dev_dependency,
+    usuario: encargado_bolsines_dependency,
     db: db_dependency,
 ) -> ConfirmacionCorreoResponse:
-    _verificar_rol(usuario)
     gestor = registro_casos_uso.obtener(str(idCU))
     if gestor is None:
         raise ErrorDeApi(
@@ -188,9 +168,8 @@ async def confirmar(
 
 @router.delete("/{idCU}", status_code=status.HTTP_204_NO_CONTENT)
 async def cancelar(
-    idCU: UUID, usuario: usuario_dev_dependency, db: db_dependency
+    idCU: UUID, usuario: encargado_bolsines_dependency, db: db_dependency
 ) -> Response:
-    _verificar_rol(usuario)
     if not registro_casos_uso.eliminar(str(idCU)):
         raise ErrorDeApi(
             status.HTTP_404_NOT_FOUND, "CASO_USO_NO_ENCONTRADO", CASO_NO_ENCONTRADO
