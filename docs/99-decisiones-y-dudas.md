@@ -138,3 +138,9 @@
 | 2026-11-25 | Registro en memoria: `gestores_activos.py` vs `registro_casos_uso.py`. | Se usa **`services/registro_casos_uso.py`** con `crear`/`obtener`/`eliminar` (+ `reset`). |
 | 2026-11-25 | Visibilidad de atributos del gestor. | Nombres **publicos en Python** (`nombreComisionMedica`, `bolsines`, ...) tratados como privados; el `-` del diagrama es documental. |
 | 2026-11-25 | Ubicacion de los tests del gestor. | **`backend/tests/services/`** (dentro de `testpaths`), con principal, A1-A5 y test de uso del iterador. |
+| 2026-11-25 | Archivo de rutas: `pantalla_buscar_bolsines.py` vs `seguimiento_bolsines.py`. | Se usa **`routes/seguimiento_bolsines.py`** (el rol de pantalla se mantiene conceptualmente). |
+| 2026-11-25 | A1: 200 `SIN_BOLSINES` vs 404. | Se usa **404 con `{codigo: "SIN_BOLSINES_ENVIADOS", mensaje}`**. Se elimina `SinBolsinesResponse`. |
+| 2026-11-25 | Formato de error: `{codigo, detalle}` vs `{codigo, mensaje}`. | Se usa **`{codigo, mensaje}`** en todas las respuestas de error (handlers en `main.py`). |
+| 2026-11-25 | Autenticacion de las rutas de seguimiento: JWT vs usuario de desarrollo. | Se usa **`usuario_dev_dependency`** (`USUARIO_DEV`); el login JWT sigue disponible en `routes/auth.py`. |
+| 2026-11-25 | `GET /me`. | Se agrega en `routes/auth.py`; devuelve `{id, mail, nombre, apellido, rol, codigoCM}` del usuario de desarrollo. |
+| 2026-11-25 | Ubicacion de tests de rutas. | **`backend/tests/routes/`** con `TestClient`, `dependency_overrides` del usuario dev y GPS mockeado. |

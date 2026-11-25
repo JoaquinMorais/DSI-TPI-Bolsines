@@ -19,8 +19,8 @@ Restricciones de ejecucion (`AGENTS.md` §9, `docs/07-api-rest.md`):
 
 | Criterio (`docs/00-contexto.md` §4.5) | Evidencia prevista | Estado |
 |---|---|---|
-| Flujo principal ejecutado | Test de endpoints: POST `/seguimiento-bolsines` -> POST `.../seleccion` -> POST `.../confirmacion-correo` con EB Cordoba 2 (bolsin 110), con GPS fake y correo fake. Esperado: 201, 200, 200 con `notificado: true`. | Cumplido (`tests/test_routes_seguimiento.py::test_flujo_principal`) |
-| Alternativo A1 ejecutado | Test con EB Tucuman: POST responde 200 `SinBolsinesResponse`, sin llamadas al GPS ni al correo. | Cumplido (`test_a1_sin_bolsines`) |
+| Flujo principal ejecutado | Test de endpoints: POST `/seguimiento-bolsines` -> POST `.../seleccion` -> POST `.../confirmacion-correo` con EB Cordoba 2 (bolsin 110), con GPS fake y correo fake. Esperado: 201, 200, 200 con `notificado: true`. | Cumplido (`tests/routes/test_seguimiento_bolsines.py::test_flujo_principal`) |
+| Alternativo A1 ejecutado | Test con EB Tucuman: POST responde 404 `SIN_BOLSINES_ENVIADOS`, sin llamadas al GPS ni al correo. | Cumplido (`test_a1_sin_bolsines_da_404`) |
 | Alternativo A3 ejecutado | Test con EB Cordoba 1: bolsin 111 con GPS fake que lanza `UbicacionNoDisponibleError`. Aparece en `sinUbicacion` y la sesion sigue abierta. Prueba adicional contra la API real (§3), donde 111 responde 404. | Cumplido (`test_a3_gps_sin_ubicacion` y test de integracion) |
 | Alternativo A5 ejecutado | Test de confirmacion con `confirma: false`: 200 con `notificado: false`, el correo fake no recibe envios. | Cumplido (`test_a5_no_confirma`) |
 | Iterator visible y usado por el gestor | Revision de codigo: `GestorBuscarBolsines` implementa `IAgregado` y solo llama a `primero`, `haFinalizado`, `elementoActual`, `siguiente`. Un test verifica que el gestor no accede a la lista. | Cumplido (`test_obtener_codigos_usa_iterador` y revision) |
@@ -90,14 +90,14 @@ Ubicacion: `backend/tests/` (`pytest.ini` apunta a esa carpeta y se ejecuta desd
 | A5 | `confirma: false` | `enviarMailGCM` no se llama. Correo fake sin envios. |
 | Gestor no recorre lista | Inyeccion de una lista espia | El gestor solo usa los metodos del iterador. |
 
-### 4.4 Endpoints (`test_routes_seguimiento.py`, `TestClient`)
+### 4.4 Endpoints (`tests/routes/test_seguimiento_bolsines.py`, `TestClient`)
 
 | Caso | Entrada | Resultado esperado |
 |---|---|---|
 | POST sin JWT | Sin header | 401 |
 | POST con usuario sin rol EB | JWT de un GCM | 403 |
 | POST flujo principal | JWT de EB Cordoba 2 | 201 con `idCU` y `bolsines` |
-| POST A1 | JWT de EB Tucuman | 200 `estado: SIN_BOLSINES`, sin `idCU` |
+| POST A1 | usuario dev EB Tucuman | 404 `codigo: SIN_BOLSINES_ENVIADOS` |
 | POST A3 | JWT de EB Cordoba 1 | 201, 111 en `sinUbicacion` |
 | POST seleccion | `numeroBolsin: 0` | 422 |
 | POST seleccion con `idCU` vencido | UUID inexistente | 404 `CASO_USO_NO_ENCONTRADO` |
@@ -131,7 +131,7 @@ Orden sugerido (unos 15 minutos):
 3. **Iterator concreto:** abrir `backend/models/iterator/iterador_bolsin.py`. Mostrar `init(elementos, filtros)`, `posicionarEnValido()` y `comprobarFiltro()`, con las llamadas a `esTuCMOrigen` y `sosEnviado`.
 4. **Llamada desde el gestor:** abrir `backend/services/gestor_buscar_bolsines.py`. Mostrar `obtenerBolsinesEnviados()`: `crearIterador`, `primero`, `haFinalizado`, `elementoActual`, `getNumeroBolsin`, `siguiente`. Senalar que no hay `for` sobre la lista.
 5. **Entidades:** `Bolsin.esTuCMOrigen` y `sosEnviado`, y la cadena hasta `Estado.esEnviado`.
-6. **Boundary:** `backend/routes/pantalla_buscar_bolsines.py`. Mostrar que solo traduce HTTP.
+6. **Boundary:** `backend/routes/seguimiento_bolsines.py`. Mostrar que solo traduce HTTP.
 7. **Pruebas:** `pytest -k iterador -v` y luego `pytest -v`. Mostrar un caso de reutilizacion (CU 28).
 8. **Flujo en vivo:** `docker compose up` con la API de la catedra corriendo. Login como EB Cordoba 1 y mostrar A3 (111 en `sinUbicacion`). Despues EB Tucuman y mostrar A1.
 9. **Persistencia:** abrir la base y mostrar el `CambioEstado` vigente de un bolsin.
@@ -158,7 +158,7 @@ Cada paso se verifica antes de pasar al siguiente.
 10. `GestorBuscarBolsines` con `IAgregado` y `registro_casos_uso`. Verificar: tests de §4.3.
 11. `utils/security.py` y `utils/auth.py` (login, `user_dependency`). Verificar: el login devuelve JWT y un token invalido da 401.
 12. `schemas/seguimiento.py` y `schemas/auth.py`. Verificar: `numeroBolsin > 0`.
-13. `routes/pantalla_buscar_bolsines.py` y `routes/auth.py`, incluidos en `index.py`. Verificar: tests de §4.4 con `TestClient`.
+13. `routes/seguimiento_bolsines.py` y `routes/auth.py`, incluidos en `main.py`. Verificar: tests de §4.4 con `TestClient`.
 14. `data/seed.py`. Verificar: tests de §4.6 y `docker compose exec backend python -m data.seed`.
 15. Integracion real contra la API de la catedra. Verificar: tests de §3 con la API corriendo.
 16. Frontend minimo: login, lista de bolsines, filtro por precinto (A2) y mapa con marcadores. Verificar: flujo principal en el navegador. Va despues de cerrar el backend (pasos 1 a 15).

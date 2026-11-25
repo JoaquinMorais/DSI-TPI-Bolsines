@@ -9,3 +9,12 @@ class TokenResponse(BaseModel):
 class UsuarioActualOut(BaseModel):
     id: int
     mail: str
+
+
+class EmpleadoMeOut(BaseModel):
+    id: int
+    mail: str
+    nombre: str
+    apellido: str
+    rol: str
+    codigoCM: str

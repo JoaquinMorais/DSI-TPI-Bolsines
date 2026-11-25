@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
 
+import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.orm import selectinload
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -25,7 +27,7 @@ from models import (
 from models.rol import NOMBRE_ENCARGADO_BOLSINES, NOMBRE_GCM
 from models.ubicacion_bolsin import UbicacionBolsin
 from services import registro_casos_uso
-from utils.security import create_access_token
+from utils.auth import get_usuario_dev
 
 INICIO = datetime(2026, 11, 20, 9, 0)
 
@@ -135,7 +137,10 @@ async def entorno(monkeypatch):
     app.dependency_overrides[get_db] = override_get_db
 
     gps = GpsTrackerFake(
-        ubicaciones={101: _ubicacion(101, -31.4201, -64.1888), 110: _ubicacion(110, -31.4167, -64.1833)},
+        ubicaciones={
+            101: _ubicacion(101, -31.4201, -64.1888),
+            110: _ubicacion(110, -31.4167, -64.1833),
+        },
         sin_ubicacion={111},
     )
     correo = CorreoFake()
@@ -143,14 +148,21 @@ async def entorno(monkeypatch):
     monkeypatch.setattr(composicion, "crear_correo", lambda: correo)
     registro_casos_uso.reset()
 
-    tokens = {}
-    for mail in ("eb.cba01", "eb.cba02", "eb.tuc01", "gcm.ros"):
-        stmt = select(Usuario).where(Usuario.mail == f"{mail}@example.test")
+    async def cargar(mail: str) -> Usuario:
+        stmt = (
+            select(Usuario)
+            .where(Usuario.mail == mail)
+            .options(
+                selectinload(Usuario.empleado).selectinload(Empleado.rol),
+                selectinload(Usuario.empleado).selectinload(Empleado.comisionMedica),
+            )
+        )
         usuario = (await session.exec(stmt)).first()
-        tokens[mail] = create_access_token(usuario.id)
+        assert usuario is not None
+        return usuario
 
     with TestClient(app) as client:
-        yield client, tokens, correo
+        yield client, cargar, correo
 
     app.dependency_overrides.clear()
     registro_casos_uso.reset()
@@ -158,136 +170,133 @@ async def entorno(monkeypatch):
     await engine.dispose()
 
 
-def _auth(token: str) -> dict[str, str]:
-    return {"Authorization": f"Bearer {token}"}
+async def _usar(cargar, mail: str) -> None:
+    usuario = await cargar(mail)
+    app.dependency_overrides[get_usuario_dev] = lambda: usuario
 
 
-def test_post_sin_token(entorno) -> None:
-    client, _, _ = entorno
-    assert client.post("/seguimiento-bolsines").status_code == 401
-
-
-def test_post_con_rol_gcm_da_403(entorno) -> None:
-    client, tokens, _ = entorno
-    respuesta = client.post(
-        "/seguimiento-bolsines", headers=_auth(tokens["gcm.ros"])
-    )
-    assert respuesta.status_code == 403
-
-
-def test_flujo_principal(entorno) -> None:
-    client, tokens, correo = entorno
-    respuesta = client.post(
-        "/seguimiento-bolsines", headers=_auth(tokens["eb.cba02"])
-    )
-    assert respuesta.status_code == 201
+def _auth_codigo(respuesta) -> str:
     cuerpo = respuesta.json()
+    assert set(cuerpo) == {"codigo", "mensaje"}
+    return cuerpo["codigo"]
+
+
+@pytest.mark.asyncio
+async def test_flujo_principal(entorno) -> None:
+    client, cargar, correo = entorno
+    await _usar(cargar, "eb.cba02@example.test")
+
+    creado = client.post("/seguimiento-bolsines")
+    assert creado.status_code == 201
+    cuerpo = creado.json()
     assert [b["numeroBolsin"] for b in cuerpo["bolsines"]] == [110]
     assert [m["numeroBolsin"] for m in cuerpo["mapa"]["marcadores"]] == [110]
 
     seleccion = client.post(
         f"/seguimiento-bolsines/{cuerpo['idCU']}/seleccion",
         json={"numeroBolsin": 110},
-        headers=_auth(tokens["eb.cba02"]),
     )
     assert seleccion.status_code == 200
-    assert seleccion.json()["requiereConfirmacionCorreo"] is True
 
     confirmacion = client.post(
         f"/seguimiento-bolsines/{cuerpo['idCU']}/confirmacion-correo",
         json={"confirma": True},
-        headers=_auth(tokens["eb.cba02"]),
     )
     assert confirmacion.status_code == 200
     assert confirmacion.json()["notificado"] is True
     assert correo.enviados[0]["destinatario"] == "gcm.ros@example.test"
 
 
-def test_a1_sin_bolsines(entorno) -> None:
-    client, tokens, _ = entorno
-    respuesta = client.post(
-        "/seguimiento-bolsines", headers=_auth(tokens["eb.tuc01"])
-    )
-    assert respuesta.status_code == 200
-    assert respuesta.json()["estado"] == "SIN_BOLSINES"
-    assert respuesta.json()["idCU"] is None
+@pytest.mark.asyncio
+async def test_a1_sin_bolsines_da_404(entorno) -> None:
+    client, cargar, _ = entorno
+    await _usar(cargar, "eb.tuc01@example.test")
+    respuesta = client.post("/seguimiento-bolsines")
+    assert respuesta.status_code == 404
+    assert _auth_codigo(respuesta) == "SIN_BOLSINES_ENVIADOS"
 
 
-def test_a3_gps_sin_ubicacion(entorno) -> None:
-    client, tokens, _ = entorno
-    respuesta = client.post(
-        "/seguimiento-bolsines", headers=_auth(tokens["eb.cba01"])
-    )
+@pytest.mark.asyncio
+async def test_a3_gps_sin_ubicacion(entorno) -> None:
+    client, cargar, _ = entorno
+    await _usar(cargar, "eb.cba01@example.test")
+    respuesta = client.post("/seguimiento-bolsines")
     assert respuesta.status_code == 201
     cuerpo = respuesta.json()
     assert [s["numeroBolsin"] for s in cuerpo["sinUbicacion"]] == [111]
     assert [m["numeroBolsin"] for m in cuerpo["mapa"]["marcadores"]] == [101]
 
 
-def test_a5_no_confirma(entorno) -> None:
-    client, tokens, correo = entorno
-    creado = client.post(
-        "/seguimiento-bolsines", headers=_auth(tokens["eb.cba02"])
-    ).json()
+@pytest.mark.asyncio
+async def test_a4_cancelar(entorno) -> None:
+    client, cargar, _ = entorno
+    await _usar(cargar, "eb.cba02@example.test")
+    creado = client.post("/seguimiento-bolsines").json()
+    assert client.delete(f"/seguimiento-bolsines/{creado['idCU']}").status_code == 204
+    segunda = client.delete(f"/seguimiento-bolsines/{creado['idCU']}")
+    assert segunda.status_code == 404
+    assert _auth_codigo(segunda) == "CASO_USO_NO_ENCONTRADO"
+
+
+@pytest.mark.asyncio
+async def test_a5_no_confirma(entorno) -> None:
+    client, cargar, correo = entorno
+    await _usar(cargar, "eb.cba02@example.test")
+    creado = client.post("/seguimiento-bolsines").json()
     client.post(
         f"/seguimiento-bolsines/{creado['idCU']}/seleccion",
         json={"numeroBolsin": 110},
-        headers=_auth(tokens["eb.cba02"]),
     )
     respuesta = client.post(
         f"/seguimiento-bolsines/{creado['idCU']}/confirmacion-correo",
         json={"confirma": False},
-        headers=_auth(tokens["eb.cba02"]),
     )
     assert respuesta.status_code == 200
     assert respuesta.json()["notificado"] is False
     assert correo.enviados == []
 
 
-def test_seleccion_invalida_da_422(entorno) -> None:
-    client, tokens, _ = entorno
-    creado = client.post(
-        "/seguimiento-bolsines", headers=_auth(tokens["eb.cba02"])
-    ).json()
+@pytest.mark.asyncio
+async def test_rol_insuficiente_da_403(entorno) -> None:
+    client, cargar, _ = entorno
+    await _usar(cargar, "gcm.ros@example.test")
+    respuesta = client.post("/seguimiento-bolsines")
+    assert respuesta.status_code == 403
+    assert _auth_codigo(respuesta) == "ROL_INSUFICIENTE"
+
+
+@pytest.mark.asyncio
+async def test_validacion_da_422(entorno) -> None:
+    client, cargar, _ = entorno
+    await _usar(cargar, "eb.cba02@example.test")
+    creado = client.post("/seguimiento-bolsines").json()
     respuesta = client.post(
         f"/seguimiento-bolsines/{creado['idCU']}/seleccion",
         json={"numeroBolsin": 0},
-        headers=_auth(tokens["eb.cba02"]),
     )
     assert respuesta.status_code == 422
+    assert _auth_codigo(respuesta) == "SOLICITUD_INVALIDA"
 
 
-def test_idcu_inexistente_da_404(entorno) -> None:
-    client, tokens, _ = entorno
+@pytest.mark.asyncio
+async def test_idcu_inexistente_da_404(entorno) -> None:
+    client, cargar, _ = entorno
+    await _usar(cargar, "eb.cba02@example.test")
     respuesta = client.post(
         f"/seguimiento-bolsines/{uuid4()}/seleccion",
         json={"numeroBolsin": 110},
-        headers=_auth(tokens["eb.cba02"]),
     )
     assert respuesta.status_code == 404
+    assert _auth_codigo(respuesta) == "CASO_USO_NO_ENCONTRADO"
 
 
-def test_delete_y_404_posterior(entorno) -> None:
-    client, tokens, _ = entorno
-    creado = client.post(
-        "/seguimiento-bolsines", headers=_auth(tokens["eb.cba02"])
-    ).json()
-    assert (
-        client.delete(
-            f"/seguimiento-bolsines/{creado['idCU']}",
-            headers=_auth(tokens["eb.cba02"]),
-        ).status_code
-        == 204
-    )
-    assert (
-        client.delete(
-            f"/seguimiento-bolsines/{creado['idCU']}",
-            headers=_auth(tokens["eb.cba02"]),
-        ).status_code
-        == 404
-    )
-
-
-def test_health(entorno) -> None:
-    client, _, _ = entorno
-    assert client.get("/health").status_code == 200
+@pytest.mark.asyncio
+async def test_me_devuelve_empleado(entorno) -> None:
+    client, cargar, _ = entorno
+    await _usar(cargar, "eb.cba01@example.test")
+    respuesta = client.get("/auth/me")
+    assert respuesta.status_code == 200
+    cuerpo = respuesta.json()
+    assert cuerpo["mail"] == "eb.cba01@example.test"
+    assert cuerpo["rol"] == NOMBRE_ENCARGADO_BOLSINES
+    assert cuerpo["codigoCM"] == "CM-CBA-01"

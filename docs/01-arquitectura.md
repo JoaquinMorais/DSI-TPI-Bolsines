@@ -11,7 +11,7 @@ flowchart TD
   IDX["backend/index.py<br/>app FastAPI, include_router, composicion"]
 
   subgraph Routes
-    R["backend/routes/pantalla_buscar_bolsines.py<br/>PantallaBuscarBolsines (boundary)"]
+    R["backend/routes/seguimiento_bolsines.py<br/>PantallaBuscarBolsines (boundary)"]
     RA["backend/routes/auth.py<br/>login, refresh, logout"]
   end
 
@@ -50,7 +50,7 @@ flowchart TD
 
 Puntos clave:
 
-- **`backend/routes/pantalla_buscar_bolsines.py` = PantallaBuscarBolsines (boundary).** Cada endpoint corresponde a un metodo de la pantalla del diagrama de secuencia de la Entrega 1 (`opcionSeguirBolsines`, `mostrarCM`, `mostrarMapaBolsines`, `pedirFormaSeleccionBolsin`, `tomarSeleccionBolsin`, `pedirConfirmacionEnvioCorreo`, `tomarConfirmacionEnvioCorreo`). Solo traduce HTTP a llamadas del gestor y del gestor a schemas. No tiene logica de negocio, no accede a la base ni a integraciones.
+- **`backend/routes/seguimiento_bolsines.py` = PantallaBuscarBolsines (boundary).** Cada endpoint corresponde a un metodo de la pantalla del diagrama de secuencia de la Entrega 1 (`opcionSeguirBolsines`, `mostrarCM`, `mostrarMapaBolsines`, `pedirFormaSeleccionBolsin`, `tomarSeleccionBolsin`, `pedirConfirmacionEnvioCorreo`, `tomarConfirmacionEnvioCorreo`). Solo traduce HTTP a llamadas del gestor y del gestor a schemas. No tiene logica de negocio, no accede a la base ni a integraciones.
 - **`backend/services/` = GestorBuscarBolsines.** Coordina el CU, es el agregado del Iterator (`IAgregado.crearIterador`) y es el unico que recorre bolsines, siempre con `primero`, `haFinalizado`, `elementoActual` y `siguiente`.
 - **`backend/models/` = entidades con metodos de negocio + Iterator.** Las reglas (`esTuCMOrigen`, `sosEnviado`, `comprobarFiltro`) no dependen de HTTP, de integraciones ni de la configuracion.
 - **`backend/integrations/` = adaptadores.** El gestor solo ve interfaces. Las implementaciones reales y los fakes viven detras de ellas.
@@ -94,8 +94,8 @@ Puntos clave:
 | Registro de casos de uso | `backend/services/registro_casos_uso.py` | `crear`/`obtener`/`eliminar` en memoria por `idCU`. Seccion 4. |
 | Schemas CU 36 | `backend/schemas/seguimiento.py` | Pydantic. Sin logica. |
 | Schemas auth | `backend/schemas/auth.py` | Pydantic: login y token. |
-| Endpoints CU 36 | `backend/routes/pantalla_buscar_bolsines.py` | Boundary. |
-| Endpoints auth | `backend/routes/auth.py` | Login, refresh, logout. |
+| Endpoints CU 36 | `backend/routes/seguimiento_bolsines.py` | Boundary; usa el usuario de desarrollo. |
+| Endpoints auth | `backend/routes/auth.py` | Login, refresh, logout y `/me`. |
 | Autenticacion | `backend/utils/auth.py` | Cookies de refresh, `authenticate_user`, `issue_tokens`, `get_current_user`, `user_dependency`. |
 | Seguridad | `backend/utils/security.py` | JWT (`create_access_token`, `decode_access_token`), `generate_refresh_token`, `hash_token`. |
 | Configuracion | `backend/config/settings.py`, `backend/config/database.py` | Variables de entorno y engine SQLite async. |
@@ -224,7 +224,8 @@ backend/
     seed.py                            # datos semilla
   backend/routes/
     __init__.py
-    pantalla_buscar_bolsines.py        # APIRouter: PantallaBuscarBolsines (boundary, CU 36)
+    seguimiento_bolsines.py            # APIRouter: PantallaBuscarBolsines (boundary, CU 36)
+    errores.py                         # ErrorDeApi (codigo + mensaje + status)
     auth.py                            # login, refresh, logout
   backend/schemas/
     __init__.py
@@ -268,9 +269,10 @@ backend/
     services/
       test_gestor_buscar_bolsines.py   # principal y A1-A5
       test_gestor_usa_iterador.py      # verifica uso del Iterator
+    routes/
+      test_seguimiento_bolsines.py     # TestClient + GPS mockeado (principal y A1-A5)
     test_gps_tracker_xtr4500l.py       # parseo de getBolsinLocation (A3)
     test_seed.py
-    test_routes_seguimiento.py
     test_auth.py
     integracion/
       test_gps_tracker_xtr4500l_real.py  # contra la API de la catedra (opcional)

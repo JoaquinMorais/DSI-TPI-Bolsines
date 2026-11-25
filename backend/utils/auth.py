@@ -98,3 +98,25 @@ async def get_current_user(
 
 
 user_dependency = Annotated[Usuario, Depends(get_current_user)]
+
+
+async def get_usuario_dev(db: db_dependency) -> Usuario:
+    mail = settings.USUARIO_DEV.strip().lower()
+    stmt = (
+        select(Usuario)
+        .where(Usuario.mail == mail)
+        .options(
+            selectinload(Usuario.empleado).selectinload(Empleado.rol),
+            selectinload(Usuario.empleado).selectinload(Empleado.comisionMedica),
+        )
+    )
+    usuario = (await db.exec(stmt)).first()
+    if usuario is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario de desarrollo no encontrado",
+        )
+    return usuario
+
+
+usuario_dev_dependency = Annotated[Usuario, Depends(get_usuario_dev)]

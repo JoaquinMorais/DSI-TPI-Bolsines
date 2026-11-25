@@ -42,12 +42,6 @@ class SeguimientoCreadoResponse(BaseModel):
     sinUbicacion: list[SinUbicacionOut]
 
 
-class SinBolsinesResponse(BaseModel):
-    idCU: None = None
-    codigoCM: str
-    estado: Literal["SIN_BOLSINES"] = "SIN_BOLSINES"
-
-
 class SeleccionBolsinRequest(BaseModel):
     numeroBolsin: int = Field(gt=0)
 
@@ -71,4 +65,4 @@ class ConfirmacionCorreoResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     codigo: str
-    detalle: str
+    mensaje: str

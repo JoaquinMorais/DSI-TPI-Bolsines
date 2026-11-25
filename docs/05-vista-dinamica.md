@@ -107,7 +107,7 @@ Diagrama: `docs/diagramas/secuencia-cu36-completo.puml`. La porcion reemplazada 
 
 | Alternativo | Afecta la secuencia | Tratamiento en el diagrama |
 |---|---|---|
-| **A1** No hay bolsines Enviados de la CM | Si. El iterador no produce elementos y `obtenerBolsinesEnviados` queda vacio. | El gestor lanza `SinBolsinesEnviadosError`; el route la traduce a 200 `SinBolsinesResponse`. No se llama al GPS, al mapa ni al correo. |
+| **A1** No hay bolsines Enviados de la CM | Si. El iterador no produce elementos y `obtenerBolsinesEnviados` queda vacio. | El gestor lanza `SinBolsinesEnviadosError`; el route la traduce a 404 `{codigo: "SIN_BOLSINES_ENVIADOS", mensaje}`. No se llama al GPS, al mapa ni al correo. |
 | **A2** Precinto no encontrado | Si. Lo resuelve `GestorBuscarBolsines.filtrarPorPrecinto`. | Devuelve lista vacia y agrega una advertencia en `gestor.advertencias`; el frontend informa sin resultados. |
 | **A3** GPS no informa ubicacion | Si. Ocurre dentro del loop del paso 7. | `alt A3` dentro del loop. El bolsin queda registrado como "sin ubicacion" y el loop sigue con el resto. Si ninguno tiene ubicacion, la sesion queda abierta con `marcadores: []` y todos los bolsines en `sinUbicacion` (ver `docs/07-api-rest.md` §4). |
 | **A4** EB cancela | Si. Puede ocurrir en pasos interactivos (9 a 11). | `alt A4` despues de la seleccion. Se modela como `DELETE /seguimiento-bolsines/{idCU}`. El gestor se descarta del registro en memoria y no se envia correo. |

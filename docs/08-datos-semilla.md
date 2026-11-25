@@ -126,7 +126,7 @@ Regla de carga: `fechaHoraInicio` del cambio siguiente es igual a `fechaHoraFin`
 |---|---|---|---|
 | Principal | EB Córdoba 1 | Seguimiento completo | Enviados 101 y 111. Marcador para 101. 111 en `sinUbicacion` (A3). |
 | Principal limpio | EB Córdoba 2 | Seguimiento completo, hasta el correo | Solo 110, con ubicacion. Correo a GCM Rosario. |
-| A1 | EB Tucumán | Seguimiento | 200 `SinBolsinesResponse`, sin `idCU`. No hay Enviados de CM-TUC-01. |
+| A1 | EB Tucumán | Seguimiento | 404 `{codigo: "SIN_BOLSINES_ENVIADOS"}`. No hay Enviados de CM-TUC-01. |
 | A2 | EB Córdoba 1 | Filtro por precinto `P-0111` en el frontend | Muestra solo 111. Sin llamada al backend. Con `P-9999`, sin resultados. |
 | A3 | EB Córdoba 1 | Seleccionar 111 | Sin marcador. La sesion queda abierta. |
 | A4 | Cualquiera | DELETE del caso de uso | 204. No se envia correo. |
