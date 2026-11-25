@@ -1,0 +1,129 @@
+@startuml secuencia-cu36-completo
+title CU 36 - Consultar seguimiento de bolsines (flujo completo, diseno)
+skinparam sequenceMessageAlign center
+
+actor "EB:Encargado de Bolsines" as EB
+boundary "pantalla:PantallaBuscarBolsines" as P
+control "gestor:GestorBuscarBolsines" as G
+participant "iterador:IteradorBolsin" as IT
+entity "usuario:Usuario" as U
+entity "empleado:Empleado" as EM
+entity "cm:ComisionMedica" as CM
+entity "bolsin:Bolsin" as B
+entity "actual:CambioEstado" as CE
+entity "estado:Estado" as ES
+participant "gps:InterfazGPSTracker" as GPS
+participant "maps:InterfazGoogleMaps" as MAPS
+participant "correo:InterfazCorreo" as C
+participant "cu31:Notificar ubicacion de bolsin" as N31
+
+note over P
+  Usuario logueado llega por user_dependency (JWT).
+  No hay clase Sesion en el diseno.
+end note
+
+== Pasos 1 a 5 ==
+EB -> P : opcionSeguirBolsines()
+P -> P : habilitarPantalla()
+P -> G : opcionSeguirBolsines(usuario)
+G -> U : getEmpleado()
+U --> G : empleado
+G -> EM : getCM()
+EM --> G : cm
+G -> CM : getCodigo()
+CM --> G : codigoCM
+G -> P : mostrarCM(codigoCM)
+
+== Paso 6: busqueda de bolsines Enviados ==
+group Entrega 2: reemplaza el loop de obtenerBolsinesEnviados() de E1 #LightYellow
+  G -> G : obtenerCodigoBolsinesEnviados()
+  G -> G : crearIterador(elementos)
+  G -> IT : init(elementos, filtros)
+  G -> IT : primero()
+  IT -> IT : posicionarEnValido()
+  loop mientras haFinalizado() = false
+    G -> IT : haFinalizado()
+    G -> IT : elementoActual()
+    G -> B : getNumeroBolsin()
+    G -> IT : siguiente()
+    IT -> IT : posicionarEnValido()
+  end
+  note over IT
+    posicionarEnValido() usa comprobarFiltro(filtros):
+    esTuCMOrigen(codigoCM), sosEnviado() -> sosActual() -> sosEnviado() -> Estado.esEnviado()
+  end note
+end
+note over G
+  Entrega 1 (reemplazado): el gestor recorria bolsines con
+  esTuCMOrigen() y sosEnviado() en un loop propio.
+end note
+
+alt A1: no hay bolsines Enviados de la CM
+  G -> P : informarSinBolsines()
+  G -> G : finCU()
+else hay bolsines
+  == Paso 7: ubicacion en GPS (A3 si no informa) ==
+  loop por cada codigo de bolsin enviado
+    G -> GPS : getBolsinLocation(numeroBolsin, codigoCM)
+    alt A3: GPS no informa ubicacion
+      GPS --> G : sin datos
+      G -> G : registrarSinUbicacion(numeroBolsin)
+    else ubicacion informada
+      GPS --> G : UbicacionBolsin
+    end
+  end
+
+  == Paso 8: mapa ==
+  G -> MAPS : obtenerMapa(ubicaciones)
+  MAPS --> G : mapa
+
+  == Paso 9: mostrar y pedir seleccion ==
+  G -> P : mostrarMapaBolsines(mapa)
+  G -> P : pedirFormaSeleccionBolsin()
+
+  == Paso 10: seleccion ==
+  EB -> P : tomarSeleccionBolsin(numeroBolsin)
+  P -> G : tomarSeleccionBolsin(numeroBolsin)
+
+  alt A4: EB cancela el caso de uso
+    EB -> P : cancelar()
+    P -> G : DELETE /seguimiento-bolsines/{idCasoUso}
+    G -> G : descartarGestor()
+  else continua
+    == Paso 11: confirmacion de correo ==
+    G -> P : pedirConfirmacionEnvioCorreo()
+    EB -> P : tomarConfirmacionEnvioCorreo(confirma)
+    P -> G : tomarConfirmacionEnvioCorreo(confirma)
+
+    alt A5: EB no confirma el correo
+      G -> G : finCU() sin notificacion
+    else confirma
+      == Paso 12: enviarMailGCM ==
+      G -> G : enviarMailGCM()
+      G -> B : obtenerCMDestino()
+      B --> G : cmDestino
+      note over G
+        Decision: consulta simple, sin bucle en el gestor.
+        Devuelve el empleado GCM de la CM destino.
+      end note
+      G -> EM : obtenerGCMDeCM(codigoCMDestino)
+      EM --> G : gcm
+      G -> EM : sosGCM()
+      EM --> G : true
+      G -> EM : getUsuario()
+      EM --> G : usuarioGCM
+      G -> U : getMail()
+      U --> G : mail
+
+      == Paso 13: include CU 31 ==
+      G -> N31 : <<include>> notificarUbicacion(numeroBolsin, fechaHora, coordenadas)
+      N31 -> C : enviarMail(mail, asunto, cuerpo)
+      C --> N31 : ok
+      N31 --> G : ok
+    end
+  end
+end
+
+== Paso 14: fin ==
+G -> G : finCU()
+@enduml

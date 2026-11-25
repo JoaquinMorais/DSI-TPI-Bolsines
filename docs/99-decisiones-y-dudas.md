@@ -51,3 +51,8 @@
 | 2026-11-25 | Constructor: E2 usa `new`. | Se implementa como **`init`** (Python). |
 | 2026-11-25 | Metodos de `InterfazGoogleMaps.obtenerMapa` y parametros de `InterfazCorreo.enviarMail`: la ERS no los define. | Propuestas del equipo, aceptadas. Se revisan cuando se defina la integracion. |
 | 2026-11-25 | Validacion del diagrama PlantUML. | `.puml` valido (`java -jar plantuml.jar -checkonly`). El render PNG necesita Graphviz (`dot`), que no esta instalado en el entorno; el layout no se pudo revisar visualmente. |
+| 2026-11-25 | Donde se aplica `comprobarFiltro`: en E2 esta dentro del bucle del gestor, despues de `elementoActual()`. | **`primero()` y `siguiente()` avanzan internamente** al proximo elemento que cumple el filtro. `elementoActual()` siempre devuelve un bolsin valido y el gestor no filtra. Detalle en `docs/05-vista-dinamica.md` §2 y §6. |
+| 2026-11-25 | Loop de empleados GCM en el paso 12 (E1: `esTuCM`, `sosGCM`, `esGCM`). | Se reemplaza por la consulta simple **`Empleado.obtenerGCMDeCM(codigoCM)`** (sin bucle en el gestor). Metodo nuevo: agregar a `docs/04-vista-estatica.md` al implementar. |
+| 2026-11-25 | Usuario logueado en `buscarUsuarioLogueado`: E1 usa `Sesion`. | Sin `Sesion`: el usuario llega por `user_dependency` (JWT) -> `Usuario` -> `Empleado`. |
+| 2026-11-25 | Nombre del estado en secuencias: `CambioEstadoBolsin` (pedido) vs `CambioEstado`. | Se usa **`CambioEstado`** en los diagramas. |
+| 2026-11-25 | CU 31 en la secuencia completa. | Se modela como `<<include>>` del CU 36 (paso 13), segun el diagrama de casos de uso de la ERS. |
