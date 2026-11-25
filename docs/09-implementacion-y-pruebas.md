@@ -1,6 +1,6 @@
 # 09 - Implementacion y pruebas (CU 36)
 
-Estado: **plan de implementacion**. El codigo de aplicacion todavia no existe: `backend/` tiene `index.py`, `Dockerfile` y carpetas con `.gitkeep`. Por eso la evidencia de cada criterio figura como pendiente.
+Estado: **implementado** (pasos 1 a 16 del orden de implementacion). La suite pytest da **73 passed, 4 skipped** (los 4 skipped son los tests de integracion, que requieren la API GPS). El chequeo en vivo con `docker compose up` respondio login y seguimiento (A3 por GPS inalcanzable) y el frontend sirvio en `3020`.
 
 ## 1. Detalles de implementacion
 
@@ -19,15 +19,15 @@ Restricciones de ejecucion (`AGENTS.md` §9, `docs/07-api-rest.md`):
 
 | Criterio (`docs/00-contexto.md` §4.5) | Evidencia prevista | Estado |
 |---|---|---|
-| Flujo principal ejecutado | Test de endpoints: POST `/seguimiento-bolsines` -> POST `.../seleccion` -> POST `.../confirmacion-correo` con EB Cordoba 2 (bolsin 110), con GPS fake y correo fake. Esperado: 201, 200, 200 con `notificado: true`. | Pendiente |
-| Alternativo A1 ejecutado | Test con EB Tucuman: POST responde 200 `SinBolsinesResponse`, sin llamadas al GPS ni al correo. | Pendiente |
-| Alternativo A3 ejecutado | Test con EB Cordoba 1: bolsin 111 con GPS fake que lanza `UbicacionNoDisponibleError`. Aparece en `sinUbicacion` y la sesion sigue abierta. Prueba adicional contra la API real (§3), donde 111 responde 404. | Pendiente |
-| Alternativo A5 ejecutado | Test de confirmacion con `confirma: false`: 200 con `notificado: false`, el correo fake no recibe envios. | Pendiente |
-| Iterator visible y usado por el gestor | Revision de codigo: `GestorBuscarBolsines` implementa `IAgregado` y solo llama a `primero`, `haFinalizado`, `elementoActual`, `siguiente`. Un test verifica que el gestor no accede a la lista. | Pendiente |
-| Filtro dentro de `comprobarFiltro()` | Tests unitarios del iterador (§4.1). | Pendiente |
-| Consistencia con el modelado | Nombres de clases y metodos iguales a `docs/04-vista-estatica.md`. Revision cruzada con `docs/02-modelo-datos.md` y `docs/07-api-rest.md`. | Pendiente |
-| Persistencia en DB | Test de integracion: el seed carga una SQLite temporal y la consulta del gestor devuelve los bolsines esperados (101, 110 y 111 segun el escenario). Verifica un solo `CambioEstado` vigente por bolsin. | Pendiente |
-| Defensa del patron | Checklist de §5. | Pendiente |
+| Flujo principal ejecutado | Test de endpoints: POST `/seguimiento-bolsines` -> POST `.../seleccion` -> POST `.../confirmacion-correo` con EB Cordoba 2 (bolsin 110), con GPS fake y correo fake. Esperado: 201, 200, 200 con `notificado: true`. | Cumplido (`tests/test_routes_seguimiento.py::test_flujo_principal`) |
+| Alternativo A1 ejecutado | Test con EB Tucuman: POST responde 200 `SinBolsinesResponse`, sin llamadas al GPS ni al correo. | Cumplido (`test_a1_sin_bolsines`) |
+| Alternativo A3 ejecutado | Test con EB Cordoba 1: bolsin 111 con GPS fake que lanza `UbicacionNoDisponibleError`. Aparece en `sinUbicacion` y la sesion sigue abierta. Prueba adicional contra la API real (§3), donde 111 responde 404. | Cumplido (`test_a3_gps_sin_ubicacion` y test de integracion) |
+| Alternativo A5 ejecutado | Test de confirmacion con `confirma: false`: 200 con `notificado: false`, el correo fake no recibe envios. | Cumplido (`test_a5_no_confirma`) |
+| Iterator visible y usado por el gestor | Revision de codigo: `GestorBuscarBolsines` implementa `IAgregado` y solo llama a `primero`, `haFinalizado`, `elementoActual`, `siguiente`. Un test verifica que el gestor no accede a la lista. | Cumplido (`test_obtener_codigos_usa_iterador` y revision) |
+| Filtro dentro de `comprobarFiltro()` | Tests unitarios del iterador (§4.1). | Cumplido (`tests/test_iterador_bolsin.py`) |
+| Consistencia con el modelado | Nombres de clases y metodos iguales a `docs/04-vista-estatica.md`. Revision cruzada con `docs/02-modelo-datos.md` y `docs/07-api-rest.md`. | Cumplido (nombres iguales a `docs/04`; revision cruzada) |
+| Persistencia en DB | Test de integracion: el seed carga una SQLite temporal y la consulta del gestor devuelve los bolsines esperados (101, 110 y 111 segun el escenario). Verifica un solo `CambioEstado` vigente por bolsin. | Cumplido (`tests/test_seed.py` y chequeo en vivo con SQLite) |
+| Defensa del patron | Checklist de §5. | Pendiente (defensa oral) |
 
 ## 3. Integracion contra la API real del GPS Tracker
 
