@@ -4,6 +4,7 @@ from models.comision_medica import ComisionMedica
 from models.empleado import Empleado
 from models.estado import Estado
 from models.rol import Rol
+from models.ubicacion_bolsin import UbicacionBolsin
 from models.usuario import Usuario
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "Empleado",
     "Estado",
     "Rol",
+    "UbicacionBolsin",
     "Usuario",
 ]

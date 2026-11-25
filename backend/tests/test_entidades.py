@@ -26,3 +26,30 @@ def test_rol_es_gcm() -> None:
 def test_rol_es_encargado_bolsines() -> None:
     assert Rol(nombre=NOMBRE_ENCARGADO_BOLSINES).esEncargadoBolsines() is True
     assert Rol(nombre=NOMBRE_GCM).esEncargadoBolsines() is False
+
+
+def test_ubicacion_bolsin_es_inmutable() -> None:
+    from dataclasses import FrozenInstanceError
+    from datetime import datetime
+
+    import pytest
+
+    from models.ubicacion_bolsin import UbicacionBolsin
+
+    ubicacion = UbicacionBolsin(
+        numeroBolsin=101,
+        latitud=-31.4201,
+        longitud=-64.1888,
+        fechaHoraUltimaActualizacion=datetime(2026, 3, 7, 12, 30),
+    )
+    assert ubicacion.numeroBolsin == 101
+    with pytest.raises(FrozenInstanceError):
+        ubicacion.latitud = 0.0
+
+
+def test_ubicacion_no_disponible_error() -> None:
+    from integrations.gps_tracker.errores import UbicacionNoDisponibleError
+
+    error = UbicacionNoDisponibleError(111, "El GPS no informo ubicacion")
+    assert error.numeroBolsin == 111
+    assert error.motivo == "El GPS no informo ubicacion"
