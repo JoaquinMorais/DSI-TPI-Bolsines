@@ -8,9 +8,11 @@ services:
         required: false
     environment:
       CORS_ORIGINS: http://localhost:3020
+      DB_URL: sqlite+aiosqlite:////app/db/bolsines.db
     volumes:
-      # La base SQLite persiste fuera del contenedor.
-      - bolsines-data:/app/data
+      # La base SQLite persiste fuera del contenedor, en un subdirectorio propio
+      # para no tapar el codigo de backend/data (seed.py).
+      - bolsines-data:/app/db
 
   frontend:
     build: ./frontend

@@ -115,3 +115,4 @@
 | 2026-11-25 | Centro por defecto del mapa sin marcadores. | Se usa CABA (`-34.6037, -58.3816`) por ahora. Sigue pendiente de confirmar. |
 | 2026-11-25 | `SECRET_KEY` sin valor en dev rompe los tokens. | Default de desarrollo largo (`dev-insecure-...`); en produccion va por `.env`. `ACCESS_TOKEN_MINUTES=30`, `REFRESH_DAYS=7`. |
 | 2026-11-25 | Mapeo de errores en `routes`: seleccion inexistente, correo caido, `idCU` vencido. | `422` si el bolsin no esta entre los enviados; `502` si el correo no sale (la sesion queda abierta); `404` si el `idCU` no existe o vencio. |
+| 2026-11-25 | El volumen de la base en `/app/data` tapaba `data/seed.py` dentro del contenedor. | El volumen `bolsines-data` se monta en `/app/db` y `DB_URL` (compose y `.env.example`) apunta a `/app/db/bolsines.db`. El codigo de `backend/data/` queda visible. |
