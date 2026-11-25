@@ -22,7 +22,7 @@
 
 **3. Reutilizacion del recorrido**
 - *Problema:* otros casos de uso necesitan recorrer bolsines con otros criterios. Por ejemplo, el CU 28 (Registrar recepcion de bolsin) busca los bolsines enviados a la CM del usuario logueado, es decir, filtra por CM destino y no por CM origen.
-- *Solucion:* el iterador recibe la coleccion y los filtros en `new(elementos, filtros)`, asi que el mismo recorrido puede reutilizarse cambiando solo los filtros.
+- *Solucion:* el iterador recibe la coleccion y los filtros en `init(elementos, filtros)` (equivalente al `new` del diagrama), asi que el mismo recorrido puede reutilizarse cambiando solo los filtros.
 
 **Nota:** en el CU 28 el filtro es por CM destino. `IteradorBolsin` lo resuelve con el mismo `comprobarFiltro()`, pasando filtros distintos. El CU 28 no se implementa en esta entrega.
 
@@ -88,7 +88,7 @@ Reglas que hacen visible el patron (`AGENTS.md` §6):
 1. **Senalar la interfaz del agregado:** mostrar `IAgregado` y decir que `GestorBuscarBolsines` la implementa con `crearIterador()`.
 2. **Mostrar la creacion del iterador:** en el gestor, `crearIterador(bolsines, filtros)` devuelve un `IteradorBolsin`. Explicar que el gestor no sabe como esta almacenada la coleccion.
 3. **Recorrer el bucle del gestor:** `primero()`, `haFinalizado()`, `elementoActual()`, `siguiente()`. Senalar que no hay un `for` sobre la lista.
-4. **Mostrar `comprobarFiltro()`:** es el unico lugar donde estan `esTuCMOrigen()` y `sosEnviado()`. Explicar que los filtros se pasan en `new()`, y que por eso el CU 28 puede reutilizar el recorrido con otro criterio.
+4. **Mostrar `comprobarFiltro()`:** es el unico lugar donde estan `esTuCMOrigen()` y `sosEnviado()`. Explicar que los filtros se pasan en `init()`, y que por eso el CU 28 puede reutilizar el recorrido con otro criterio.
 5. **Mostrar el resultado en la prueba:** `backend/tests/test_iterador_bolsin.py` verifica el filtro, y `backend/tests/test_gestor_buscar_bolsines.py` verifica que el gestor devuelve solo los codigos de bolsines Enviados de la CM del usuario logueado (flujo principal y alternativos A1 y A2).
 
 ---

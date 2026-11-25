@@ -123,6 +123,8 @@ Metodos:
 | `esTuCM(codigoCM: str)` | publica | `bool` | `self.comisionMedica.getCodigo() == codigoCM` |
 | `sosGCM()` | publica | `bool` | `self.rol.esGCM()` |
 | `getCM()` | publica | `ComisionMedica` | |
+| `getUsuario()` | publica | `Usuario` | |
+| `obtenerGCMDeCM(codigoCM: str)` | publica | `Empleado` | Consulta simple del GCM de la CM destino (paso 12) | |
 
 ### Usuario (`backend/models/usuario.py`, entidad de login)
 
@@ -132,13 +134,15 @@ Metodos:
 | `mail` | `str` | unico, normalizado a minusculas |
 | `hashedPassword` | `str` | hash (pwdlib/argon2) |
 
-Relaciones: `empleado: Empleado | None` (1 a 1), `back_populates="user"`.
+Relaciones: `empleado: Empleado | None` (1 a 1), `back_populates="usuario"`.
 
 Metodos:
 
 | Metodo | Visibilidad | Retorno |
 |---|---|---|
 | `verify_password(password: str)` | publica | `bool` |
+| `getEmpleado()` | publica | `Empleado` |
+| `getMail()` | publica | `str` |
 
 ### RefreshToken (`backend/models/refresh_token.py`, reemplaza a `Sesion` para auth)
 
@@ -149,7 +153,7 @@ Metodos:
 | `tokenHash` | `str` | |
 | `expiresAt` | `datetime` | |
 
-Relaciones: `user: Usuario` (N a 1), `back_populates` con `Usuario` (ver §2).
+Relaciones: `usuario: Usuario` (N a 1), `back_populates` con `Usuario` (ver §2).
 
 Ver §5: `Sesion` del diagrama no tiene tabla propia.
 
@@ -204,8 +208,8 @@ erDiagram
   ESTADO ||--o{ CAMBIO_ESTADO : "estado"
   COMISION_MEDICA ||--o{ EMPLEADO : "asignadoA"
   ROL ||--o{ EMPLEADO : "rol"
-  USER ||--|| EMPLEADO : "1 a 1 (idUser)"
-  USER ||--o{ REFRESH_TOKEN : "idUser"
+  USUARIO ||--|| EMPLEADO : "1 a 1 (idUser)"
+  USUARIO ||--o{ REFRESH_TOKEN : "idUser"
 
   BOLSIN {
     int id PK
@@ -245,7 +249,7 @@ erDiagram
     int id PK
     string nombre
   }
-  USER {
+  USUARIO {
     int id PK
     string mail
     string hashedPassword

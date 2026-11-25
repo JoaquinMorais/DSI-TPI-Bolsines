@@ -110,7 +110,7 @@ Request:
 
 Response 200:
 ```json
-{ "estado": "FINALIZADO", "notificado": true, "destinatarioEnmascarado": "g***@cmrosario.gob.ar" }
+{ "estado": "FINALIZADO", "notificado": true, "destinatarioEnmascarado": "g***@example.test" }
 ```
 
 ### 5.2 A1: sin bolsines Enviados
@@ -124,7 +124,8 @@ No hay sesion abierta, ni GPS, mapa o correo.
 
 ### 5.3 A3: GPS sin ubicacion para un bolsin
 
-POST `/seguimiento-bolsines`, response 201 (fragmento, mismo caso que 5.1 pero con el 101 tambien sin ubicacion):
+POST `/seguimiento-bolsines`, response 201 (fragmento; es el caso de la defensa: 101 con ubicacion y 111 sin ubicacion):
+
 ```json
 {
   "idCU": "3f2a9c1e-7b4d-4e8a-9f10-2c5d6e7a8b90",
@@ -134,18 +135,17 @@ POST `/seguimiento-bolsines`, response 201 (fragmento, mismo caso que 5.1 pero c
     { "numeroBolsin": 111, "numeroPrecinto": "P-0111", "codigoCMDestino": "CM-MDZ-03" }
   ],
   "mapa": {
-    "centro": { "latitud": 0, "longitud": 0 },
+    "centro": { "latitud": -31.4201, "longitud": -64.1888 },
     "zoom": 6,
-    "marcadores": []
+    "marcadores": [
+      { "numeroBolsin": 101, "latitud": -31.4201, "longitud": -64.1888, "fechaHoraUltimaActualizacion": "2026-03-07T12:30:00" }
+    ]
   },
-  "sinUbicacion": [
-    { "numeroBolsin": 101, "motivo": "El GPS no informo ubicacion" },
-    { "numeroBolsin": 111, "motivo": "El GPS no informo ubicacion" }
-  ]
+  "sinUbicacion": [ { "numeroBolsin": 111, "motivo": "El GPS no informo ubicacion" } ]
 }
 ```
 
-El caso real de la defensa (111 sin ubicacion, 101 con ubicacion) es el de 5.1. Este ejemplo muestra el caso sin ningun marcador, que el `centro` por defecto del backend debe definir (`docs/06-integraciones.md` §3).
+Si ningun bolsin tuviera ubicacion, `marcadores` seria `[]` y todos irian a `sinUbicacion`. En ese caso el `centro` toma el valor por defecto del backend (`docs/06-integraciones.md` §7).
 
 ### 5.4 A5: EB no confirma el correo
 

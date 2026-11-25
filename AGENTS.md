@@ -58,6 +58,7 @@ frontend/
 - **`schemas` solo validacion y serializacion.** Sin logica de negocio.
 - **Integraciones solo en `integrations/`.** Ningun otro modulo habla directamente con GPS, Google Maps o el servidor de correo. Se accede mediante interfaces (`InterfazGPSTracker`, `InterfazGoogleMaps`, `InterfazCorreo`) con implementacion real y una implementacion fake para tests.
 - **`utils/` solo cross-cutting** (auth, seguridad). No contiene reglas de negocio ni integraciones.
+- **Visualizacion del mapa en el frontend.** El backend devuelve `MapaBolsines` (centro, zoom y marcadores). El frontend renderiza con la libreria de Google Maps usando `VITE_GOOGLE_MAPS_API_KEY`. El backend no llama a la API de Google Maps.
 - **Persistencia:** SQLModel. Los accesos a la base van en `models`/`services`/`utils/auth.py`, nunca en `routes`.
 - Reglas de importacion completas en `docs/01-arquitectura.md` (seccion 5).
 
@@ -74,6 +75,8 @@ frontend/
 
 - El Iterator debe ser **claramente visible** y **usado por el gestor**.
 - Jerarquia obligatoria: `IAgregado` (implementado por `GestorBuscarBolsines`, expone `crearIterador`), `IIterador` (`primero`, `siguiente`, `haFinalizado`, `elementoActual`, `comprobarFiltro`), `IteradorBolsin` (concreto, en `backend/models/iterator/`).
+- El nombre de la interfaz es siempre **`IIterador`**. `IIterator` (texto de la Entrega 2) es un error de escritura; no usarlo.
+- El constructor de `IteradorBolsin` es **`init(elementos, filtros)`**, equivalente al `new` del diagrama. `primero()` y `siguiente()` avanzan hasta el proximo elemento que cumple `comprobarFiltro()`.
 - El gestor recorre los bolsines **solo** con `primero()`, `haFinalizado()`, `elementoActual()`, `siguiente()`. No recorre listas ni consulta bolsines en bucles propios.
 - El filtrado (CM origen = CM del usuario logueado y estado Enviado) vive en `comprobarFiltro()` del iterador.
 - **Prohibido** agregar otros patrones que oculten al Iterator: repositorios genericos, fabricas adicionales, query builders, `Specification`, `Strategy` de filtros, mapeos intermedios, etc. Si la base se consulta para cargar bolsines, la consulta debe ser simple y el recorrido sigue siendo el del iterador.
@@ -87,8 +90,9 @@ frontend/
 
 ## 8. Integraciones externas
 
-- GPS Tracker: modelo XTR-4500L (endpoint `getBolsinLocation()`), segun Entrega 2. Credenciales, URL y API key por variable de entorno, nunca en el codigo ni en el repo.
-- Pendiente de definir por el equipo: URL/documentacion reales del GPS, Google Maps y servidor de correo. No inventar endpoints.
+- GPS Tracker: API simulada de la catedra, repositorio `LiberaeMentis/dsi-api-bolsines`. Modelo XTR-4500L (endpoint `getBolsinLocation`). Base por defecto `http://localhost:8080` (`GPS_BASE_URL`). Una API key por modelo por variable de entorno (`GPS_API_KEY_XTR4500L`, `GPS_API_KEY_NAVTRACK`, `GPS_API_KEY_GEOPULSE`); nunca en el codigo ni en el repo. Detalle en `docs/06-integraciones.md`.
+- Google Maps: la visualizacion vive en el frontend (`VITE_GOOGLE_MAPS_API_KEY`). El backend no llama a la API de Maps.
+- Servidor de correo: implementacion simulada (log/archivo) por defecto; Microsoft Graph documentado, sin implementar. Detalle en `docs/06-integraciones.md`.
 
 ## 9. Flujo de trabajo
 

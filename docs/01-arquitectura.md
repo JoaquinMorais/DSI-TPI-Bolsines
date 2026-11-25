@@ -63,7 +63,7 @@ Puntos clave:
 | `GestorBuscarBolsines` | `backend/services/gestor_buscar_bolsines.py` | Implementa `IAgregado`. Atributos: `seleccionBolsin`, `bolsines`, `ubicaciones`. |
 | `IAgregado` | `backend/models/iterator/i_agregado.py` | Interfaz (ABC). Declara `crearIterador`. |
 | `IIterador` | `backend/models/iterator/i_iterador.py` | Interfaz (ABC). `primero`, `siguiente`, `haFinalizado`, `elementoActual`, `comprobarFiltro`. |
-| `IteradorBolsin` | `backend/models/iterator/iterador_bolsin.py` | Concreto. Recibe `elementos` y `filtros` en `new`. |
+| `IteradorBolsin` | `backend/models/iterator/iterador_bolsin.py` | Concreto. Recibe `elementos` y `filtros` en `init`. |
 | `Bolsin` | `backend/models/bolsin.py` | Entidad SQLModel. Atributos: `numeroBolsin`, `fecha`, `numeroPrecinto`, `peso`. Metodos: `esTuCMOrigen`, `sosEnviado`, `getNumeroBolsin`. |
 | `CambioEstado` | `backend/models/cambio_estado.py` | Entidad SQLModel. `fechaHoraInicio`, `fechaHoraFin`, `sosActual`, `sosEnviado`. Nombre segun Entrega 2. |
 | `Estado` | `backend/models/estado.py` | Entidad SQLModel. `nombre`, `descripcion`, `esEnviado`. |
@@ -73,13 +73,18 @@ Puntos clave:
 | `Usuario` | `backend/models/usuario.py` | Entidad de login. `id`, `mail`, `hashedPassword`, `verify_password`. (Antes se llamaba `User`, ver bitacora.) |
 | `RefreshToken` | `backend/models/refresh_token.py` | Entidad de sesion de auth. `idUser`, `tokenHash`, `expiresAt`. No es `Sesion` de los diagramas. Detalle en `docs/02-modelo-datos.md`. |
 | `UbicacionBolsin` | `backend/models/ubicacion_bolsin.py` | Value object: `numeroBolsin`, `latitud`, `longitud`, `fechaHoraUltimaActualizacion`. Lo produce la integracion GPS. |
+| `UbicacionNoDisponibleError` | `backend/integrations/gps_tracker/errores.py` | Excepcion del GPS que el gestor traduce a A3. |
+| `MapaBolsines` | `backend/schemas/seguimiento.py` | Schema de salida: `centro`, `zoom`, `marcadores`. Lo devuelve `obtenerMapa`. |
 | `InterfazGPSTracker` | `backend/integrations/gps_tracker/interfaz_gps_tracker.py` | Interfaz con `getBolsinLocation(numeroBolsin, codigoCM)`. |
-| (impl. GPS) | `backend/integrations/gps_tracker/gps_tracker_xtr4500l.py` | Llamada HTTP real. Pendiente de URL y API key. |
+| (impl. GPS XTR-4500L) | `backend/integrations/gps_tracker/gps_tracker_xtr4500l.py` | Implementacion usada en el CU 36 contra la API de la catedra. |
+| (impl. GPS NavTrack) | `backend/integrations/gps_tracker/gps_tracker_navtrack_qx7a.py` | Adaptador disponible, fuera del flujo del CU 36. |
+| (impl. GPS GeoPulse) | `backend/integrations/gps_tracker/gps_tracker_geopulse_mtr900.py` | Adaptador disponible, fuera del flujo del CU 36. |
 | (fake GPS) | `backend/integrations/gps_tracker/gps_tracker_fake.py` | Para tests. |
-| `InterfazGoogleMaps` | `backend/integrations/google_maps/interfaz_google_maps.py` | Interfaz con `obtenerMapa`. Alcance pendiente. |
-| (impl. Maps) | `backend/integrations/google_maps/google_maps_adapter.py` | Pendiente. |
+| `InterfazGoogleMaps` | `backend/integrations/google_maps/interfaz_google_maps.py` | Interfaz con `obtenerMapa`, devuelve `MapaBolsines`. |
+| (impl. Maps) | `backend/integrations/google_maps/google_maps_adapter.py` | Arma centro, zoom y marcadores. No llama a la API de Maps. |
 | `InterfazCorreo` | `backend/integrations/correo/interfaz_correo.py` | Interfaz con `enviarMail(destinatario, asunto, cuerpo)`. Nombre aprobado. |
-| (impl. correo) | `backend/integrations/correo/outlook_graph.py` | Microsoft Graph. Pendiente de credenciales. |
+| (impl. correo) | `backend/integrations/correo/correo_simulado.py` | Implementacion simulada (log/archivo). |
+| (impl. correo Graph) | `backend/integrations/correo/outlook_graph.py` | Microsoft Graph. Documentada, sin implementar. |
 | (fake correo) | `backend/integrations/correo/correo_fake.py` | Para tests. |
 | Gestores en memoria | `backend/services/gestores_activos.py` | Seccion 4. No es clase del diagrama. |
 | Schemas CU 36 | `backend/schemas/seguimiento.py` | Pydantic. Sin logica. |
@@ -229,23 +234,31 @@ backend/
     __init__.py
     gps_tracker/
       interfaz_gps_tracker.py          # InterfazGPSTracker
-      gps_tracker_xtr4500l.py          # implementacion real (pendiente de URL y API key)
+      errores.py                       # UbicacionNoDisponibleError
+      gps_tracker_xtr4500l.py          # implementacion usada (API de la catedra)
+      gps_tracker_navtrack_qx7a.py     # adaptador alternativo (fuera del CU 36)
+      gps_tracker_geopulse_mtr900.py   # adaptador alternativo (fuera del CU 36)
       gps_tracker_fake.py              # fake para tests
     google_maps/
       interfaz_google_maps.py          # InterfazGoogleMaps
-      google_maps_adapter.py           # pendiente
+      google_maps_adapter.py           # arma MapaBolsines (sin llamar a Maps)
     correo/
       interfaz_correo.py               # InterfazCorreo
-      outlook_graph.py                 # pendiente de credenciales
+      correo_simulado.py               # implementacion simulada (log/archivo)
+      outlook_graph.py                 # Microsoft Graph (documentada, sin implementar)
       correo_fake.py                   # fake para tests
   backend/tests/
     conftest.py                        # base en memoria, reset de gestores_activos
     test_bolsin.py
+    test_cambio_estado.py
     test_iterador_bolsin.py
-    test_gestor_buscar_bolsines.py     # flujo principal y A1, A2, A4, A5
+    test_gestor_buscar_bolsines.py     # flujo principal y A1, A3, A4, A5
     test_gps_tracker_xtr4500l.py       # parseo de getBolsinLocation (A3)
+    test_seed.py
     test_routes_seguimiento.py
     test_auth.py
+    integracion/
+      test_gps_tracker_xtr4500l_real.py  # contra la API de la catedra (opcional)
 frontend/
   Dockerfile
   .dockerignore

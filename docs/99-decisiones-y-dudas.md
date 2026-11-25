@@ -44,7 +44,7 @@
 | 2026-11-25 | `Remito` esta en E1 y dominio, pero no en el CU 36. | **Fuera** del modelo del CU 36. Se agrega cuando se implemente el CU 15. |
 | 2026-11-25 | `Estado` en E2 tiene `nombre` y `descripcion`; en dominio tiene ademas `ambito`. | Se usa **E2** (sin `ambito`). |
 | 2026-11-25 | Modelo del CU 36: remito, usuario y sesion. | **Confirmado**: Remito fuera del CU 36; `RefreshToken` cubre la sesion sin entidad `Sesion` aparte; `Empleado` 1 a 1 con `User`. |
-| 2026-11-25 | El CU 28 (recepcion de bolsin) necesita recorrer bolsines enviados a la CM del usuario (filtro por CM destino), no por CM origen. | Se reutiliza **el mismo IteradorBolsin** con otros filtros pasados en `new(elementos, filtros)`. No se implementa en esta entrega. Detalle en `docs/03-patron-iterator.md` §1. |
+| 2026-11-25 | El CU 28 (recepcion de bolsin) necesita recorrer bolsines enviados a la CM del usuario (filtro por CM destino), no por CM origen. | Se reutiliza **el mismo IteradorBolsin** con otros filtros pasados en `init(elementos, filtros)`. No se implementa en esta entrega. Detalle en `docs/03-patron-iterator.md` §1. |
 | 2026-11-25 | Clase de estado del bolsin: el pedido de tarea dice `CambioEstadoBolsin`, E2 dice `CambioEstado`. | Se usa **`CambioEstado`**. |
 | 2026-11-25 | Nombre de la entidad de login: `User` (codigo de referencia) o `Usuario` (diagramas). | Se usa **`Usuario`**. `RefreshToken` se mantiene. |
 | 2026-11-25 | Visibilidad de atributos: E2 usa `-`; `02-modelo-datos` los definia publicos. | Se usa **privado (`-`)**, accedidos por `get`/`set` cuando hace falta. En SQLModel la privacidad es convencional. |
@@ -85,3 +85,14 @@
 | 2026-11-25 | Tests de integracion contra la API GPS real. | Marcados como `integracion`, se saltan si la API no responde. No bloquean la suite normal. |
 | 2026-11-25 | Frontend en esta entrega. | Se implementa despues de cerrar el backend (paso 16 del orden de implementacion). |
 | 2026-11-25 | Evidencia de criterios de correccion. | Todas pendientes: todavia no hay codigo de aplicacion. Se actualiza `docs/09` §2 al implementar. |
+| 2026-11-25 | `IIterator` (texto de la Entrega 2) vs `IIterador`. | `IIterator` es un error de escritura. Se usa **`IIterador`** en documentos, diagramas y codigo. |
+| 2026-11-25 | Tipos de la Entrega 2: `IteradorBolsin.filtros`/`comprobarFiltro` en `Object[]`, `elementoActual()` devuelve `Object`, `crearIterador` recibe `Object[]`. | Se usa `str[]`, `Bolsin` y `Bolsin[]` respectivamente. Registrado en `04-vista-estatica.md` §3 (decision 9). |
+| 2026-11-25 | `Bolsin`–`CambioEstado`: E2 muestra asociacion simple con `1..*`. | Se modela como **composicion** (`*--`): el historial se elimina con el bolsin. |
+| 2026-11-25 | `obtenerMapa` devuelve `str` (04) o `MapaBolsines` (06). | Devuelve **`MapaBolsines`** (centro, zoom, marcadores). Corregido en 04 y en `clases-diseno.puml`. |
+| 2026-11-25 | `IteradorBolsin.posicionarEnValido()` se usa en 05 y 08/09 pero no estaba declarado. | Se declara como **privado** (`-`) en `IteradorBolsin` (04 y `.puml`). |
+| 2026-11-25 | Metodos del gestor usados en 05 y 07 (`opcionSeguirBolsines`, `tomarSeleccionBolsin`, `tomarConfirmacionEnvioCorreo`, `cancelar`, `enviarMailGCM`). | Se declaran en `GestorBuscarBolsines` (04 y `.puml`). `enviarMailGCM` es privado. |
+| 2026-11-25 | Accesos `Usuario.getEmpleado()`, `Empleado.getUsuario()`, `Usuario.getMail()`, `Empleado.obtenerGCMDeCM()` usados en 05. | Se agregan a `Usuario` y `Empleado` (02, 04 y `.puml`). |
+| 2026-11-25 | `00-contexto` decia que la visualizacion en mapa estaba "pendiente de definir". | Se actualiza: el backend devuelve `MapaBolsines` y el frontend renderiza con Google Maps (`VITE_GOOGLE_MAPS_API_KEY`). |
+| 2026-11-25 | Relacion `Usuario`–`Empleado` en 02: `user`/`USER` en relacion y diagrama ER. | Se unifica a **`usuario`/`USUARIO`**, igual que el nombre de la entidad. |
+| 2026-11-25 | Metodo de la interfaz GPS por bolsin o por lote. | **Por bolsin** (`getBolsinLocation`): el gestor consulta un bolsin por llamada. |
+| 2026-11-25 | La guia de la API GPS no estaba en el repo. | La fuente es el repositorio **`LiberaeMentis/dsi-api-bolsines`**. `06-integraciones` §1 completo. |

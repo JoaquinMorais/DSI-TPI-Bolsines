@@ -32,6 +32,11 @@ class GestorBuscarBolsines {
   - codigoBolsin: int[]
   + obtenerCodigoBolsinesEnviados(): int[]
   + crearIterador(elementos: Bolsin[]): IIterador
+  + opcionSeguirBolsines(usuario: Usuario): void
+  + tomarSeleccionBolsin(numeroBolsin: int): void
+  + tomarConfirmacionEnvioCorreo(confirma: bool): void
+  + cancelar(): void
+  - enviarMailGCM(): bool
 }
 
 class IteradorBolsin {
@@ -44,6 +49,7 @@ class IteradorBolsin {
   + haFinalizado(): bool
   + elementoActual(): Bolsin
   + comprobarFiltro(filtros: str[]): bool
+  - posicionarEnValido(): void
 }
 
 class Bolsin {
@@ -83,17 +89,22 @@ class Empleado {
   + esTuCM(codigoCM: str): bool
   + sosGCM(): bool
   + getCM(): ComisionMedica
+  + getUsuario(): Usuario
+  + obtenerGCMDeCM(codigoCM: str): Empleado
 }
 
 class Rol {
   - nombre: str
   + esGCM(): bool
+  + esEncargadoBolsines(): bool
 }
 
 class Usuario {
   - mail: str
   - hashedPassword: str
   + verify_password(password: str): bool
+  + getEmpleado(): Empleado
+  + getMail(): str
 }
 
 class RefreshToken {
@@ -102,11 +113,11 @@ class RefreshToken {
 }
 
 interface InterfazGPSTracker {
-  + getBolsinLocation(numeroBolsin: int, codigoCM: str): UbicacionBolsin[]
+  + getBolsinLocation(numeroBolsin: int, codigoCM: str): UbicacionBolsin
 }
 
 interface InterfazGoogleMaps {
-  + obtenerMapa(ubicaciones: UbicacionBolsin[]): str
+  + obtenerMapa(ubicaciones: UbicacionBolsin[]): MapaBolsines
 }
 
 interface InterfazCorreo {
@@ -118,6 +129,12 @@ class UbicacionBolsin {
   - latitud: float
   - longitud: float
   - fechaHoraUltimaActualizacion: datetime
+}
+
+class MapaBolsines {
+  - centro: Coordenada
+  - zoom: int
+  - marcadores: UbicacionBolsin[]
 }
 
 ' Patron Iterator
@@ -142,6 +159,8 @@ GestorBuscarBolsines ..> InterfazGPSTracker
 GestorBuscarBolsines ..> InterfazGoogleMaps
 GestorBuscarBolsines ..> InterfazCorreo
 InterfazGPSTracker ..> UbicacionBolsin
+InterfazGoogleMaps ..> MapaBolsines
+MapaBolsines ..> UbicacionBolsin
 
 @enduml
 ```
@@ -176,6 +195,11 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | - | `codigoBolsin` | `int[]` | |
 | + | `obtenerCodigoBolsinesEnviados` | | `int[]` |
 | + | `crearIterador` | `elementos: Bolsin[]` | `IIterador` |
+| + | `opcionSeguirBolsines` | `usuario: Usuario` | `void` |
+| + | `tomarSeleccionBolsin` | `numeroBolsin: int` | `void` |
+| + | `tomarConfirmacionEnvioCorreo` | `confirma: bool` | `void` |
+| + | `cancelar` | | `void` |
+| - | `enviarMailGCM` | | `bool` |
 
 **IteradorBolsin** (iterador concreto, `backend/models/iterator/iterador_bolsin.py`). Realiza `IIterador`.
 
@@ -190,6 +214,7 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | + | `haFinalizado` | | `bool` |
 | + | `elementoActual` | | `Bolsin` |
 | + | `comprobarFiltro` | `filtros: str[]` | `bool` |
+| - | `posicionarEnValido` | | `void` |
 
 ### 2.2 Dominio
 
@@ -241,6 +266,8 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | + | `esTuCM` | `codigoCM: str` | `bool` |
 | + | `sosGCM` | | `bool` |
 | + | `getCM` | | `ComisionMedica` |
+| + | `getUsuario` | | `Usuario` |
+| + | `obtenerGCMDeCM` | `codigoCM: str` | `Empleado` |
 
 **Rol** (`backend/models/rol.py`, SQLModel)
 
@@ -257,6 +284,8 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | - | `mail` | `str` | |
 | - | `hashedPassword` | `str` | |
 | + | `verify_password` | `password: str` | `bool` |
+| + | `getEmpleado` | | `Empleado` |
+| + | `getMail` | | `str` |
 
 **RefreshToken** (`backend/models/refresh_token.py`, SQLModel, sesion de auth)
 
@@ -278,11 +307,11 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 
 | Interfaz | Archivo | Metodo | Parametros | Retorno |
 |---|---|---|---|---|
-| `InterfazGPSTracker` | `gps_tracker/interfaz_gps_tracker.py` | + `getBolsinLocation` | `numeroBolsin: int, codigoCM: str` | `UbicacionBolsin[]` |
-| `InterfazGoogleMaps` | `google_maps/interfaz_google_maps.py` | + `obtenerMapa` | `ubicaciones: UbicacionBolsin[]` | `str` |
+| `InterfazGPSTracker` | `gps_tracker/interfaz_gps_tracker.py` | + `getBolsinLocation` | `numeroBolsin: int, codigoCM: str` | `UbicacionBolsin` |
+| `InterfazGoogleMaps` | `google_maps/interfaz_google_maps.py` | + `obtenerMapa` | `ubicaciones: UbicacionBolsin[]` | `MapaBolsines` |
 | `InterfazCorreo` | `correo/interfaz_correo.py` | + `enviarMail` | `destinatario: str, asunto: str, cuerpo: str` | `void` |
 
-`obtenerMapa` y los parametros de `enviarMail` son propuestas del equipo: la ERS no los define.
+`MapaBolsines` es el schema de salida (`backend/schemas/seguimiento.py`): `centro: Coordenada`, `zoom: int`, `marcadores: UbicacionBolsin[]`. La visualizacion la hace el frontend. `obtenerMapa` y los parametros de `enviarMail` son propuestas del equipo: la ERS no los define.
 
 ## 3. Decisiones de diseno
 
@@ -294,3 +323,6 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 6. **Interfaces de integracion** (`InterfazGPSTracker`, `InterfazGoogleMaps`, `InterfazCorreo`) son clases de apoyo de analisis. El gestor depende de ellas, no de las implementaciones.
 7. **Dependencias del gestor:** crea `IteradorBolsin`, usa `Bolsin` y depende de las interfaces de integracion. `IteradorBolsin` depende de `Bolsin` para `comprobarFiltro`. Esto respeta `docs/01-arquitectura.md` §5.
 8. **Patron Iterator visible:** `IAgregado` lo realiza `GestorBuscarBolsines`, y `IIterador` lo realiza `IteradorBolsin` (ver `docs/03-patron-iterator.md`).
+9. **Tipos de la Entrega 2 ajustados.** `IteradorBolsin.filtros` y `comprobarFiltro` usan `str[]`; `elementoActual()` devuelve `Bolsin`; `crearIterador` recibe `Bolsin[]`. La Entrega 2 usaba `Object[]` y `Object`. Registrado en `docs/99-decisiones-y-dudas.md`.
+10. **`Bolsin`–`CambioEstado` como composicion (`*--`).** El historial de estados pertenece al bolsin y se elimina con el. La Entrega 2 lo muestra como asociacion simple.
+11. **`obtenerMapa` devuelve `MapaBolsines`.** El backend arma centro, zoom y marcadores; el frontend dibuja con Google Maps.

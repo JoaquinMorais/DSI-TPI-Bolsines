@@ -60,7 +60,7 @@ Hay tres modelos posibles, pero la Entrega 2 y el diagrama de secuencia usan **X
 - Entidades: `Bolsin`, `CambioEstado`, `Estado`, con sus metodos de negocio.
 - Integracion real con la API del GPS Tracker (detras de `backend/integrations/`).
 - Notificacion por correo al GCM destino (detras de `backend/integrations/`).
-- Visualizacion en mapa: el backend entrega los datos; la visualizacion con Google Maps es pendiente de definir.
+- Visualizacion en mapa: el backend devuelve `MapaBolsines` (centro, zoom y marcadores) en la respuesta del CU 36. El frontend renderiza el mapa con la libreria de Google Maps (`VITE_GOOGLE_MAPS_API_KEY`). El backend no llama a la API de Google Maps.
 
 ## 4. Entregables del TP (Entrega 2 y siguientes)
 
