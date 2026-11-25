@@ -259,6 +259,7 @@ backend/
     test_bolsin.py
     test_cambio_estado.py
     test_entidades.py
+    test_schemas.py
     test_fakes.py
     test_empleado.py
     test_iterador_bolsin.py
