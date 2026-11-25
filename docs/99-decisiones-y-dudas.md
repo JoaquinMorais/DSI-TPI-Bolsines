@@ -126,3 +126,7 @@
 | 2026-11-25 | Requirements: pedido de 8 paquetes pinneados. | Se pinnean los 8 y se agregan las dependencias que el CU 36 ya usa: `aiosqlite`, `sqlalchemy[asyncio]`, `PyJWT`, `pwdlib[argon2]`, `python-multipart`. |
 | 2026-11-25 | Paquetes sin `__init__.py`. | Se agregan `__init__.py` en todas las carpetas de `backend/`. |
 | 2026-11-25 | La guia de la API GPS no estaba en el repo; se tomaba solo del repositorio de la catedra. | Se crea **`docs/referencias/api-gps-guia.md`** (adaptada del repo, con API keys mock literales, tabla 101-110 y codigos de error exactos). Reemplaza las filas anteriores que indicaban que la guia no existia. |
+| 2026-11-25 | Adaptadores GPS: solo XTR implementado; NavTrack/GeoPulse en la API pero sin codigo. | Se implementan los **tres adaptadores reales** (httpx) con su parser propio. La fabrica `crear_gps()` elige por `GPS_MODELO` (`xtr4500l`/`navtrack`/`geopulse`). |
+| 2026-11-25 | Nombre del error de integracion: `ErrorIntegracionGPS` vs `ErrorServicioGPS`. | Se mantiene `ErrorIntegracionGPS` y se agrega **`ErrorServicioGPS` como alias** en `errores.py`. |
+| 2026-11-25 | Correo simulado: archivo configurable vs ruta fija. | `CorreoSimulado` escribe por defecto en **`backend/data/mails_enviados.log`** (ademas del log); `CORREO_ARCHIVO` puede sobreescribirlo. Se agrega `outlook_graph.py` como stub comentado. |
+| 2026-11-25 | Tests de integraciones y script de prueba. | Nuevos tests en **`backend/tests/integrations/`** (parsers y adaptadores con httpx mockeado) y script **`backend/scripts/probar_gps.py`**. |

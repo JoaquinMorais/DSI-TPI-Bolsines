@@ -1,14 +1,19 @@
 import logging
+from pathlib import Path
 from typing import Optional
 
 from integrations.correo.interfaz_correo import InterfazCorreo
 
 logger = logging.getLogger(__name__)
 
+_LOG_POR_DEFECTO = (
+    Path(__file__).resolve().parents[2] / "data" / "mails_enviados.log"
+)
+
 
 class CorreoSimulado(InterfazCorreo):
     def __init__(self, archivo: Optional[str] = None) -> None:
-        self._archivo = archivo
+        self._archivo = Path(archivo) if archivo else _LOG_POR_DEFECTO
 
     async def enviarMail(
         self, destinatario: str, asunto: str, cuerpo: str
@@ -19,8 +24,8 @@ class CorreoSimulado(InterfazCorreo):
             asunto,
             cuerpo,
         )
-        if self._archivo:
-            with open(self._archivo, "a", encoding="utf-8") as archivo:
-                archivo.write(
-                    f"Para: {destinatario}\nAsunto: {asunto}\n{cuerpo}\n---\n"
-                )
+        self._archivo.parent.mkdir(parents=True, exist_ok=True)
+        with self._archivo.open("a", encoding="utf-8") as archivo:
+            archivo.write(
+                f"Para: {destinatario}\nAsunto: {asunto}\n{cuerpo}\n---\n"
+            )

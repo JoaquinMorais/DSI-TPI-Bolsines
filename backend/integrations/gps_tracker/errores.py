@@ -9,3 +9,6 @@ class ErrorIntegracionGPS(Exception):
     def __init__(self, motivo: str) -> None:
         self.motivo = motivo
         super().__init__(motivo)
+
+
+ErrorServicioGPS = ErrorIntegracionGPS

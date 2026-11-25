@@ -82,8 +82,8 @@ Puntos clave:
 | `ResultadoConfirmacion` | `backend/models/resultados.py` | Value object de salida de la confirmacion. |
 | `InterfazGPSTracker` | `backend/integrations/gps_tracker/interfaz_gps_tracker.py` | Interfaz con `getBolsinLocation(numeroBolsin, codigoCM)`. |
 | (impl. GPS XTR-4500L) | `backend/integrations/gps_tracker/gps_tracker_xtr4500l.py` | Implementacion usada en el CU 36 contra la API de la catedra. |
-| (impl. GPS NavTrack) | `backend/integrations/gps_tracker/gps_tracker_navtrack_qx7a.py` | Adaptador disponible, fuera del flujo del CU 36. |
-| (impl. GPS GeoPulse) | `backend/integrations/gps_tracker/gps_tracker_geopulse_mtr900.py` | Adaptador disponible, fuera del flujo del CU 36. |
+| (impl. GPS NavTrack) | `backend/integrations/gps_tracker/gps_tracker_navtrack_qx7a.py` | Adaptador implementado; se elige con `GPS_MODELO=navtrack`. |
+| (impl. GPS GeoPulse) | `backend/integrations/gps_tracker/gps_tracker_geopulse_mtr900.py` | Adaptador implementado; se elige con `GPS_MODELO=geopulse`. |
 | (fake GPS) | `backend/integrations/gps_tracker/gps_tracker_fake.py` | Para tests. |
 | `InterfazGoogleMaps` | `backend/integrations/google_maps/interfaz_google_maps.py` | Interfaz con `obtenerMapa`, devuelve `MapaBolsines`. |
 | (impl. Maps) | `backend/integrations/google_maps/google_maps_adapter.py` | Arma centro, zoom y marcadores. No llama a la API de Maps. |
@@ -242,10 +242,10 @@ backend/
     __init__.py
     gps_tracker/
       interfaz_gps_tracker.py          # InterfazGPSTracker
-      errores.py                       # UbicacionNoDisponibleError
-      gps_tracker_xtr4500l.py          # implementacion usada (API de la catedra)
-      gps_tracker_navtrack_qx7a.py     # adaptador alternativo (fuera del CU 36)
-      gps_tracker_geopulse_mtr900.py   # adaptador alternativo (fuera del CU 36)
+      errores.py                       # UbicacionNoDisponibleError, ErrorIntegracionGPS
+      gps_tracker_xtr4500l.py          # adaptador real (GPS_MODELO=xtr4500l, default)
+      gps_tracker_navtrack_qx7a.py     # adaptador real (GPS_MODELO=navtrack)
+      gps_tracker_geopulse_mtr900.py   # adaptador real (GPS_MODELO=geopulse)
       gps_tracker_fake.py              # fake para tests
     google_maps/
       interfaz_google_maps.py          # InterfazGoogleMaps
@@ -271,6 +271,11 @@ backend/
     test_auth.py
     integracion/
       test_gps_tracker_xtr4500l_real.py  # contra la API de la catedra (opcional)
+    integrations/
+      test_gps_parsers.py              # parsers de los 3 formatos
+      test_gps_adapters_mock.py        # adaptadores con httpx.MockTransport
+  backend/scripts/
+    probar_gps.py                      # prueba la API real del GPS
 frontend/
   Dockerfile
   .dockerignore
@@ -291,5 +296,5 @@ frontend/
   - `frontend`: build de `./frontend`, dev server de Vite en `3020`, `depends_on: backend`.
 - Variables del backend por `env_file: .env` (opcional). `.env.example` lista las claves sin secretos.
 - El frontend usa `VITE_API_URL=http://localhost:8020`: el navegador llama al backend, por eso no se usa el nombre del servicio.
-- CORS: `CORS_ORIGINS` (default `http://localhost:3020`).
+- CORS: default en settings `http://localhost:5173`; `docker-compose.yml` fija `CORS_ORIGINS=http://localhost:3020` para el frontend.
 - Sin Docker: `uvicorn main:app --app-dir backend --port 8020` desde la raiz, y `npm run dev` dentro de `frontend/`.

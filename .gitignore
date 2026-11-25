@@ -16,3 +16,6 @@ frontend/dist/
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Correos simulados
+backend/data/*.log

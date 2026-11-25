@@ -38,7 +38,7 @@ Cada adaptador convierte el formato de su modelo a `UbicacionBolsin`. El gestor 
 
 La API expone los tres modelos de la ERS. Cada uno tiene su propia API key (header `X-API-Key`). Con una key de otro modelo responde 401.
 
-**Modelo usado en el CU 36: XTR-4500L.** Es el de la Entrega 2 y el del diagrama de secuencia. Los adaptadores de NavTrack y GeoPulse existen en la API, pero el CU no los usa. Se implementan solo si el equipo los necesita.
+**Modelo usado en el CU 36: XTR-4500L.** Es el de la Entrega 2 y el del diagrama de secuencia. Los **tres adaptadores estan implementados** y consumen la API real; el que se usa se elige con `GPS_MODELO`.
 
 | Modelo | Adaptador | Endpoint | Parametros | Header | Formato de respuesta |
 |---|---|---|---|---|---|
@@ -46,9 +46,9 @@ La API expone los tres modelos de la ERS. Cada uno tiene su propia API key (head
 | NavTrack QX-7A | `gps_tracker_navtrack_qx7a.py` | `GET /api/navtrack-qx-7a/retrieveTrackingData` | `numeroBolsin` (int), `codigoComisionMedicaDestino` (str) | `X-API-Key: sk_nav_...` | Texto plano CSV: `101,-31.4201,-64.1888,2026-03-07T12:30` |
 | GeoPulse MTR-900 | `gps_tracker_geopulse_mtr900.py` | `GET /api/geopulse-mtr-900/fetchCargoPositions` | `numeroBolsin` (int) | `X-API-Key: sk_geo_...` | Lista de listas: `[[101, -31.4201, -64.1888, "2026-03-07T12:30:00"]]` |
 
-**Seleccion del modelo:** `GPS_MODELO` en `backend/config/settings.py`, valores `XTR-4500L` (default), `NAVTRACK-QX7A`, `GEOPULSE-MTR900`. `backend/config/composicion.py` elige el adaptador. Ningun otro modulo lee `GPS_MODELO`.
+**Seleccion del modelo:** `GPS_MODELO` en `backend/config/settings.py`, valores `xtr4500l` (default), `navtrack`, `geopulse`. `backend/config/composicion.py` elige el adaptador. Ningun otro modulo lee `GPS_MODELO`.
 
-**Parseo:** cada adaptador tiene una funcion de parseo pura (sin red). La del XTR-4500L toma `items[0]` y valida que venga exactamente un item. Las fechas de la API vienen **sin zona horaria** (`2026-03-07T12:30:00`, o `2026-03-07T12:30` si los segundos son cero, porque la API usa `LocalDateTime.toString()`). Se parsean con `datetime.fromisoformat`, que acepta ambas formas.
+**Parseo:** cada adaptador tiene una funcion de parseo pura (sin red). XTR toma `items[0]` (JSON); NavTrack separa el CSV por comas; GeoPulse toma la unica fila de la matriz. Las tres validan el numero de bolsin devuelto. Las fechas de la API vienen **sin zona horaria** (`2026-03-07T12:30:00`, o `2026-03-07T12:30` si los segundos son cero, porque la API usa `LocalDateTime.toString()`). Se parsean con `datetime.fromisoformat`, que acepta ambas formas.
 
 **Base URL:** `GPS_BASE_URL`, default `http://localhost:8080`.
 
