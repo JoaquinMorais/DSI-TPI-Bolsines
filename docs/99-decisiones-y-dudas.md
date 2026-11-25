@@ -97,3 +97,4 @@
 | 2026-11-25 | Metodo de la interfaz GPS por bolsin o por lote. | **Por bolsin** (`getBolsinLocation`): el gestor consulta un bolsin por llamada. |
 | 2026-11-25 | La guia de la API GPS no estaba en el repo. | La fuente es el repositorio **`LiberaeMentis/dsi-api-bolsines`**. `06-integraciones` §1 completo. |
 | 2026-11-25 | SQLAlchemy async requiere `greenlet`; SQLModel no lo trae. | Se agrega `sqlalchemy[asyncio]` a `backend/requirements.txt` (instala `greenlet`). |
+| 2026-11-25 | `crearIterador` recibe `filtros` (texto de 03) o solo `elementos` (04 y 05). | Se implementa per **04**: `crearIterador(elementos: list[Bolsin]) -> IIterador`. Los `filtros` los recibe `IteradorBolsin.init`. |
