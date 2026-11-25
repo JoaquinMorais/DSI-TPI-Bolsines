@@ -1,6 +1,6 @@
 # 06 - Integraciones (CU 36)
 
-Fuentes: ERS v1.2, CU 36 (Observacion 1 sobre GPS Tracker) y requerimientos no funcionales 5, 6 y 7. Regla de `AGENTS.md` §4 y §8: las integraciones viven solo en `backend/integrations/` y el gestor depende solo de interfaces.
+Fuentes: ERS v1.2, CU 36 (Observacion 1 sobre GPS Tracker) y requerimientos no funcionales 5, 6 y 7. Guia local de la API: `docs/referencias/api-gps-guia.md` (adaptada del repositorio de la catedra). Regla de `AGENTS.md` §4 y §8: las integraciones viven solo en `backend/integrations/` y el gestor depende solo de interfaces.
 
 Estado de esta version:
 - Seccion 1 (GPS): completa, segun la API simulada de la catedra (repositorio `LiberaeMentis/dsi-api-bolsines`).
@@ -8,7 +8,7 @@ Estado de esta version:
 
 ## 1. GPS Tracker (API simulada de la catedra)
 
-Fuente: repositorio `LiberaeMentis/dsi-api-bolsines` (Spring Boot, datos en memoria, sin base). Contacto de la catedra: Ing. Sol Vega.
+Fuente: repositorio `LiberaeMentis/dsi-api-bolsines` (Spring Boot, datos en memoria, sin base). Guia local adaptada: `docs/referencias/api-gps-guia.md` (endpoints, formatos, errores y datos mock). Contacto de la catedra: Ing. Sol Vega.
 
 Estado: **completo**. La seccion 1.3 detalla lo que la API valida y devuelve.
 
