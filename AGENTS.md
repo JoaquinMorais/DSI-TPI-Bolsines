@@ -17,7 +17,7 @@ Estructura: monorepo. Backend en `backend/`, frontend en `frontend/`, documentac
 - Caso de uso a implementar: **CU 36 "Consultar seguimiento de bolsines"** (ERS v1.2, nro. de orden 36).
 - Flujo principal y alternativos A1..A5 segun ERS (ver `docs/00-contexto.md`).
 - Implementacion con patron **Iterator (Gamma)** segun Entrega 2 (`docs/referencias/PPAI2026_3K7_Grupo7_Entrega2_Diseño.pdf`).
-- Autenticacion (`utils/auth.py`, `utils/security.py`, entidades `User` y `RefreshToken`): agregado pedido por el equipo para cubrir el requisito no funcional 4 de la ERS ("Seguridad de usuarios"). No forma parte del CU 36.
+- Autenticacion (`utils/auth.py`, `utils/security.py`, entidades `Usuario` y `RefreshToken`): agregado pedido por el equipo para cubrir el requisito no funcional 4 de la ERS ("Seguridad de usuarios"). No forma parte del CU 36.
 - Fuentes, por orden de prevalencia:
   1. Entrega 2 (diseno del CU 36, clases y secuencias).
   2. Entrega 1 (analisis: clases y maquina de estados de Bolsin).

@@ -1,0 +1,137 @@
+@startuml clases-diseno
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+left to right direction
+
+' Convenciones: - privado (se accede por get/set), + publico.
+' new del diagrama de Entrega 2 se implementa como __init__ (init en Python).
+
+interface IAgregado {
+  + crearIterador(elementos: Bolsin[]): IIterador
+}
+
+interface IIterador {
+  + primero(): void
+  + siguiente(): void
+  + haFinalizado(): bool
+  + elementoActual(): Bolsin
+  + comprobarFiltro(filtros: str[]): bool
+}
+
+class GestorBuscarBolsines {
+  - seleccionBolsin: Bolsin
+  - codigoBolsin: int[]
+  + obtenerCodigoBolsinesEnviados(): int[]
+  + crearIterador(elementos: Bolsin[]): IIterador
+}
+
+class IteradorBolsin {
+  - lista: Bolsin[]
+  - posicionActual: int
+  - filtros: str[]
+  + init(elementos: Bolsin[], filtros: str[])
+  + primero(): void
+  + siguiente(): void
+  + haFinalizado(): bool
+  + elementoActual(): Bolsin
+  + comprobarFiltro(filtros: str[]): bool
+}
+
+class Bolsin {
+  - numeroBolsin: int
+  - fecha: datetime
+  - numeroPrecinto: str
+  - peso: int
+  + esTuCMOrigen(codigoCM: str): bool
+  + sosEnviado(): bool
+  + getNumeroBolsin(): int
+  + obtenerCMDestino(): ComisionMedica
+}
+
+class CambioEstado {
+  - fechaHoraInicio: datetime
+  - fechaHoraFin: datetime
+  + sosActual(): bool
+  + sosEnviado(): bool
+  + setFechaHoraFin(fecha: datetime): void
+}
+
+class Estado {
+  - nombre: str
+  - descripcion: str
+  + esEnviado(): bool
+}
+
+class ComisionMedica {
+  - codigo: str
+  - nombre: str
+  + getCodigo(): str
+}
+
+class Empleado {
+  - nombre: str
+  - apellido: str
+  + esTuCM(codigoCM: str): bool
+  + sosGCM(): bool
+  + getCM(): ComisionMedica
+}
+
+class Rol {
+  - nombre: str
+  + esGCM(): bool
+}
+
+class Usuario {
+  - mail: str
+  - hashedPassword: str
+  + verify_password(password: str): bool
+}
+
+class RefreshToken {
+  - tokenHash: str
+  - expiresAt: datetime
+}
+
+interface InterfazGPSTracker {
+  + getBolsinLocation(numeroBolsin: int, codigoCM: str): UbicacionBolsin[]
+}
+
+interface InterfazGoogleMaps {
+  + obtenerMapa(ubicaciones: UbicacionBolsin[]): str
+}
+
+interface InterfazCorreo {
+  + enviarMail(destinatario: str, asunto: str, cuerpo: str): void
+}
+
+class UbicacionBolsin {
+  - numeroBolsin: int
+  - latitud: float
+  - longitud: float
+  - fechaHoraUltimaActualizacion: datetime
+}
+
+' Patron Iterator
+IAgregado <|.. GestorBuscarBolsines : realiza
+IIterador <|.. IteradorBolsin : realiza
+GestorBuscarBolsines ..> IteradorBolsin : crea
+GestorBuscarBolsines ..> Bolsin : usa
+IteradorBolsin ..> Bolsin : comprueba filtro
+
+' Dominio
+Bolsin "1" *-- "1..*" CambioEstado : cambioEstado
+CambioEstado "1..*" --> "1" Estado : estado
+Bolsin "*" --> "1" ComisionMedica : origen
+Bolsin "*" --> "1" ComisionMedica : destino
+Empleado "*" --> "1" ComisionMedica : asignadoA
+Empleado "*" --> "1" Rol : rol
+Empleado "1" -- "1" Usuario : idUser
+Usuario "1" -- "*" RefreshToken : idUser
+
+' Integraciones
+GestorBuscarBolsines ..> InterfazGPSTracker
+GestorBuscarBolsines ..> InterfazGoogleMaps
+GestorBuscarBolsines ..> InterfazCorreo
+InterfazGPSTracker ..> UbicacionBolsin
+
+@enduml

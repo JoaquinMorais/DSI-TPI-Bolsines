@@ -2,11 +2,11 @@
 
 Convencion: atributos y columnas en camelCase en todas las entidades (dominio y auth). Las funciones de `backend/utils/auth.py` mantienen el nombre del codigo de referencia.
 
-Visibilidad: todos los atributos y metodos son publicos. Python no tiene visibilidad privada real; la convencion queda como decision del equipo.
+Visibilidad: los atributos son privados (`-`) y se acceden con funciones get/set cuando hace falta. Los metodos de negocio son publicos (`+`). En SQLModel los campos se mapean como columnas; la privacidad es convencional (prefijo `_` o acceso por get/set), decision del equipo.
 
 ## 1. Entidades del CU 36
 
-Remito queda fuera del modelo del CU 36: el CU filtra por CM origen y estado del bolsin, no necesita remitos. `Usuario` y `Sesion` se reemplazan por `User` y `RefreshToken` (ver §5).
+Remito queda fuera del modelo del CU 36: el CU filtra por CM origen y estado del bolsin, no necesita remitos. `Sesion` se reemplaza por `RefreshToken` (ver §5). La entidad de login se llama `Usuario` en el codigo.
 
 ### Bolsin (`backend/models/bolsin.py`)
 
@@ -106,12 +106,12 @@ Metodos:
 | `id` | `int` | PK |
 | `nombre` | `str` | |
 | `apellido` | `str` | |
-| `idUser` | `int` | FK unica a `User.id` (1 a 1) |
+| `idUser` | `int` | FK unica a `Usuario.id` (1 a 1) |
 | `rolId` | `int` | FK a `Rol.id` |
 | `comisionMedicaId` | `int` | FK a `ComisionMedica.id` |
 
 Relaciones:
-- `user: User` (1 a 1), `uselist=False`, `back_populates="empleado"`.
+- `usuario: Usuario` (1 a 1), `uselist=False`, `back_populates="empleado"`.
 - `rol: Rol` (N a 1), rol "rol".
 - `comisionMedica: ComisionMedica` (N a 1), rol "asignadoA" (E1).
 
@@ -123,7 +123,7 @@ Metodos:
 | `sosGCM()` | publica | `bool` | `self.rol.esGCM()` |
 | `getCM()` | publica | `ComisionMedica` | |
 
-### User (`backend/models/user.py`, reemplaza a `Usuario` para login)
+### Usuario (`backend/models/usuario.py`, entidad de login)
 
 | Atributo | Tipo Python | Clave |
 |---|---|---|
@@ -144,11 +144,11 @@ Metodos:
 | Atributo | Tipo Python | Clave |
 |---|---|---|
 | `id` | `int` | PK |
-| `idUser` | `int` | FK a `User.id` |
+| `idUser` | `int` | FK a `Usuario.id` |
 | `tokenHash` | `str` | |
 | `expiresAt` | `datetime` | |
 
-Relaciones: `user: User` (N a 1), `back_populates` con `User` (ver §2).
+Relaciones: `user: Usuario` (N a 1), `back_populates` con `Usuario` (ver §2).
 
 Ver §5: `Sesion` del diagrama no tiene tabla propia.
 
@@ -173,7 +173,7 @@ No es tabla. `dataclass(frozen=True)` o Pydantic `BaseModel`, no SQLModel.
 | ComisionMedica | si | persistente |
 | Rol | si | catalogo |
 | Empleado | si | persistente |
-| User | si | auth |
+| Usuario | si | auth |
 | RefreshToken | si | auth |
 | UbicacionBolsin | no | value object, viene del GPS |
 | IAgregado, IIterador | no | ABC en `backend/models/iterator/` |
@@ -182,8 +182,8 @@ No es tabla. `dataclass(frozen=True)` o Pydantic `BaseModel`, no SQLModel.
 Relaciones:
 - **Origen y destino de Bolsin:** dos FK a `ComisionMedica`. SQLAlchemy necesita saber cual es cual: `sa_relationship_kwargs={"foreign_keys": "[Bolsin.cmOrigenId]"}` y lo mismo para `cmDestinoId`.
 - **Bolsin -> CambioEstado:** `Relationship(back_populates="bolsin")` en ambos lados, con `cascade_delete` para que el historial se borre con el bolsin.
-- **Empleado <-> User (1 a 1):** `idUser` con `unique=True`, y `uselist=False` en el lado de `User`.
-- **User -> RefreshToken (1 a N):** `idUser` FK sin unique.
+- **Empleado <-> Usuario (1 a 1):** `idUser` con `unique=True`, y `uselist=False` en el lado de `Usuario`.
+- **Usuario -> RefreshToken (1 a N):** `idUser` FK sin unique.
 
 **Carga en async:** las relaciones se cargan con `lazy="selectin"` o con `selectinload(...)` en la consulta. Sin eso, acceder a `bolsin.cambiosEstado` despues de cerrar la sesion falla con `MissingGreenlet`. Los metodos de negocio nunca disparan una carga lazy.
 
@@ -284,12 +284,12 @@ Regla: una entidad no consulta la base ni llama a `integrations`. Si necesita da
 |---|---|---|---|
 | 1 | `CambioEstado` (E2) vs `CambioEstadoBolsin` (E1, dominio, pedido de tarea). | E1, E2, dominio | Se usa `CambioEstado` (decision ya registrada, E2). |
 | 2 | `IAgregado.crearIterador` devuelve `IIterator` en el texto de E2 y `IIterador` en el diagrama. | E2 | Se usa `IIterador` (nombre del diagrama y AGENTS.md §6). |
-| 3 | `Usuario` y `Sesion` (E1) no existen en el dominio, que tiene `Empleado` y `Rol`. | E1 vs dominio | Se usa `User` (login) y `RefreshToken` (sesion). `Sesion` no tiene tabla propia. |
+| 3 | `Usuario` y `Sesion` (E1) no existen en el dominio, que tiene `Empleado` y `Rol`. | E1 vs dominio | Se usa `Usuario` (login) y `RefreshToken` (sesion). `Sesion` no tiene tabla propia. |
 | 4 | Origen y destino de Bolsin: E1 los tiene como asociacion a `ComisionMedica`; E2 no los modela. | E1, E2 | Se modelan como dos FK en `Bolsin`. |
 | 5 | `numeroPrecinto` no aparece en E1 ni E2; si en dominio y ERS. | dominio, ERS | Se agrega como `str \| None`. |
 | 6 | Estados de Bolsin: E1 usa "Creado, Cerrado, Enviado, Recibido, De baja"; ERS usa "Recibido en CM destino". | E1, ERS | Se usa el nombre de E1. |
 | 7 | `numeroBolsin` aparece como atributo y como `getNumeroBolsin()`. | E2 | Atributo publico; el getter devuelve el mismo valor. |
-| 8 | `Empleado` tiene `email` (dominio) y el login necesita `mail`. | dominio, auth | El correo es solo `User.mail`. |
+| 8 | `Empleado` tiene `email` (dominio) y el login necesita `mail`. | dominio, auth | El correo es solo `Usuario.mail`. |
 | 9 | `Remito` esta en E1 y en dominio, pero no en el CU 36. | E1, dominio | Fuera del modelo del CU 36. Se agrega cuando se implemente el CU 15. |
 | 10 | `Estado` en E2 tiene `nombre` y `descripcion`; en dominio tiene ademas `ambito`. | E2, dominio | Se usa E2 (sin `ambito`). |
 | 11 | Nombres de columnas: el codigo de referencia de auth usa snake_case (`id_user`, `token_hash`, `expires_at`); AGENTS.md §5 lo aceptaba como excepcion. | referencia auth, AGENTS.md | Se usa **camelCase en todas las columnas** (`idUser`, `tokenHash`, `expiresAt`, `hashedPassword`), decision del equipo. Las funciones de `utils/auth.py` mantienen el nombre de referencia. |

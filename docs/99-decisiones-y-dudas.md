@@ -45,3 +45,9 @@
 | 2026-11-25 | `Estado` en E2 tiene `nombre` y `descripcion`; en dominio tiene ademas `ambito`. | Se usa **E2** (sin `ambito`). |
 | 2026-11-25 | Modelo del CU 36: remito, usuario y sesion. | **Confirmado**: Remito fuera del CU 36; `RefreshToken` cubre la sesion sin entidad `Sesion` aparte; `Empleado` 1 a 1 con `User`. |
 | 2026-11-25 | El CU 28 (recepcion de bolsin) necesita recorrer bolsines enviados a la CM del usuario (filtro por CM destino), no por CM origen. | Se reutiliza **el mismo IteradorBolsin** con otros filtros pasados en `new(elementos, filtros)`. No se implementa en esta entrega. Detalle en `docs/03-patron-iterator.md` §1. |
+| 2026-11-25 | Clase de estado del bolsin: el pedido de tarea dice `CambioEstadoBolsin`, E2 dice `CambioEstado`. | Se usa **`CambioEstado`**. |
+| 2026-11-25 | Nombre de la entidad de login: `User` (codigo de referencia) o `Usuario` (diagramas). | Se usa **`Usuario`**. `RefreshToken` se mantiene. |
+| 2026-11-25 | Visibilidad de atributos: E2 usa `-`; `02-modelo-datos` los definia publicos. | Se usa **privado (`-`)**, accedidos por `get`/`set` cuando hace falta. En SQLModel la privacidad es convencional. |
+| 2026-11-25 | Constructor: E2 usa `new`. | Se implementa como **`init`** (Python). |
+| 2026-11-25 | Metodos de `InterfazGoogleMaps.obtenerMapa` y parametros de `InterfazCorreo.enviarMail`: la ERS no los define. | Propuestas del equipo, aceptadas. Se revisan cuando se defina la integracion. |
+| 2026-11-25 | Validacion del diagrama PlantUML. | `.puml` valido (`java -jar plantuml.jar -checkonly`). El render PNG necesita Graphviz (`dot`), que no esta instalado en el entorno; el layout no se pudo revisar visualmente. |

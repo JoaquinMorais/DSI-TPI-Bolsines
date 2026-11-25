@@ -22,7 +22,7 @@ flowchart TD
 
   subgraph Models
     IT["backend/models/iterator/<br/>IAgregado, IIterador, IteradorBolsin"]
-    E["backend/models/<br/>Bolsin, CambioEstado, Estado, ComisionMedica,<br/>Empleado, Rol, User, RefreshToken, UbicacionBolsin"]
+    E["backend/models/<br/>Bolsin, CambioEstado, Estado, ComisionMedica,<br/>Empleado, Rol, Usuario, RefreshToken, UbicacionBolsin"]
   end
 
   subgraph Integrations
@@ -68,9 +68,9 @@ Puntos clave:
 | `CambioEstado` | `backend/models/cambio_estado.py` | Entidad SQLModel. `fechaHoraInicio`, `fechaHoraFin`, `sosActual`, `sosEnviado`. Nombre segun Entrega 2. |
 | `Estado` | `backend/models/estado.py` | Entidad SQLModel. `nombre`, `descripcion`, `esEnviado`. |
 | `ComisionMedica` | `backend/models/comision_medica.py` | Entidad SQLModel. `codigo`, `getCodigo`. |
-| `Empleado` | `backend/models/empleado.py` | Entidad SQLModel. `esTuCM`, `sosGCM`. Relacion 1 a 1 con `User` (`idUser` unico). Es el usuario de negocio logueado en el CU. |
+| `Empleado` | `backend/models/empleado.py` | Entidad SQLModel. `esTuCM`, `sosGCM`. Relacion 1 a 1 con `Usuario` (`idUser` unico). Es el usuario de negocio logueado en el CU. |
 | `Rol` | `backend/models/rol.py` | Entidad SQLModel. `esGCM`. |
-| `User` | `backend/models/user.py` | Entidad de login. `id`, `mail`, `hashedPassword`, `verify_password`. |
+| `Usuario` | `backend/models/usuario.py` | Entidad de login. `id`, `mail`, `hashedPassword`, `verify_password`. (Antes se llamaba `User`, ver bitacora.) |
 | `RefreshToken` | `backend/models/refresh_token.py` | Entidad de sesion de auth. `idUser`, `tokenHash`, `expiresAt`. No es `Sesion` de los diagramas. Detalle en `docs/02-modelo-datos.md`. |
 | `UbicacionBolsin` | `backend/models/ubicacion_bolsin.py` | Value object: `numeroBolsin`, `latitud`, `longitud`, `fechaHoraUltimaActualizacion`. Lo produce la integracion GPS. |
 | `InterfazGPSTracker` | `backend/integrations/gps_tracker/interfaz_gps_tracker.py` | Interfaz con `getBolsinLocation(numeroBolsin, codigoCM)`. |
@@ -142,7 +142,7 @@ Principio: las dependencias apuntan hacia adentro. Nada del nucleo conoce a la c
 | **models** | no | si (entre si) | si | no | no | no | no | no |
 | **backend/models/iterator** | no | si | - | no | no | no | no | no |
 | **integrations** | si (solo `settings`) | si (solo value objects) | no | no | - | no | no | no |
-| **utils** | si (`settings`, `database`) | si (`User`, `RefreshToken`) | no | no | no | - | no | no |
+| **utils** | si (`settings`, `database`) | si (`Usuario`, `RefreshToken`) | no | no | no | - | no | no |
 | **backend/config/composicion.py** | si | si | si | si | si | no | no | no |
 | **tests** | si | si | si | si | si | si | si | si |
 
@@ -154,18 +154,18 @@ Reglas concretas:
 4. `integrations` no importa `services`, `routes` ni `utils`. Puede importar `models` solo para value objects (ej. `UbicacionBolsin`) y `config.settings`.
 5. `routes` no importa `models`, `integrations` ni `config`. Recibe objetos del gestor y los convierte en schemas. Puede importar `backend/utils/auth.py` solo para `user_dependency` y para las funciones del login.
 6. `schemas` no importa nada del proyecto.
-7. `backend/utils/auth.py` puede importar `config`, `models` (`User`, `RefreshToken`) y `backend/utils/security.py`. Ningun modulo de negocio (`services`, `models`) importa `utils`.
+7. `backend/utils/auth.py` puede importar `config`, `models` (`Usuario`, `RefreshToken`) y `backend/utils/security.py`. Ningun modulo de negocio (`services`, `models`) importa `utils`.
 8. `backend/config/composicion.py` es el unico modulo que importa `services` e `integrations` juntos. Solo lo importa `backend/index.py`.
 9. `index.py` es el unico punto que une `routes`, `config`, `utils` y la composicion.
-10. Relaciones SQLModel (`Bolsin` <-> `CambioEstado` <-> `Estado`, `Empleado` <-> `User`, `Empleado` -> `ComisionMedica`): se declaran con nombres en string. `backend/models/__init__.py` importa todas las clases en un orden fijo. Nunca se importan clases entre si a nivel de modulo en ambos sentidos.
+10. Relaciones SQLModel (`Bolsin` <-> `CambioEstado` <-> `Estado`, `Empleado` <-> `Usuario`, `Empleado` -> `ComisionMedica`): se declaran con nombres en string. `backend/models/__init__.py` importa todas las clases en un orden fijo. Nunca se importan clases entre si a nivel de modulo en ambos sentidos.
 11. Si aparece un ciclo en revision, se corrige moviendo la dependencia a `backend/config/composicion.py` o a un tipo auxiliar. No se usan imports tardios para tapar ciclos.
 
-## 6. Relacion User / Empleado (1 a 1)
+## 6. Relacion Usuario / Empleado (1 a 1)
 
-- `User` es la entidad de login: `id`, `mail` (unico), contrasena hasheada. Los metodos de verificacion de contrasena viven en la entidad.
-- `Empleado` es el dato de negocio: `esTuCM`, `sosGCM`, con `Rol` y `ComisionMedica`. Tiene `idUser` unico que referencia a `User.id`.
-- `Empleado.email` del dominio no se duplica: el correo es `User.mail`.
-- Esta relacion es 1 a 1: cada `User` corresponde a como mucho un `Empleado`, y cada `Empleado` a un unico `User`.
+- `Usuario` es la entidad de login: `id`, `mail` (unico), contrasena hasheada. Los metodos de verificacion de contrasena viven en la entidad.
+- `Empleado` es el dato de negocio: `esTuCM`, `sosGCM`, con `Rol` y `ComisionMedica`. Tiene `idUser` unico que referencia a `Usuario.id`.
+- `Empleado.email` del dominio no se duplica: el correo es `Usuario.mail`.
+- Esta relacion es 1 a 1: cada `Usuario` corresponde a como mucho un `Empleado`, y cada `Empleado` a un unico `Usuario`.
 
 ## 7. Arbol de archivos propuesto
 
@@ -198,7 +198,7 @@ backend/
     comision_medica.py                 # ComisionMedica
     rol.py                             # Rol
     empleado.py                        # Empleado (esTuCM, sosGCM, idUser 1 a 1)
-    user.py                            # User (mail, contrasena hasheada, verify_password)
+    usuario.py                            # Usuario (mail, contrasena hasheada, verify_password)
     refresh_token.py                   # RefreshToken
     ubicacion_bolsin.py                # UbicacionBolsin (value object)
     iterator/
