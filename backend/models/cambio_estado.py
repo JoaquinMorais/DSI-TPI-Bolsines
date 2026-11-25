@@ -25,10 +25,13 @@ class CambioEstado(SQLModel, table=True):
     )
 
     def sosActual(self) -> bool:
+        """Indica si el cambio es el vigente (fechaHoraFin nula, paso 6 del CU 36)."""
         return self.fechaHoraFin is None
 
     def sosEnviado(self) -> bool:
+        """Delega en Estado.esEnviado (paso 6 del CU 36)."""
         return self.estado is not None and self.estado.esEnviado()
 
     def setFechaHoraFin(self, fecha: datetime) -> None:
+        """Cierra el cambio de estado con la fecha indicada."""
         self.fechaHoraFin = fecha

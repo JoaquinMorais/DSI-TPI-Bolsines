@@ -31,24 +31,29 @@ class Empleado(SQLModel, table=True):
     )
 
     def esTuCM(self, codigoCM: str) -> bool:
+        """Indica si el empleado pertenece a la CM indicada (paso 4 del CU 36)."""
         return (
             self.comisionMedica is not None
             and self.comisionMedica.getCodigo() == codigoCM
         )
 
     def sosGCM(self) -> bool:
+        """Delega en Rol.esGCM (paso 12 del CU 36)."""
         return self.rol is not None and self.rol.esGCM()
 
     def getCM(self) -> Optional[ComisionMedica]:
+        """Devuelve la CM asignada al empleado (paso 4 del CU 36)."""
         return self.comisionMedica
 
     def getUsuario(self) -> "Optional[Usuario]":
+        """Devuelve el usuario de login del empleado (paso 12 del CU 36)."""
         return self.usuario
 
     @classmethod
     async def obtenerGCMDeCM(
         cls, db: "AsyncSession", codigoCM: str
     ) -> Optional["Empleado"]:
+        """Busca el GCM de la CM destino (paso 12 del CU 36)."""
         stmt = (
             select(cls)
             .join(Rol, Rol.id == cls.rolId)

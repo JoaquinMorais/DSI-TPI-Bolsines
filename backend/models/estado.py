@@ -7,4 +7,5 @@ class Estado(SQLModel, table=True):
     descripcion: str
 
     def esEnviado(self) -> bool:
+        """Indica si el estado es Enviado (paso 6 del CU 36)."""
         return self.nombre == "Enviado"

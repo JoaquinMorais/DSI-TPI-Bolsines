@@ -7,4 +7,5 @@ class ComisionMedica(SQLModel, table=True):
     nombre: str
 
     def getCodigo(self) -> str:
+        """Devuelve el codigo de la CM (pasos 4 y 6 del CU 36)."""
         return self.codigo

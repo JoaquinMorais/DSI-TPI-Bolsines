@@ -24,10 +24,13 @@ class Usuario(SQLModel, table=True):
         self.mail = self.mail.strip().lower()
 
     def verify_password(self, password: str) -> bool:
+        """Verifica la contrasena contra el hash almacenado (login)."""
         return _password_hash.verify(password, self.hashedPassword)
 
     def getEmpleado(self) -> "Optional[Empleado]":
+        """Devuelve el empleado asociado 1 a 1 (paso 3 del CU 36)."""
         return self.empleado
 
     def getMail(self) -> str:
+        """Devuelve el correo del usuario (paso 12 del CU 36)."""
         return self.mail
