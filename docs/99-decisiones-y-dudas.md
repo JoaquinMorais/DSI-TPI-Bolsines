@@ -44,3 +44,4 @@
 | 2026-11-25 | `Remito` esta en E1 y dominio, pero no en el CU 36. | **Fuera** del modelo del CU 36. Se agrega cuando se implemente el CU 15. |
 | 2026-11-25 | `Estado` en E2 tiene `nombre` y `descripcion`; en dominio tiene ademas `ambito`. | Se usa **E2** (sin `ambito`). |
 | 2026-11-25 | Modelo del CU 36: remito, usuario y sesion. | **Confirmado**: Remito fuera del CU 36; `RefreshToken` cubre la sesion sin entidad `Sesion` aparte; `Empleado` 1 a 1 con `User`. |
+| 2026-11-25 | El CU 28 (recepcion de bolsin) necesita recorrer bolsines enviados a la CM del usuario (filtro por CM destino), no por CM origen. | Se reutiliza **el mismo IteradorBolsin** con otros filtros pasados en `new(elementos, filtros)`. No se implementa en esta entrega. Detalle en `docs/03-patron-iterator.md` §1. |
