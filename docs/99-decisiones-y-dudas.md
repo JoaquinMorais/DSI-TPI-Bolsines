@@ -70,3 +70,14 @@
 | 2026-11-25 | Nombre del parametro de ruta: `{idCasoUso}` o `{idCU}`. | **`{idCU}`** (UUID4). Se actualiza `docs/01-arquitectura.md`. |
 | 2026-11-25 | Validacion de rol en la API. | En `routes`: si el `Empleado` no es Encargado de Bolsines, `403`. Requiere `Rol.esEncargadoBolsines()`. |
 | 2026-11-25 | Email del GCM en la respuesta. | Solo `destinatarioEnmascarado` (ej. `g***@dominio.gob`). La direccion completa no sale de la API. |
+| 2026-11-25 | Guia de la API GPS: el repositorio de la catedra es `LiberaeMentis/dsi-api-bolsines`, no un archivo en `docs/referencias/`. | Se toma como fuente de la seccion 1 de `06-integraciones`. La guia no se copia al repo. |
+| 2026-11-25 | La API expone los tres modelos (XTR-4500L, NavTrack QX-7A, GeoPulse MTR-900), cada uno con su API key. | El CU 36 usa **XTR-4500L** (`GPS_MODELO` default). Los otros dos quedan disponibles pero no se usan en el flujo. |
+| 2026-11-25 | La API responde **404** (no 200 vacio) cuando el bolsin no existe o el codigo de CM no coincide. | El adaptador traduce 404 a `UbicacionNoDisponibleError`, es decir, A3. |
+| 2026-11-25 | Interfaz GPS: consulta por lote (`obtenerUbicaciones`) u por bolsin (`getBolsinLocation`, diagrama). | **Por bolsin**, firma del diagrama. Lote descartado. |
+| 2026-11-25 | Fechas de la API sin zona horaria (`2026-03-07T12:30:00`), a veces sin segundos. | Se parsean con `datetime.fromisoformat`. |
+| 2026-11-25 | Codigos de CM: los ejemplos de `07-api-rest` usaban `CM-CORDOBA`, `CM-ROSARIO`, etc. | Se usan los codigos de la API: `CM-CBA-01`, `CM-CBA-02`, `CM-ROS-02`, `CM-MDZ-03`, `CM-TUC-01`, `CM-BA-01`. Ejemplos corregidos. |
+| 2026-11-25 | Datos semilla: bolsines 101 a 104 y 110 con origen/destino igual a la API; 111 no existe en la API (caso A3). | Aprobado. Detalle en `docs/08-datos-semilla.md`. |
+| 2026-11-25 | Datos semilla: EB Córdoba 2 con bolsin 110 como escenario principal limpio. | Aprobado. |
+| 2026-11-25 | Datos semilla: `CM-BA-01` como CMC; nombre de `CM-CBA-02`; dominio `example.test`; contrasena en `SEED_PASSWORD_DEV`. | Aprobado (supuestos registrados en `docs/08-datos-semilla.md` §8). |
+| 2026-11-25 | Credenciales de la API GPS: el repositorio de la catedra las publica en `application.properties`. | No se copian al repo. Van en `.env` como `GPS_API_KEY_*`. |
+| 2026-11-25 | Centro del mapa cuando no hay marcadores. | **Pendiente**: valor por defecto a definir (`docs/07-api-rest.md` §5.3, `docs/06` §7). |

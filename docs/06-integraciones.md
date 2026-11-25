@@ -3,19 +3,25 @@
 Fuentes: ERS v1.2, CU 36 (Observacion 1 sobre GPS Tracker) y requerimientos no funcionales 5, 6 y 7. Regla de `AGENTS.md` §4 y §8: las integraciones viven solo en `backend/integrations/` y el gestor depende solo de interfaces.
 
 Estado de esta version:
-- Seccion 1 (adaptadores GPS): **pendiente**. La guia de la API simulada de la catedra (`docs/referencias/api-gps-guia.md`) no existe en el repo. No se definen endpoints ni formatos de respuesta sin esa guia. Se completa cuando el equipo la copie.
+- Seccion 1 (GPS): completa, segun la API simulada de la catedra (repositorio `LiberaeMentis/dsi-api-bolsines`).
 - Secciones 2 a 6: definidas.
 
-## 1. GPS Tracker (pendiente de la guia de la catedra)
+## 1. GPS Tracker (API simulada de la catedra)
+
+Fuente: repositorio `LiberaeMentis/dsi-api-bolsines` (Spring Boot, datos en memoria, sin base). Contacto de la catedra: Ing. Sol Vega.
+
+Estado: **completo**. La seccion 1.3 detalla lo que la API valida y devuelve.
 
 ### 1.1 Interfaz comun
 
-`InterfazGPSTracker` (`backend/integrations/gps_tracker/interfaz_gps_tracker.py`) es una clase abstracta. Su metodo devuelve siempre la misma forma normalizada, sin importar el modelo de dispositivo:
+`InterfazGPSTracker` (`backend/integrations/gps_tracker/interfaz_gps_tracker.py`) es una clase abstracta. Devuelve siempre la misma forma normalizada, sin importar el modelo de dispositivo:
 
 ```
 InterfazGPSTracker (ABC)
-  + obtenerUbicaciones(codigosBolsin: int[], codigoCM: str): UbicacionBolsin[]
+  + getBolsinLocation(numeroBolsin: int, codigoCM: str): UbicacionBolsin   # una consulta por bolsin, firma del diagrama
 ```
+
+Decision: la interfaz consulta **un bolsin por llamada**. El gestor recorre los bolsines Enviados y llama una vez por cada uno (paso 7 del CU, `docs/05-vista-dinamica.md`). Asi A3 se maneja por bolsin, sin lote. Se descarta `obtenerUbicaciones` por lote.
 
 `UbicacionBolsin` (`backend/models/ubicacion_bolsin.py`, value object, no es tabla):
 
@@ -26,25 +32,43 @@ InterfazGPSTracker (ABC)
 | `longitud` | `float` |
 | `fechaHoraUltimaActualizacion` | `datetime` |
 
-Cada adaptador convierte el formato de su modelo a `UbicacionBolsin`. El gestor nunca ve JSON, CSV ni matrices.
+Cada adaptador convierte el formato de su modelo a `UbicacionBolsin`. El gestor nunca ve JSON, CSV ni listas anidadas.
 
-Nota: el diagrama de diseno (`docs/04-vista-estatica.md`) muestra `getBolsinLocation(numeroBolsin, codigoCM)` en la interfaz. Esa firma es la del endpoint del XTR-4500L. Para respetar el diagrama, la interfaz publica se llama `getBolsinLocation` y se consulta por bolsin; `obtenerUbicaciones` queda como nombre de la version normalizada por lote. Pendiente de confirmar con la guia y el equipo.
+### 1.2 Modelo usado y adaptadores
 
-### 1.2 Adaptadores por modelo (ERS, Obs. 1)
+La API expone los tres modelos de la ERS. Cada uno tiene su propia API key (header `X-API-Key`). Con una key de otro modelo responde 401.
 
-Firmas segun la ERS. Los formatos de respuesta y las rutas HTTP se completan con la guia de la catedra.
+**Modelo usado en el CU 36: XTR-4500L.** Es el de la Entrega 2 y el del diagrama de secuencia. Los adaptadores de NavTrack y GeoPulse existen en la API, pero el CU no los usa. Se implementan solo si el equipo los necesita.
 
-| Modelo | Adaptador | Endpoint (ERS) | Entrada (ERS) | Salida (ERS) |
-|---|---|---|---|---|
-| XTR-4500L | `gps_tracker_xtr4500l.py` | `getBolsinLocation()` | API key, numero de bolsin (int), codigo CM origen (str) | JSON en cadena: por cada item, numero, latitud, longitud, fecha/hora de ultima actualizacion |
-| NavTrack QX-7A | `gps_tracker_navtrack_qx7a.py` | `retrieveTrackingData()` | API key, numero de bolsin (int), codigo CM destino (str) | Un solo String con items separados por comas |
-| GeoPulse MTR-900 | `gps_tracker_geopulse_mtr900.py` | `fetchCargoPositions()` | API key, numero de bolsin (int) | Matriz |
+| Modelo | Adaptador | Endpoint | Parametros | Header | Formato de respuesta |
+|---|---|---|---|---|---|
+| XTR-4500L (**usado**) | `gps_tracker_xtr4500l.py` | `GET /api/xtr-4500l/getBolsinLocation` | `numeroBolsin` (int), `codigoComisionMedicaOrigen` (str) | `X-API-Key: sk_xtr_...` | JSON: `{"items":[{numeroBolsin, latitud, longitud, fechaHoraUltimaActualizacion}]}` |
+| NavTrack QX-7A | `gps_tracker_navtrack_qx7a.py` | `GET /api/navtrack-qx-7a/retrieveTrackingData` | `numeroBolsin` (int), `codigoComisionMedicaDestino` (str) | `X-API-Key: sk_nav_...` | Texto plano CSV: `101,-31.4201,-64.1888,2026-03-07T12:30` |
+| GeoPulse MTR-900 | `gps_tracker_geopulse_mtr900.py` | `GET /api/geopulse-mtr-900/fetchCargoPositions` | `numeroBolsin` (int) | `X-API-Key: sk_geo_...` | Lista de listas: `[[101, -31.4201, -64.1888, "2026-03-07T12:30:00"]]` |
 
-**Cual se usa contra la API de la catedra:** pendiente. La ERS describe tres modelos, pero la API simulada puede exponer solo uno. Se confirma con la guia.
+**Seleccion del modelo:** `GPS_MODELO` en `backend/config/settings.py`, valores `XTR-4500L` (default), `NAVTRACK-QX7A`, `GEOPULSE-MTR900`. `backend/config/composicion.py` elige el adaptador. Ningun otro modulo lee `GPS_MODELO`.
 
-**Seleccion del modelo:** variable `GPS_MODELO` en `backend/config/settings.py` (valores `XTR-4500L`, `NAVTRACK-QX7A`, `GEOPULSE-MTR900`). `backend/config/composicion.py` elige el adaptador segun esa variable. Ningun otro modulo lee `GPS_MODELO`.
+**Parseo:** cada adaptador tiene una funcion de parseo pura (sin red). La del XTR-4500L toma `items[0]` y valida que venga exactamente un item. Las fechas de la API vienen **sin zona horaria** (`2026-03-07T12:30:00`, o `2026-03-07T12:30` si los segundos son cero, porque la API usa `LocalDateTime.toString()`). Se parsean con `datetime.fromisoformat`, que acepta ambas formas.
 
-**Parseo:** cada adaptador tiene su funcion de parseo pura (sin red), probada con respuestas de ejemplo. Los formatos se documentaran aca cuando se conozcan.
+**Base URL:** `GPS_BASE_URL`, default `http://localhost:8080`.
+
+### 1.3 Comportamiento de la API (verificado en el repositorio)
+
+| Situacion | HTTP | Cuerpo | Como lo trata el adaptador |
+|---|---|---|---|
+| OK | 200 | segun modelo | Parsea y devuelve `UbicacionBolsin`. |
+| API key invalida o de otro modelo | 401 | `API_KEY_INVALIDA` | Error de configuracion. Se propaga como error del sistema, no como A3. |
+| Parametro faltante o invalido | 400 | error JSON | Error de integracion. No deberia ocurrir con parametros validados. |
+| Bolsin inexistente (no esta en la API) | 404 | error JSON | `UbicacionNoDisponibleError` para ese bolsin (**A3**). |
+| Codigo de CM no coincide con el bolsin | 404 | error JSON | `UbicacionNoDisponibleError` para ese bolsin (**A3**). |
+
+Consecuencia: la API no responde "sin ubicacion" con 200. Responde 404. El adaptador traduce 404 a A3.
+
+Validacion de codigo: la API compara `codigoComisionMedicaOrigen` con el origen del bolsin (sin distinguir mayusculas). Por eso el adaptador envia el codigo de la CM del usuario logueado, y el bolsin solo tiene ubicacion si esa CM es su origen. Esto coincide con el filtro del CU 36.
+
+### 1.4 Datos de la API y del set de datos
+
+La API tiene 10 bolsines fijos (101 a 110). El set de datos (`docs/08-datos-semilla.md`) usa 101, 102, 103, 104 y 110 con origen y destino iguales a la API. El 111 no existe en la API, y es el caso A3 de la defensa.
 
 ## 2. Manejo de errores (A3)
 
@@ -122,9 +146,11 @@ Todas las variables se leen en `backend/config/settings.py` y se cargan desde `.
 
 | Variable | Uso | Default |
 |---|---|---|
-| `GPS_MODELO` | Modelo de dispositivo: `XTR-4500L`, `NAVTRACK-QX7A`, `GEOPULSE-MTR900` | `XTR-4500L` (pendiente de confirmar) |
-| `GPS_BASE_URL` | URL base de la API GPS | vacio (pendiente de la guia) |
-| `GPS_API_KEY` | API key identificatoria | vacio. Nunca en el repo. |
+| `GPS_MODELO` | Modelo de dispositivo: `XTR-4500L`, `NAVTRACK-QX7A`, `GEOPULSE-MTR900` | `XTR-4500L` |
+| `GPS_BASE_URL` | URL base de la API GPS | `http://localhost:8080` |
+| `GPS_API_KEY_XTR4500L` | API key del XTR-4500L (header `X-API-Key`) | vacio en el repo. Valor en `.env`. |
+| `GPS_API_KEY_NAVTRACK` | API key del NavTrack QX-7A | vacio. Solo si se usa ese modelo. |
+| `GPS_API_KEY_GEOPULSE` | API key del GeoPulse MTR-900 | vacio. Solo si se usa ese modelo. |
 | `CORREO_MODO` | `simulado` o `graph` | `simulado` |
 | `CORREO_ARCHIVO` | Archivo donde el correo simulado guarda los mensajes | vacio (solo log) |
 | `CORREO_TENANT_ID`, `CORREO_CLIENT_ID`, `CORREO_CLIENT_SECRET` | Credenciales de Microsoft Graph | vacio. Solo si `CORREO_MODO=graph`. |
@@ -134,6 +160,6 @@ Ver `.env.example` (variables del backend). La clave de Maps va en `frontend/.en
 
 ## 7. Pendientes
 
-1. Copiar la guia de la API simulada de la catedra en `docs/referencias/api-gps-guia.md`. Con ella se completa la seccion 1 (rutas, formatos y modelo real).
-2. Definir el nombre definitivo del metodo de la interfaz GPS (`getBolsinLocation` por bolsin u `obtenerUbicaciones` por lote).
-3. Credenciales de Microsoft Graph, si el equipo decide implementarlo.
+1. Confirmar con el equipo si el CU 36 usa solo XTR-4500L (asi esta definido) o si conviene implementar tambien NavTrack y GeoPulse.
+2. Credenciales de Microsoft Graph, si el equipo decide implementarlo.
+3. Centro del mapa cuando no hay marcadores (`docs/07-api-rest.md` §5.3): valor por defecto a definir.

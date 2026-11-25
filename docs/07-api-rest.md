@@ -64,24 +64,23 @@ Los schemas solo validan y serializan. `MapaBolsinesOut` lo arma `integrations/g
 
 **Paso 1, POST `/seguimiento-bolsines`** (sin body, header `Authorization: Bearer <jwt>`)
 
-Response 201:
+Response 201 (usuario EB Córdoba 1, escenario de `08-datos-semilla.md` §7):
 ```json
 {
   "idCU": "3f2a9c1e-7b4d-4e8a-9f10-2c5d6e7a8b90",
-  "codigoCM": "CM-CORDOBA",
+  "codigoCM": "CM-CBA-01",
   "bolsines": [
-    { "numeroBolsin": 1042, "numeroPrecinto": "P-88321", "codigoCMDestino": "CM-ROSARIO" },
-    { "numeroBolsin": 1057, "numeroPrecinto": null, "codigoCMDestino": "CM-MENDOZA" }
+    { "numeroBolsin": 101, "numeroPrecinto": "P-0101", "codigoCMDestino": "CM-ROS-02" },
+    { "numeroBolsin": 111, "numeroPrecinto": "P-0111", "codigoCMDestino": "CM-MDZ-03" }
   ],
   "mapa": {
-    "centro": { "latitud": -31.4, "longitud": -64.2 },
+    "centro": { "latitud": -31.4201, "longitud": -64.1888 },
     "zoom": 6,
     "marcadores": [
-      { "numeroBolsin": 1042, "latitud": -32.95, "longitud": -60.66, "fechaHoraUltimaActualizacion": "2026-11-25T09:14:00Z" },
-      { "numeroBolsin": 1057, "latitud": -32.89, "longitud": -68.84, "fechaHoraUltimaActualizacion": "2026-11-25T09:10:00Z" }
+      { "numeroBolsin": 101, "latitud": -31.4201, "longitud": -64.1888, "fechaHoraUltimaActualizacion": "2026-03-07T12:30:00" }
     ]
   },
-  "sinUbicacion": []
+  "sinUbicacion": [ { "numeroBolsin": 111, "motivo": "El GPS no informo ubicacion" } ]
 }
 ```
 
@@ -89,15 +88,15 @@ Response 201:
 
 Request:
 ```json
-{ "numeroBolsin": 1042 }
+{ "numeroBolsin": 101 }
 ```
 
 Response 200:
 ```json
 {
   "idCU": "3f2a9c1e-7b4d-4e8a-9f10-2c5d6e7a8b90",
-  "bolsin": { "numeroBolsin": 1042, "numeroPrecinto": "P-88321", "codigoCMDestino": "CM-ROSARIO" },
-  "ubicacion": { "numeroBolsin": 1042, "latitud": -32.95, "longitud": -60.66, "fechaHoraUltimaActualizacion": "2026-11-25T09:14:00Z" },
+  "bolsin": { "numeroBolsin": 101, "numeroPrecinto": "P-0101", "codigoCMDestino": "CM-ROS-02" },
+  "ubicacion": { "numeroBolsin": 101, "latitud": -31.4201, "longitud": -64.1888, "fechaHoraUltimaActualizacion": "2026-03-07T12:30:00" },
   "requiereConfirmacionCorreo": true
 }
 ```
@@ -118,32 +117,35 @@ Response 200:
 
 POST `/seguimiento-bolsines`, response 200 (`SinBolsinesResponse`):
 ```json
-{ "idCU": null, "codigoCM": "CM-CORDOBA", "estado": "SIN_BOLSINES" }
+{ "idCU": null, "codigoCM": "CM-CBA-01", "estado": "SIN_BOLSINES" }
 ```
 
 No hay sesion abierta, ni GPS, mapa o correo.
 
 ### 5.3 A3: GPS sin ubicacion para un bolsin
 
-POST `/seguimiento-bolsines`, response 201 (fragmento):
+POST `/seguimiento-bolsines`, response 201 (fragmento, mismo caso que 5.1 pero con el 101 tambien sin ubicacion):
 ```json
 {
   "idCU": "3f2a9c1e-7b4d-4e8a-9f10-2c5d6e7a8b90",
-  "codigoCM": "CM-CORDOBA",
+  "codigoCM": "CM-CBA-01",
   "bolsines": [
-    { "numeroBolsin": 1042, "numeroPrecinto": "P-88321", "codigoCMDestino": "CM-ROSARIO" },
-    { "numeroBolsin": 1057, "numeroPrecinto": null, "codigoCMDestino": "CM-MENDOZA" }
+    { "numeroBolsin": 101, "numeroPrecinto": "P-0101", "codigoCMDestino": "CM-ROS-02" },
+    { "numeroBolsin": 111, "numeroPrecinto": "P-0111", "codigoCMDestino": "CM-MDZ-03" }
   ],
   "mapa": {
-    "centro": { "latitud": -32.95, "longitud": -60.66 },
+    "centro": { "latitud": 0, "longitud": 0 },
     "zoom": 6,
-    "marcadores": [
-      { "numeroBolsin": 1042, "latitud": -32.95, "longitud": -60.66, "fechaHoraUltimaActualizacion": "2026-11-25T09:14:00Z" }
-    ]
+    "marcadores": []
   },
-  "sinUbicacion": [ { "numeroBolsin": 1057, "motivo": "El GPS no informo ubicacion" } ]
+  "sinUbicacion": [
+    { "numeroBolsin": 101, "motivo": "El GPS no informo ubicacion" },
+    { "numeroBolsin": 111, "motivo": "El GPS no informo ubicacion" }
+  ]
 }
 ```
+
+El caso real de la defensa (111 sin ubicacion, 101 con ubicacion) es el de 5.1. Este ejemplo muestra el caso sin ningun marcador, que el `centro` por defecto del backend debe definir (`docs/06-integraciones.md` §3).
 
 ### 5.4 A5: EB no confirma el correo
 
