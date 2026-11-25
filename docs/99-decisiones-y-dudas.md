@@ -81,3 +81,7 @@
 | 2026-11-25 | Datos semilla: `CM-BA-01` como CMC; nombre de `CM-CBA-02`; dominio `example.test`; contrasena en `SEED_PASSWORD_DEV`. | Aprobado (supuestos registrados en `docs/08-datos-semilla.md` §8). |
 | 2026-11-25 | Credenciales de la API GPS: el repositorio de la catedra las publica en `application.properties`. | No se copian al repo. Van en `.env` como `GPS_API_KEY_*`. |
 | 2026-11-25 | Centro del mapa cuando no hay marcadores. | **Pendiente**: valor por defecto a definir (`docs/07-api-rest.md` §5.3, `docs/06` §7). |
+| 2026-11-25 | Escenario A3 en la defensa: bolsin 111 con EB Cordoba 1. | Aprobado. Detalle en `docs/09-implementacion-y-pruebas.md` §7. |
+| 2026-11-25 | Tests de integracion contra la API GPS real. | Marcados como `integracion`, se saltan si la API no responde. No bloquean la suite normal. |
+| 2026-11-25 | Frontend en esta entrega. | Se implementa despues de cerrar el backend (paso 16 del orden de implementacion). |
+| 2026-11-25 | Evidencia de criterios de correccion. | Todas pendientes: todavia no hay codigo de aplicacion. Se actualiza `docs/09` §2 al implementar. |
