@@ -103,3 +103,4 @@
 | 2026-11-25 | `comprobarFiltro(filtros)` no recibe el elemento; evalua el elemento en la posicion actual. | Se mantiene la firma de 04. El test unitario del predicado fija `_posicionActual` (prueba de caja blanca). |
 | 2026-11-25 | Visibilidad `-` de atributos en SQLModel. | Pydantic trata los nombres con `_` como privados y no los mapea a columnas, asi que las entidades usan atributos publicos (`nombre`, `codigo`) y exponen getters. La privacidad queda documental (ver 04 decision 2). |
 | 2026-11-25 | Tests de `Estado`, `ComisionMedica` y `Rol` no tenian archivo en 09 §4.2. | Se agregan en `backend/tests/test_entidades.py`. |
+| 2026-11-25 | `from __future__ import annotations` con `Relationship` rompe la resolucion del target (`"Clase | None"`). | Los modelos usan `Optional["Clase"]` / `List["Clase"]` sin future annotations, patron de SQLModel; las relaciones llevan `lazy="selectin"`. |
