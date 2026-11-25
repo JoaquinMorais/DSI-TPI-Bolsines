@@ -28,15 +28,29 @@ interface IIterador {
 }
 
 class GestorBuscarBolsines {
+  - nombreComisionMedica: str
+  - codigoComisionMedica: str
+  - bolsines: Bolsin[]
+  - bolsinesEnviados: Bolsin[]
+  - ubicacionesBolsines: UbicacionBolsin[]
   - seleccionBolsin: Bolsin
+  - mapa: MapaBolsines
   - codigoBolsin: int[]
-  + obtenerCodigoBolsinesEnviados(): int[]
+  - sinUbicacion: SinUbicacion[]
+  - advertencias: str[]
+  + buscarUsuarioLogueado(): Empleado
+  + getCMUsuarioLogueado(): ComisionMedica
+  + opcionSeguirBolsines(): void
+  + obtenerBolsinesEnviados(): Bolsin[]
   + crearIterador(elementos: Bolsin[]): IIterador
-  + opcionSeguirBolsines(usuario: Usuario): ResultadoSeguimiento
+  + obtenerUbicacionBolsin(): void
+  + obtenerMapa(): MapaBolsines
+  + filtrarPorPrecinto(precinto: str): Bolsin[]
   + tomarSeleccionBolsin(numeroBolsin: int): ResultadoSeleccion
   + tomarConfirmacionEnvioCorreo(confirma: bool): ResultadoConfirmacion
-  + cancelar(): void
   - enviarMailGCM(): bool
+  + finCU(): void
+  + cancelar(): void
 }
 
 class IteradorBolsin {
@@ -222,15 +236,29 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 
 | Visibilidad | Atributo / metodo | Tipo | Retorno / parametros |
 |---|---|---|---|
+| - | `nombreComisionMedica` | `str` | |
+| - | `codigoComisionMedica` | `str` | |
+| - | `bolsines` | `Bolsin[]` | |
+| - | `bolsinesEnviados` | `Bolsin[]` | |
+| - | `ubicacionesBolsines` | `UbicacionBolsin[]` | |
 | - | `seleccionBolsin` | `Bolsin` | |
+| - | `mapa` | `MapaBolsines` | |
 | - | `codigoBolsin` | `int[]` | |
-| + | `obtenerCodigoBolsinesEnviados` | | `int[]` |
+| - | `sinUbicacion` | `SinUbicacion[]` | |
+| - | `advertencias` | `str[]` | |
+| + | `buscarUsuarioLogueado` | | `Empleado` |
+| + | `getCMUsuarioLogueado` | | `ComisionMedica` |
+| + | `opcionSeguirBolsines` | | `void` |
+| + | `obtenerBolsinesEnviados` | | `Bolsin[]` |
 | + | `crearIterador` | `elementos: Bolsin[]` | `IIterador` |
-| + | `opcionSeguirBolsines` | `usuario: Usuario` | `ResultadoSeguimiento` |
+| + | `obtenerUbicacionBolsin` | | `void` |
+| + | `obtenerMapa` | | `MapaBolsines` |
+| + | `filtrarPorPrecinto` | `precinto: str` | `Bolsin[]` |
 | + | `tomarSeleccionBolsin` | `numeroBolsin: int` | `ResultadoSeleccion` |
 | + | `tomarConfirmacionEnvioCorreo` | `confirma: bool` | `ResultadoConfirmacion` |
-| + | `cancelar` | | `void` |
 | - | `enviarMailGCM` | | `bool` |
+| + | `finCU` | | `void` |
+| + | `cancelar` | | `void` |
 
 **IteradorBolsin** (iterador concreto, `backend/models/iterator/iterador_bolsin.py`). Realiza `IIterador`.
 
@@ -357,3 +385,6 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 9. **Tipos de la Entrega 2 ajustados.** `IteradorBolsin.filtros` y `comprobarFiltro` usan `str[]`; `elementoActual()` devuelve `Bolsin`; `crearIterador` recibe `Bolsin[]`. La Entrega 2 usaba `Object[]` y `Object`. Registrado en `docs/99-decisiones-y-dudas.md`.
 10. **`Bolsin`–`CambioEstado` como composicion (`*--`).** El historial de estados pertenece al bolsin y se elimina con el. La Entrega 2 lo muestra como asociacion simple.
 11. **`obtenerMapa` devuelve `MapaBolsines`.** El backend arma centro, zoom y marcadores; el frontend dibuja con Google Maps.
+12. **`obtenerBolsinesEnviados`** reemplaza a `obtenerCodigoBolsinesEnviados` (docs/99).
+13. **Atributos publicos tratados como privados:** en Python no hay `_`; el `-` del diagrama es documental.
+14. **A1** lanza `SinBolsinesEnviadosError`; **A2** en `filtrarPorPrecinto`; **mail** con loop `esTuCM`/`sosGCM`.

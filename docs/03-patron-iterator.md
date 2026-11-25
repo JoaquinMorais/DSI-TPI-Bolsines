@@ -51,7 +51,7 @@ GestorBuscarBolsines.obtenerBolsinesEnviados():
 **Despues (diseno con Iterator, Entrega 2):** el gestor solo coordina. El recorrido y el filtro estan en el iterador.
 
 ```
-GestorBuscarBolsines.obtenerCodigoBolsinesEnviados():
+GestorBuscarBolsines.obtenerBolsinesEnviados():
     iterador = crearIterador(bolsines, filtros=["origen", codigoCMUsuario])
     codigos = []
     iterador.primero()
@@ -100,4 +100,4 @@ Reglas que hacen visible el patron (`AGENTS.md` §6):
 
 **Notas:**
 - El diagrama de clases de Entrega 2 declara `comprobarFiltro` en `IIterador` como publico. Se mantiene asi.
-- `obtenerCodigoBolsinesEnviados()` devuelve codigos, segun la decision registrada. `crearIterador` recibe la coleccion de objetos `Bolsin`.
+- `obtenerBolsinesEnviados()` devuelve codigos, segun la decision registrada. `crearIterador` recibe la coleccion de objetos `Bolsin`.

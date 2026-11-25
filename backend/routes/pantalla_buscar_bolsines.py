@@ -23,7 +23,8 @@ from schemas.seguimiento import (
     SinBolsinesResponse,
     SinUbicacionOut,
 )
-from services import gestores_activos
+from services import registro_casos_uso
+from services.errores import SinBolsinesEnviadosError
 from utils.auth import user_dependency
 
 router = APIRouter(prefix="/seguimiento-bolsines", tags=["seguimiento"])
@@ -68,6 +69,14 @@ def _mapa_out(mapa: MapaBolsines) -> MapaBolsinesOut:
     )
 
 
+def _mapa_vacio() -> MapaBolsinesOut:
+    return MapaBolsinesOut(
+        centro=CoordenadaOut(latitud=0.0, longitud=0.0),
+        zoom=6,
+        marcadores=[],
+    )
+
+
 def _enmascarar(mail: str | None) -> str | None:
     if not mail or "@" not in mail:
         return None
@@ -80,25 +89,26 @@ async def iniciar(
     usuario: user_dependency, db: db_dependency
 ) -> JSONResponse:
     _verificar_rol(usuario)
-    gestor = composicion.crear_gestor(db)
-    resultado = await gestor.opcionSeguirBolsines(usuario)
-
-    if not resultado.bolsines:
-        cuerpo = SinBolsinesResponse(codigoCM=resultado.codigoCM)
+    gestor = composicion.crear_gestor(db, usuario)
+    try:
+        await gestor.opcionSeguirBolsines()
+    except SinBolsinesEnviadosError as exc:
+        cuerpo = SinBolsinesResponse(codigoCM=exc.codigoCM)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=cuerpo.model_dump(mode="json"),
         )
 
-    idCU = gestores_activos.registrar(gestor)
+    idCU = registro_casos_uso.crear(gestor)
+    mapa = gestor.mapa
     respuesta = SeguimientoCreadoResponse(
         idCU=idCU,
-        codigoCM=resultado.codigoCM,
-        bolsines=[_bolsin_out(b) for b in resultado.bolsines],
-        mapa=_mapa_out(resultado.mapa),
+        codigoCM=gestor.codigoComisionMedica,
+        bolsines=[_bolsin_out(b) for b in gestor.bolsinesEnviados],
+        mapa=_mapa_out(mapa) if mapa is not None else _mapa_vacio(),
         sinUbicacion=[
             SinUbicacionOut(numeroBolsin=s.numeroBolsin, motivo=s.motivo)
-            for s in resultado.sinUbicacion
+            for s in gestor.sinUbicacion
         ],
     )
     return JSONResponse(
@@ -115,7 +125,7 @@ async def seleccionar(
     db: db_dependency,
 ) -> SeleccionBolsinResponse:
     _verificar_rol(usuario)
-    gestor = gestores_activos.obtener(str(idCU))
+    gestor = registro_casos_uso.obtener(str(idCU))
     if gestor is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=CASO_NO_ENCONTRADO
@@ -146,7 +156,7 @@ async def confirmar(
     db: db_dependency,
 ) -> ConfirmacionCorreoResponse:
     _verificar_rol(usuario)
-    gestor = gestores_activos.obtener(str(idCU))
+    gestor = registro_casos_uso.obtener(str(idCU))
     if gestor is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=CASO_NO_ENCONTRADO
@@ -163,7 +173,7 @@ async def confirmar(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="No se pudo enviar el correo",
         )
-    gestores_activos.eliminar(str(idCU))
+    registro_casos_uso.eliminar(str(idCU))
     return ConfirmacionCorreoResponse(
         notificado=resultado.notificado,
         destinatarioEnmascarado=_enmascarar(resultado.destinatario),
@@ -175,7 +185,7 @@ async def cancelar(
     idCU: UUID, usuario: user_dependency, db: db_dependency
 ) -> Response:
     _verificar_rol(usuario)
-    if not gestores_activos.eliminar(str(idCU)):
+    if not registro_casos_uso.eliminar(str(idCU)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=CASO_NO_ENCONTRADO
         )

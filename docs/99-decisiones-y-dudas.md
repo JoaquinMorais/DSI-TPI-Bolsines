@@ -130,3 +130,11 @@
 | 2026-11-25 | Nombre del error de integracion: `ErrorIntegracionGPS` vs `ErrorServicioGPS`. | Se mantiene `ErrorIntegracionGPS` y se agrega **`ErrorServicioGPS` como alias** en `errores.py`. |
 | 2026-11-25 | Correo simulado: archivo configurable vs ruta fija. | `CorreoSimulado` escribe por defecto en **`backend/data/mails_enviados.log`** (ademas del log); `CORREO_ARCHIVO` puede sobreescribirlo. Se agrega `outlook_graph.py` como stub comentado. |
 | 2026-11-25 | Tests de integraciones y script de prueba. | Nuevos tests en **`backend/tests/integrations/`** (parsers y adaptadores con httpx mockeado) y script **`backend/scripts/probar_gps.py`**. |
+| 2026-11-25 | Nombre del metodo del gestor: `obtenerCodigoBolsinesEnviados` (docs/04) vs `obtenerBolsinesEnviados` (pedido). | Se usa **`obtenerBolsinesEnviados`**; revierte la decision anterior. Devuelve `list[Bolsin]` y setea `codigoBolsin`. |
+| 2026-11-25 | `opcionSeguirBolsines(usuario)` vs sin args con `buscarUsuarioLogueado`. | El gestor recibe el **usuario por constructor**; `opcionSeguirBolsines()` no recibe args y usa `buscarUsuarioLogueado()`/`getCMUsuarioLogueado()`. |
+| 2026-11-25 | A1: resultado vacio vs excepcion. | **`SinBolsinesEnviadosError`** en `services/errores.py`; el route la traduce a 200 `SinBolsinesResponse`. |
+| 2026-11-25 | A2: filtro en el frontend vs en el gestor. | Se agrega **`GestorBuscarBolsines.filtrarPorPrecinto`**: devuelve lista vacia y agrega advertencia si no hay coincidencias. |
+| 2026-11-25 | Mail: `Empleado.obtenerGCMDeCM` vs loop `esTuCM`/`sosGCM`/`esGCM`. | Se usa el **loop sobre empleados** en `enviarMailGCM` (revierte la decision anterior). |
+| 2026-11-25 | Registro en memoria: `gestores_activos.py` vs `registro_casos_uso.py`. | Se usa **`services/registro_casos_uso.py`** con `crear`/`obtener`/`eliminar` (+ `reset`). |
+| 2026-11-25 | Visibilidad de atributos del gestor. | Nombres **publicos en Python** (`nombreComisionMedica`, `bolsines`, ...) tratados como privados; el `-` del diagrama es documental. |
+| 2026-11-25 | Ubicacion de los tests del gestor. | **`backend/tests/services/`** (dentro de `testpaths`), con principal, A1-A5 y test de uso del iterador. |

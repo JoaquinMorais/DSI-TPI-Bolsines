@@ -36,5 +36,7 @@ def crear_correo() -> InterfazCorreo:
     return CorreoSimulado(settings.CORREO_ARCHIVO or None)
 
 
-def crear_gestor(db) -> GestorBuscarBolsines:
-    return GestorBuscarBolsines(db, crear_gps(), crear_maps(), crear_correo())
+def crear_gestor(db, usuario) -> GestorBuscarBolsines:
+    return GestorBuscarBolsines(
+        db, usuario, crear_gps(), crear_maps(), crear_correo()
+    )

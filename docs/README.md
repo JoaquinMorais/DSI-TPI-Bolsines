@@ -54,7 +54,7 @@ Consulta permanente: `99-decisiones-y-dudas.md` (toda duda resuelta o pendiente 
 6. La cadena de estado es `Bolsin.sosEnviado()` -> `CambioEstado.sosActual()` -> `CambioEstado.sosEnviado()` -> `Estado.esEnviado()`.
 7. El GPS se consulta por bolsin a traves de `InterfazGPSTracker` (adaptador XTR-4500L); un 404 del GPS se traduce a `UbicacionNoDisponibleError` y al alternativo A3.
 8. El backend devuelve `MapaBolsines` (centro, zoom, marcadores); el frontend dibuja el mapa con Google Maps.
-9. El estado del caso de uso vive en memoria por `idCU` (`gestores_activos`), lo que exige un unico worker de uvicorn.
+9. El estado del caso de uso vive en memoria por `idCU` (`registro_casos_uso`), lo que exige un unico worker de uvicorn.
 10. Los alternativos A1 (sin bolsines), A3 (GPS sin ubicacion), A4 (cancelar) y A5 (no enviar correo) estan cubiertos por el diseno, la API y el plan de pruebas.
 
 ## Ejecucion rapida

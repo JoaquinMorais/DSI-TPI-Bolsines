@@ -46,7 +46,7 @@ Las pruebas de parseo (funciones puras) corren siempre, con respuestas de ejempl
 
 ## 4. Plan de pruebas pytest
 
-Ubicacion: `backend/tests/` (`pytest.ini` apunta a esa carpeta y se ejecuta desde la raiz). Fixtures en `conftest.py`: base SQLite en memoria, `gestores_activos` reseteado, fakes de GPS y correo, `TestClient` con la composicion de tests.
+Ubicacion: `backend/tests/` (`pytest.ini` apunta a esa carpeta y se ejecuta desde la raiz). Las pruebas del gestor estan en `backend/tests/services/`. Fixtures en `conftest.py`: base SQLite en memoria, `registro_casos_uso` reseteado, fakes de GPS y correo, `TestClient` con la composicion de tests.
 
 ### 4.1 Iterator (`test_iterador_bolsin.py`)
 
@@ -83,7 +83,7 @@ Ubicacion: `backend/tests/` (`pytest.ini` apunta a esa carpeta y se ejecuta desd
 
 | Caso | Entrada | Resultado esperado |
 |---|---|---|
-| Flujo principal | EB Cordoba 2, GPS fake con 110 ubicado | `obtenerCodigoBolsinesEnviados()` = [110]. Un marcador. Un correo al GCM Rosario. |
+| Flujo principal | EB Cordoba 2, GPS fake con 110 ubicado | `obtenerBolsinesEnviados()` = [110]. Un marcador. Un correo al GCM Rosario. |
 | A1 | EB Tucuman | Lista vacia. Sin llamadas al GPS. Sin correos. |
 | A3 | EB Cordoba 1, GPS fake lanza `UbicacionNoDisponibleError` para 111 | 111 en `sinUbicacion`, 101 con marcador. Sesion abierta. |
 | A3 total | GPS fake lanza para todos | `marcadores` vacio, todos en `sinUbicacion`. Sesion abierta. |
@@ -129,7 +129,7 @@ Orden sugerido (unos 15 minutos):
 1. **Modelo:** `docs/diagramas/clases-diseno.puml`. Senalar `IAgregado`, `IIterador`, `IteradorBolsin` y `GestorBuscarBolsines`.
 2. **Interfaces:** `backend/models/iterator/i_agregado.py` e `i_iterador.py`. Mostrar que `crearIterador` devuelve `IIterador`.
 3. **Iterator concreto:** abrir `backend/models/iterator/iterador_bolsin.py`. Mostrar `init(elementos, filtros)`, `posicionarEnValido()` y `comprobarFiltro()`, con las llamadas a `esTuCMOrigen` y `sosEnviado`.
-4. **Llamada desde el gestor:** abrir `backend/services/gestor_buscar_bolsines.py`. Mostrar `obtenerCodigoBolsinesEnviados()`: `crearIterador`, `primero`, `haFinalizado`, `elementoActual`, `getNumeroBolsin`, `siguiente`. Senalar que no hay `for` sobre la lista.
+4. **Llamada desde el gestor:** abrir `backend/services/gestor_buscar_bolsines.py`. Mostrar `obtenerBolsinesEnviados()`: `crearIterador`, `primero`, `haFinalizado`, `elementoActual`, `getNumeroBolsin`, `siguiente`. Senalar que no hay `for` sobre la lista.
 5. **Entidades:** `Bolsin.esTuCMOrigen` y `sosEnviado`, y la cadena hasta `Estado.esEnviado`.
 6. **Boundary:** `backend/routes/pantalla_buscar_bolsines.py`. Mostrar que solo traduce HTTP.
 7. **Pruebas:** `pytest -k iterador -v` y luego `pytest -v`. Mostrar un caso de reutilizacion (CU 28).
@@ -155,7 +155,7 @@ Cada paso se verifica antes de pasar al siguiente.
 7. `UbicacionBolsin` y `UbicacionNoDisponibleError`. Verificar: importacion.
 8. Adaptador GPS XTR-4500L con parseo puro. Verificar: tests de §4.5 sin red.
 9. Fakes de GPS y correo. Verificar: cumplen la interfaz.
-10. `GestorBuscarBolsines` con `IAgregado` y `gestores_activos`. Verificar: tests de §4.3.
+10. `GestorBuscarBolsines` con `IAgregado` y `registro_casos_uso`. Verificar: tests de §4.3.
 11. `utils/security.py` y `utils/auth.py` (login, `user_dependency`). Verificar: el login devuelve JWT y un token invalido da 401.
 12. `schemas/seguimiento.py` y `schemas/auth.py`. Verificar: `numeroBolsin > 0`.
 13. `routes/pantalla_buscar_bolsines.py` y `routes/auth.py`, incluidos en `index.py`. Verificar: tests de §4.4 con `TestClient`.

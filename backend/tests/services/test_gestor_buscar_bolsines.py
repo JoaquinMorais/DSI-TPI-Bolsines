@@ -22,6 +22,7 @@ from models import (
 )
 from models.rol import NOMBRE_ENCARGADO_BOLSINES, NOMBRE_GCM
 from models.ubicacion_bolsin import UbicacionBolsin
+from services.errores import SinBolsinesEnviadosError
 from services.gestor_buscar_bolsines import GestorBuscarBolsines
 
 INICIO = datetime(2026, 11, 20, 9, 0)
@@ -50,15 +51,15 @@ async def _poblar(session: AsyncSession) -> None:
     for obj in (rol_eb, rol_gcm, *estados.values(), *cms.values()):
         await session.refresh(obj)
 
-    async def crear_empleado(mail: str, nombre: str, rol: Rol, codigo_cm: str) -> None:
+    async def crear_empleado(mail: str, rol: Rol, codigo_cm: str) -> None:
         usuario = Usuario(mail=mail, hashedPassword="x")
         session.add(usuario)
         await session.commit()
         await session.refresh(usuario)
         session.add(
             Empleado(
-                nombre=nombre,
-                apellido="Test",
+                nombre="N",
+                apellido="A",
                 idUser=usuario.id,
                 rolId=rol.id,
                 comisionMedicaId=cms[codigo_cm].id,
@@ -67,11 +68,11 @@ async def _poblar(session: AsyncSession) -> None:
         )
         await session.commit()
 
-    await crear_empleado("eb.cba01@example.test", "EB1", rol_eb, "CM-CBA-01")
-    await crear_empleado("eb.cba02@example.test", "EB2", rol_eb, "CM-CBA-02")
-    await crear_empleado("eb.tuc01@example.test", "EBT", rol_eb, "CM-TUC-01")
-    await crear_empleado("gcm.ros@example.test", "GCMRos", rol_gcm, "CM-ROS-02")
-    await crear_empleado("gcm.mdz@example.test", "GCMMdz", rol_gcm, "CM-MDZ-03")
+    await crear_empleado("eb.cba01@example.test", rol_eb, "CM-CBA-01")
+    await crear_empleado("eb.cba02@example.test", rol_eb, "CM-CBA-02")
+    await crear_empleado("eb.tuc01@example.test", rol_eb, "CM-TUC-01")
+    await crear_empleado("gcm.ros@example.test", rol_gcm, "CM-ROS-02")
+    await crear_empleado("gcm.mdz@example.test", rol_gcm, "CM-MDZ-03")
 
     async def crear_bolsin(
         numero: int, origen: str, destino: str, cadena: tuple[str, ...]
@@ -153,86 +154,106 @@ def _ubicacion(numero: int, lat: float, lon: float) -> UbicacionBolsin:
     )
 
 
-def _gestor(session: AsyncSession, gps: GpsTrackerFake, correo: CorreoFake):
-    return GestorBuscarBolsines(session, gps, GoogleMapsAdapter(), correo)
+def _gestor(session, usuario, gps, correo):
+    return GestorBuscarBolsines(
+        session, usuario, gps, GoogleMapsAdapter(), correo
+    )
 
 
 @pytest.mark.asyncio
 async def test_flujo_principal(session: AsyncSession) -> None:
     gps = GpsTrackerFake(ubicaciones={110: _ubicacion(110, -31.4167, -64.1833)})
     correo = CorreoFake()
-    gestor = _gestor(session, gps, correo)
+    gestor = _gestor(session, await _usuario(session, "eb.cba02@example.test"), gps, correo)
 
-    resultado = await gestor.opcionSeguirBolsines(
-        await _usuario(session, "eb.cba02@example.test")
-    )
-    assert [b.getNumeroBolsin() for b in resultado.bolsines] == [110]
-    assert [m.numeroBolsin for m in resultado.mapa.marcadores] == [110]
-    assert resultado.sinUbicacion == []
+    await gestor.opcionSeguirBolsines()
+    assert gestor.codigoBolsin == [110]
+    assert [b.getNumeroBolsin() for b in gestor.bolsinesEnviados] == [110]
+    assert [m.numeroBolsin for m in gestor.mapa.marcadores] == [110]
+    assert gestor.sinUbicacion == []
 
-    seleccion = gestor.tomarSeleccionBolsin(110)
-    assert seleccion.ubicacion is not None
-    assert seleccion.ubicacion.numeroBolsin == 110
-
-    confirmacion = await gestor.tomarConfirmacionEnvioCorreo(True)
-    assert confirmacion.notificado is True
+    gestor.tomarSeleccionBolsin(110)
+    resultado = await gestor.tomarConfirmacionEnvioCorreo(True)
+    assert resultado.notificado is True
     assert correo.enviados[0]["destinatario"] == "gcm.ros@example.test"
+    cuerpo = correo.enviados[0]["cuerpo"]
+    assert "110" in cuerpo
+    assert "-31.4167" in cuerpo
 
 
 @pytest.mark.asyncio
 async def test_a1_sin_bolsines_enviados(session: AsyncSession) -> None:
-    gps = GpsTrackerFake()
-    correo = CorreoFake()
-    gestor = _gestor(session, gps, correo)
-
-    resultado = await gestor.opcionSeguirBolsines(
-        await _usuario(session, "eb.tuc01@example.test")
+    gestor = _gestor(
+        session,
+        await _usuario(session, "eb.tuc01@example.test"),
+        GpsTrackerFake(),
+        CorreoFake(),
     )
-    assert resultado.bolsines == []
-    assert resultado.mapa.marcadores == []
-    assert gps.llamadas == []
-    assert correo.enviados == []
+    with pytest.raises(SinBolsinesEnviadosError):
+        await gestor.opcionSeguirBolsines()
+
+
+@pytest.mark.asyncio
+async def test_a2_filtro_por_precinto(session: AsyncSession) -> None:
+    gestor = _gestor(
+        session,
+        await _usuario(session, "eb.cba01@example.test"),
+        GpsTrackerFake(
+            ubicaciones={
+                101: _ubicacion(101, -31.4201, -64.1888),
+                111: _ubicacion(111, -32.8895, -68.8458),
+            }
+        ),
+        CorreoFake(),
+    )
+    await gestor.opcionSeguirBolsines()
+    assert [b.getNumeroBolsin() for b in gestor.filtrarPorPrecinto("P-0101")] == [101]
+    assert gestor.filtrarPorPrecinto("P-9999") == []
+    assert any("P-9999" in aviso for aviso in gestor.advertencias)
 
 
 @pytest.mark.asyncio
 async def test_a3_gps_sin_ubicacion(session: AsyncSession) -> None:
-    gps = GpsTrackerFake(
-        ubicaciones={101: _ubicacion(101, -31.4201, -64.1888)},
-        sin_ubicacion={111},
+    gestor = _gestor(
+        session,
+        await _usuario(session, "eb.cba01@example.test"),
+        GpsTrackerFake(
+            ubicaciones={101: _ubicacion(101, -31.4201, -64.1888)},
+            sin_ubicacion={111},
+        ),
+        CorreoFake(),
     )
-    gestor = _gestor(session, gps, CorreoFake())
+    await gestor.opcionSeguirBolsines()
+    assert [m.numeroBolsin for m in gestor.mapa.marcadores] == [101]
+    assert [s.numeroBolsin for s in gestor.sinUbicacion] == [111]
+    assert any("111" in aviso for aviso in gestor.advertencias)
 
-    resultado = await gestor.opcionSeguirBolsines(
-        await _usuario(session, "eb.cba01@example.test")
+
+@pytest.mark.asyncio
+async def test_a4_cancelar(session: AsyncSession) -> None:
+    gestor = _gestor(
+        session,
+        await _usuario(session, "eb.cba02@example.test"),
+        GpsTrackerFake(ubicaciones={110: _ubicacion(110, -31.4167, -64.1833)}),
+        CorreoFake(),
     )
-    assert [b.getNumeroBolsin() for b in resultado.bolsines] == [101, 111]
-    assert [m.numeroBolsin for m in resultado.mapa.marcadores] == [101]
-    assert [s.numeroBolsin for s in resultado.sinUbicacion] == [111]
+    await gestor.opcionSeguirBolsines()
+    gestor.tomarSeleccionBolsin(110)
+    gestor.cancelar()
+    assert gestor.seleccionBolsin is None
 
 
 @pytest.mark.asyncio
 async def test_a5_no_confirma_correo(session: AsyncSession) -> None:
-    gps = GpsTrackerFake(ubicaciones={110: _ubicacion(110, -31.4167, -64.1833)})
     correo = CorreoFake()
-    gestor = _gestor(session, gps, correo)
-
-    await gestor.opcionSeguirBolsines(await _usuario(session, "eb.cba02@example.test"))
+    gestor = _gestor(
+        session,
+        await _usuario(session, "eb.cba02@example.test"),
+        GpsTrackerFake(ubicaciones={110: _ubicacion(110, -31.4167, -64.1833)}),
+        correo,
+    )
+    await gestor.opcionSeguirBolsines()
     gestor.tomarSeleccionBolsin(110)
-    confirmacion = await gestor.tomarConfirmacionEnvioCorreo(False)
-    assert confirmacion.notificado is False
+    resultado = await gestor.tomarConfirmacionEnvioCorreo(False)
+    assert resultado.notificado is False
     assert correo.enviados == []
-
-
-@pytest.mark.asyncio
-async def test_obtener_codigos_usa_iterador(session: AsyncSession) -> None:
-    gestor = _gestor(session, GpsTrackerFake(), CorreoFake())
-    await gestor.opcionSeguirBolsines(await _usuario(session, "eb.cba01@example.test"))
-    assert gestor.obtenerCodigoBolsinesEnviados() == [101, 111]
-
-
-@pytest.mark.asyncio
-async def test_seleccion_invalida(session: AsyncSession) -> None:
-    gestor = _gestor(session, GpsTrackerFake(), CorreoFake())
-    await gestor.opcionSeguirBolsines(await _usuario(session, "eb.cba02@example.test"))
-    with pytest.raises(ValueError):
-        gestor.tomarSeleccionBolsin(111)

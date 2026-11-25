@@ -16,7 +16,7 @@ flowchart TD
   end
 
   subgraph Services
-    GA["backend/services/gestores_activos.py<br/>registro en memoria por idCU"]
+    GA["backend/services/registro_casos_uso.py<br/>registro en memoria por idCU"]
     S["backend/services/gestor_buscar_bolsines.py<br/>GestorBuscarBolsines (IAgregado)"]
   end
 
@@ -60,7 +60,7 @@ Puntos clave:
 
 | Clase del diseno | Archivo | Notas |
 |---|---|---|
-| `GestorBuscarBolsines` | `backend/services/gestor_buscar_bolsines.py` | Implementa `IAgregado`. Atributos: `seleccionBolsin`, `bolsines`, `ubicaciones`. |
+| `GestorBuscarBolsines` | `backend/services/gestor_buscar_bolsines.py` | Implementa `IAgregado`. Atributos publicos (tratados como privados): `nombreComisionMedica`, `bolsines`, `bolsinesEnviados`, `ubicacionesBolsines`, `seleccionBolsin`, `mapa`, `codigoBolsin`, `sinUbicacion`, `advertencias`. |
 | `IAgregado` | `backend/models/iterator/i_agregado.py` | Interfaz (ABC). Declara `crearIterador`. |
 | `IIterador` | `backend/models/iterator/i_iterador.py` | Interfaz (ABC). `primero`, `siguiente`, `haFinalizado`, `elementoActual`, `comprobarFiltro`. |
 | `IteradorBolsin` | `backend/models/iterator/iterador_bolsin.py` | Concreto. Recibe `elementos` y `filtros` en `init`. |
@@ -91,7 +91,7 @@ Puntos clave:
 | (impl. correo) | `backend/integrations/correo/correo_simulado.py` | Implementacion simulada (log/archivo). |
 | (impl. correo Graph) | `backend/integrations/correo/outlook_graph.py` | Microsoft Graph. Documentada, sin implementar. |
 | (fake correo) | `backend/integrations/correo/correo_fake.py` | Para tests. |
-| Gestores en memoria | `backend/services/gestores_activos.py` | Seccion 4. No es clase del diagrama. |
+| Registro de casos de uso | `backend/services/registro_casos_uso.py` | `crear`/`obtener`/`eliminar` en memoria por `idCU`. Seccion 4. |
 | Schemas CU 36 | `backend/schemas/seguimiento.py` | Pydantic. Sin logica. |
 | Schemas auth | `backend/schemas/auth.py` | Pydantic: login y token. |
 | Endpoints CU 36 | `backend/routes/pantalla_buscar_bolsines.py` | Boundary. |
@@ -117,11 +117,11 @@ Puntos clave:
 
 **Problema:** el gestor guarda estado (`seleccionBolsin`, `bolsines`, `ubicaciones`) entre pasos del CU, pero HTTP es stateless. Cada request crea un proceso nuevo.
 
-**Solucion propuesta:** un diccionario en memoria en `backend/services/gestores_activos.py`, indexado por `idCU` (UUID4). Cada gestor vive mientras dura su caso de uso.
+**Solucion propuesta:** un diccionario en memoria en `backend/services/registro_casos_uso.py`, indexado por `idCU` (UUID4). Cada gestor vive mientras dura su caso de uso.
 
 Flujo de endpoints (rutas orientativas, se definen al implementar):
 
-1. `POST /seguimiento-bolsines` (opcionSeguirBolsines, pasos 2 a 9). Crea el gestor, ejecuta `buscarUsuarioLogueado`, `getCMUsuarioLogueado`, `obtenerCodigoBolsinesEnviados`, consulta el GPS, arma el mapa y devuelve `idCU`. Detalle en `docs/07-api-rest.md`.
+1. `POST /seguimiento-bolsines` (opcionSeguirBolsines, pasos 2 a 9). Crea el gestor, inyecta el usuario, ejecuta `buscarUsuarioLogueado`, `getCMUsuarioLogueado`, `obtenerBolsinesEnviados`, consulta el GPS, arma el mapa y devuelve `idCU`. Detalle en `docs/07-api-rest.md`.
 2. `POST /seguimiento-bolsines/{idCU}/seleccion` (tomarSeleccionBolsin, paso 10). Guarda `seleccionBolsin`.
 3. `POST /seguimiento-bolsines/{idCU}/confirmacion-correo` (pasos 11 a 13). Ejecuta `enviarMailGCM` y finaliza el caso de uso.
 4. `DELETE /seguimiento-bolsines/{idCU}` (A4, cancelar). Elimina el gestor del diccionario.
@@ -232,8 +232,9 @@ backend/
     auth.py                            # login y token
   backend/services/
     __init__.py
+    errores.py                         # SinBolsinesEnviadosError (A1)
     gestor_buscar_bolsines.py          # GestorBuscarBolsines (IAgregado)
-    gestores_activos.py                # registro en memoria por idCU (TTL + Lock)
+    registro_casos_uso.py              # registro en memoria por idCU (crear/obtener/eliminar)
   backend/utils/
     __init__.py
     auth.py                            # cookies, authenticate_user, issue_tokens, get_current_user, user_dependency
@@ -256,7 +257,7 @@ backend/
       outlook_graph.py                 # Microsoft Graph (documentada, sin implementar)
       correo_fake.py                   # fake para tests
   backend/tests/
-    conftest.py                        # base en memoria, reset de gestores_activos
+    conftest.py                        # base en memoria, reset de registro_casos_uso
     test_bolsin.py
     test_cambio_estado.py
     test_entidades.py
@@ -264,7 +265,9 @@ backend/
     test_fakes.py
     test_empleado.py
     test_iterador_bolsin.py
-    test_gestor_buscar_bolsines.py     # flujo principal y A1, A3, A4, A5
+    services/
+      test_gestor_buscar_bolsines.py   # principal y A1-A5
+      test_gestor_usa_iterador.py      # verifica uso del Iterator
     test_gps_tracker_xtr4500l.py       # parseo de getBolsinLocation (A3)
     test_seed.py
     test_routes_seguimiento.py

@@ -24,7 +24,7 @@ from models import (
 )
 from models.rol import NOMBRE_ENCARGADO_BOLSINES, NOMBRE_GCM
 from models.ubicacion_bolsin import UbicacionBolsin
-from services import gestores_activos
+from services import registro_casos_uso
 from utils.security import create_access_token
 
 INICIO = datetime(2026, 11, 20, 9, 0)
@@ -141,7 +141,7 @@ async def entorno(monkeypatch):
     correo = CorreoFake()
     monkeypatch.setattr(composicion, "crear_gps", lambda: gps)
     monkeypatch.setattr(composicion, "crear_correo", lambda: correo)
-    gestores_activos.reset()
+    registro_casos_uso.reset()
 
     tokens = {}
     for mail in ("eb.cba01", "eb.cba02", "eb.tuc01", "gcm.ros"):
@@ -153,7 +153,7 @@ async def entorno(monkeypatch):
         yield client, tokens, correo
 
     app.dependency_overrides.clear()
-    gestores_activos.reset()
+    registro_casos_uso.reset()
     await session.close()
     await engine.dispose()
 

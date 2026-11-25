@@ -2,13 +2,13 @@
 
 Endpoints FastAPI que implementan los pasos del CU 36 sin alterar la logica del gestor (`GestorBuscarBolsines`). `routes/` solo traduce HTTP a llamadas del gestor y del gestor a schemas (AGENTS.md §4).
 
-`{idCU}` es el identificador UUID4 del caso de uso en curso (registro en memoria, `backend/services/gestores_activos.py`).
+`{idCU}` es el identificador UUID4 del caso de uso en curso (registro en memoria, `backend/services/registro_casos_uso.py`).
 
 ## 1. Endpoints
 
 | Metodo | Ruta | Pasos CU | Metodo del gestor | Request | Response | Codigos HTTP |
 |---|---|---|---|---|---|---|
-| POST | `/seguimiento-bolsines` | 2 a 9 | `opcionSeguirBolsines(usuario)` | sin body | `SeguimientoCreadoResponse` (201) o `SinBolsinesResponse` (200) | 201, 200, 401, 403 |
+| POST | `/seguimiento-bolsines` | 2 a 9 | `opcionSeguirBolsines()` | sin body | `SeguimientoCreadoResponse` (201) o `SinBolsinesResponse` (200) | 201, 200, 401, 403 |
 | POST | `/seguimiento-bolsines/{idCU}/seleccion` | 10 | `tomarSeleccionBolsin(numeroBolsin)` | `SeleccionBolsinRequest` | `SeleccionBolsinResponse` | 200, 401, 403, 404, 422 |
 | POST | `/seguimiento-bolsines/{idCU}/confirmacion-correo` | 11 a 13 | `tomarConfirmacionEnvioCorreo(confirma)` | `ConfirmacionCorreoRequest` | `ConfirmacionCorreoResponse` | 200, 401, 403, 404, 422, 502 |
 | DELETE | `/seguimiento-bolsines/{idCU}` | A4 | `cancelar()` | ninguno | ninguno | 204, 401, 403, 404 |
@@ -52,7 +52,7 @@ Los schemas solo validan y serializan. `MapaBolsinesOut` lo arma `integrations/g
 
 | Alternativo | Endpoint | Respuesta | Efecto |
 |---|---|---|---|
-| A1: no hay bolsines Enviados de la CM | POST `/seguimiento-bolsines` | 200 `SinBolsinesResponse` | Consulta sin sesion abierta. No hay GPS, mapa ni correo. |
+| A1: no hay bolsines Enviados de la CM | POST `/seguimiento-bolsines` | 200 `SinBolsinesResponse` | El gestor lanza `SinBolsinesEnviadosError` y el route la traduce a 200. No hay GPS, mapa ni correo. |
 | A2: precinto sin resultado | (ninguno) | - | El filtro por precinto se hace en el frontend sobre `bolsines` y `marcadores`. Sin llamada al backend. |
 | A3: GPS no informa ubicacion de un bolsin | POST `/seguimiento-bolsines` | 201, el bolsin aparece en `sinUbicacion` y no en `marcadores` | El gestor sigue con el resto. Si ninguno tiene ubicacion, `marcadores` es `[]`, todos los bolsines van en `sinUbicacion` y la sesion queda abierta. El EB puede seleccionar otro bolsin o cancelar. |
 | A4: EB cancela | DELETE `/seguimiento-bolsines/{idCU}` | 204 | El gestor se elimina del registro en memoria. No se envia correo. |

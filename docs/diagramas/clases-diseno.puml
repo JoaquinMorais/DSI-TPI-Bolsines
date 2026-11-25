@@ -19,15 +19,29 @@ interface IIterador {
 }
 
 class GestorBuscarBolsines {
+  - nombreComisionMedica: str
+  - codigoComisionMedica: str
+  - bolsines: Bolsin[]
+  - bolsinesEnviados: Bolsin[]
+  - ubicacionesBolsines: UbicacionBolsin[]
   - seleccionBolsin: Bolsin
+  - mapa: MapaBolsines
   - codigoBolsin: int[]
-  + obtenerCodigoBolsinesEnviados(): int[]
+  - sinUbicacion: SinUbicacion[]
+  - advertencias: str[]
+  + buscarUsuarioLogueado(): Empleado
+  + getCMUsuarioLogueado(): ComisionMedica
+  + opcionSeguirBolsines(): void
+  + obtenerBolsinesEnviados(): Bolsin[]
   + crearIterador(elementos: Bolsin[]): IIterador
-  + opcionSeguirBolsines(usuario: Usuario): ResultadoSeguimiento
+  + obtenerUbicacionBolsin(): void
+  + obtenerMapa(): MapaBolsines
+  + filtrarPorPrecinto(precinto: str): Bolsin[]
   + tomarSeleccionBolsin(numeroBolsin: int): ResultadoSeleccion
   + tomarConfirmacionEnvioCorreo(confirma: bool): ResultadoConfirmacion
-  + cancelar(): void
   - enviarMailGCM(): bool
+  + finCU(): void
+  + cancelar(): void
 }
 
 class IteradorBolsin {
