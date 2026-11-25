@@ -32,6 +32,8 @@ class Settings(BaseSettings):
 
     SEED_PASSWORD_DEV: str = ""
 
+    SECRET_KEY: str = "dev-insecure-secret-change-me-0123456789"
+    ACCESS_TOKEN_MINUTES: int = 30
     REFRESH_DAYS: int = 7
     COOKIE_SECURE: bool = False
     COOKIE_SAMESITE: str = "lax"

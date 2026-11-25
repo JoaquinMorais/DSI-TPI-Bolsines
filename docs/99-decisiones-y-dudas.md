@@ -113,3 +113,4 @@
 | 2026-11-25 | `MapaBolsines` estaba como schema en `schemas/` pero lo produce la integracion y lo usa el gestor (services no puede importar schemas). | Pasa a **value object en `models/mapa_bolsines.py`** (`Coordenada` + `MapaBolsines`). `routes` lo serializa a `MapaBolsinesOut`. |
 | 2026-11-25 | El gestor devuelve `void` en 04, pero `routes` necesita los datos para la respuesta. | Devuelve value objects: `ResultadoSeguimiento`, `ResultadoSeleccion`, `ResultadoConfirmacion` (`models/resultados.py`). Actualizado en 04 y `.puml`. |
 | 2026-11-25 | Centro por defecto del mapa sin marcadores. | Se usa CABA (`-34.6037, -58.3816`) por ahora. Sigue pendiente de confirmar. |
+| 2026-11-25 | `SECRET_KEY` sin valor en dev rompe los tokens. | Default de desarrollo largo (`dev-insecure-...`); en produccion va por `.env`. `ACCESS_TOKEN_MINUTES=30`, `REFRESH_DAYS=7`. |
