@@ -2,16 +2,15 @@
 
 Proyecto: TP universitario UTN FRC, Diseno de Sistemas de Informacion, PPAI 2026, grupo 3K7 (Grupo 7). Sistema "Bolsines".
 
-Este repositorio es el backend completo. No hay carpeta `backend/`: todo vive en la raiz.
+Estructura: monorepo. Backend en `backend/`, frontend en `frontend/`, documentacion del TP en `docs/` (raiz).
 
 ## 1. Stack
 
-- Python 3.12
-- FastAPI (routers en `routes/`, entrypoint `index.py`)
-- SQLModel con SQLAlchemy async y aiosqlite (entidades en `models/`)
-- SQLite (base y seed en `data/`)
-- pytest y pytest-asyncio (pruebas en `tests/`)
-- Dependencias en `requirements.txt`
+- Backend: Python 3.12, FastAPI, SQLModel con SQLAlchemy async y aiosqlite, SQLite, pytest y pytest-asyncio. Dependencias en `backend/requirements.txt`.
+- Frontend: Vite + React + TypeScript (`frontend/`).
+- Docker: `docker-compose.yml` en la raiz levanta backend y frontend.
+- Puertos: backend `8020`, frontend `3020`. El frontend llama al backend por `http://localhost:8020` (`VITE_API_URL`). CORS permite `http://localhost:3020`.
+- Variables de entorno: `.env` (no se commitea), con plantilla en `.env.example`.
 
 ## 2. Alcance
 
@@ -28,20 +27,28 @@ Este repositorio es el backend completo. No hay carpeta `backend/`: todo vive en
 ## 3. Estructura de carpetas (no alterar)
 
 ```
-index.py          entrypoint FastAPI: app, include_router, composicion
-config/           settings, conexion a DB, composicion (composition root)
-models/           entidades SQLModel CON metodos de negocio
-models/iterator/  patron Iterator (IAgregado, IIterador, IteradorBolsin)
-data/             base SQLite y seed
-routes/           routers FastAPI (boundary)
-schemas/          schemas Pydantic request/response
-services/         gestores del caso de uso (GestorBuscarBolsines)
-utils/            cross-cutting: auth y seguridad (sin logica de negocio)
-integrations/     adaptadores a sistemas externos (GPS Tracker, Google Maps, correo)
-tests/            pytest
-docs/             documentacion del TP
-docs/referencias/ documentos fuente (solo lectura)
-requirements.txt  dependencias
+docs/                     documentacion del TP (raiz, no dentro de backend/)
+docs/referencias/         documentos fuente (solo lectura)
+docker-compose.yml        levanta backend y frontend
+.env.example              plantilla de variables (.env no se commitea)
+pytest.ini                pythonpath = backend, testpaths = backend/tests
+backend/
+  index.py                entrypoint FastAPI: app, CORS, include_router, composicion
+  Dockerfile
+  requirements.txt        dependencias del backend
+  config/                 settings, conexion a DB, composicion (composition root)
+  models/                 entidades SQLModel CON metodos de negocio
+  models/iterator/        patron Iterator (IAgregado, IIterador, IteradorBolsin)
+  data/                   base SQLite y seed
+  routes/                 routers FastAPI (boundary)
+  schemas/                schemas Pydantic request/response
+  services/               gestores del caso de uso (GestorBuscarBolsines)
+  utils/                  cross-cutting: auth y seguridad (sin logica de negocio)
+  integrations/           adaptadores a sistemas externos (GPS, Google Maps, correo)
+  tests/                  pytest
+frontend/
+  Dockerfile
+  package.json, vite.config.ts, src/
 ```
 
 ## 4. Reglas de arquitectura
@@ -66,7 +73,7 @@ requirements.txt  dependencias
 ## 6. Patron Iterator (regla central)
 
 - El Iterator debe ser **claramente visible** y **usado por el gestor**.
-- Jerarquia obligatoria: `IAgregado` (implementado por `GestorBuscarBolsines`, expone `crearIterador`), `IIterador` (`primero`, `siguiente`, `haFinalizado`, `elementoActual`, `comprobarFiltro`), `IteradorBolsin` (concreto, en `models/iterator/`).
+- Jerarquia obligatoria: `IAgregado` (implementado por `GestorBuscarBolsines`, expone `crearIterador`), `IIterador` (`primero`, `siguiente`, `haFinalizado`, `elementoActual`, `comprobarFiltro`), `IteradorBolsin` (concreto, en `backend/models/iterator/`).
 - El gestor recorre los bolsines **solo** con `primero()`, `haFinalizado()`, `elementoActual()`, `siguiente()`. No recorre listas ni consulta bolsines en bucles propios.
 - El filtrado (CM origen = CM del usuario logueado y estado Enviado) vive en `comprobarFiltro()` del iterador.
 - **Prohibido** agregar otros patrones que oculten al Iterator: repositorios genericos, fabricas adicionales, query builders, `Specification`, `Strategy` de filtros, mapeos intermedios, etc. Si la base se consulta para cargar bolsines, la consulta debe ser simple y el recorrido sigue siendo el del iterador.
@@ -87,5 +94,8 @@ requirements.txt  dependencias
 
 - No escribir codigo sin que el usuario lo pida explicitamente en la tarea.
 - Cada cambio debe mantener la estructura de carpetas de la seccion 3.
-- Antes de cerrar una tarea de codigo: ejecutar `pytest` desde la raiz del repositorio.
+- Antes de cerrar una tarea de codigo: ejecutar `pytest` desde la raiz del repositorio (`pytest.ini` apunta a `backend/`).
+- Levantar backend desde la raiz: `uvicorn index:app --app-dir backend --port 8020`. Con Docker: `docker compose up --build`.
+- Un solo worker de uvicorn: el registro de gestores de casos de uso vive en memoria.
 - No commitear ni hacer push sin pedido explicito.
+- Cada tarea termina con un commit (salvo que el usuario pida lo contrario).

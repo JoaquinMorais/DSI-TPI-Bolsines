@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8020:8020"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      CORS_ORIGINS: http://localhost:3020
+    volumes:
+      # La base SQLite persiste fuera del contenedor.
+      - bolsines-data:/app/data
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3020:3020"
+    environment:
+      # Lo usa el navegador, por eso localhost y no el nombre del servicio.
+      VITE_API_URL: http://localhost:8020
+    depends_on:
+      - backend
+
+volumes:
+  bolsines-data:

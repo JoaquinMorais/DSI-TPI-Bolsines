@@ -58,8 +58,8 @@ Hay tres modelos posibles, pero la Entrega 2 y el diagrama de secuencia usan **X
 
 - Patron **Iterator** (Gamma) para la busqueda de bolsines Enviados de la CM del usuario logueado (`IAgregado`, `IIterador`, `IteradorBolsin`, `GestorBuscarBolsines`).
 - Entidades: `Bolsin`, `CambioEstado`, `Estado`, con sus metodos de negocio.
-- Integracion real con la API del GPS Tracker (detras de `integrations/`).
-- Notificacion por correo al GCM destino (detras de `integrations/`).
+- Integracion real con la API del GPS Tracker (detras de `backend/integrations/`).
+- Notificacion por correo al GCM destino (detras de `backend/integrations/`).
 - Visualizacion en mapa: el backend entrega los datos; la visualizacion con Google Maps es pendiente de definir.
 
 ## 4. Entregables del TP (Entrega 2 y siguientes)
@@ -67,7 +67,7 @@ Hay tres modelos posibles, pero la Entrega 2 y el diagrama de secuencia usan **X
 1. **Identificacion del patron implementado:** descripcion del problema, intencion, justificacion y tabla de participantes (rol, clase, responsabilidad).
 2. **Vista estatica de la realizacion del CU:** diagrama de clases de diseno con tipos de datos, retornos, parametros y visibilidad (publica/privada) de la estructura resultante del patron.
 3. **Vista dinamica de la realizacion del CU:** diagrama de secuencia de la parte rediseñada por el Iterator (el resto se mantiene igual que en analisis).
-4. **Detalles de implementacion:** codigo en la raiz del repositorio (`index.py`, `models/`, `services/`, `routes/`, `utils/`, `integrations/`, etc.) siguiendo `AGENTS.md`.
+4. **Detalles de implementacion:** codigo en `backend/` (`index.py`, `models/`, `services/`, `routes/`, `utils/`, `integrations/`, etc.) siguiendo `AGENTS.md`, y en `frontend/`.
 5. **Criterios de correccion:**
    - Iterator visible y usado por el gestor.
    - Filtro (CM origen y estado Enviado) dentro de `comprobarFiltro()`.
@@ -75,7 +75,7 @@ Hay tres modelos posibles, pero la Entrega 2 y el diagrama de secuencia usan **X
    - Nombres coincidentes con los diagramas.
    - Alternativos A1..A5 cubiertos por pruebas.
    - Pruebas pytest pasando.
-6. **Integracion con la API real del GPS Tracker:** adaptador en `integrations/`, configuracion por variables de entorno, prueba con fake para CI.
+6. **Integracion con la API real del GPS Tracker:** adaptador en `backend/integrations/`, configuracion por variables de entorno, prueba con fake para CI.
 
 ## 5. Documentos fuente
 
