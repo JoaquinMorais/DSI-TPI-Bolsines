@@ -109,8 +109,8 @@ Diagrama: `docs/diagramas/secuencia-cu36-completo.puml`. La porcion reemplazada 
 |---|---|---|
 | **A1** No hay bolsines Enviados de la CM | Si. El iterador no produce elementos y `obtenerCodigoBolsinesEnviados` devuelve lista vacia. | `alt A1` despues del paso 6. El gestor informa "sin bolsines", termina el CU y no llama al GPS, al mapa ni al correo. |
 | **A2** Precinto no encontrado | No afecta al gestor. El filtro por precinto se aplica en la pantalla sobre los datos ya cargados. | No aparece en la secuencia. Se documenta como filtro de la pantalla en el paso 9. |
-| **A3** GPS no informa ubicacion | Si. Ocurre dentro del loop del paso 7. | `alt A3` dentro del loop. El bolsin queda registrado como "sin ubicacion" y el loop sigue con el resto. Si ninguno tiene ubicacion, el mapa se muestra vacio y se informa. |
-| **A4** EB cancela | Si. Puede ocurrir en pasos interactivos (9 a 11). | `alt A4` despues de la seleccion. Se modela como `DELETE /seguimiento-bolsines/{idCasoUso}`. El gestor se descarta del registro en memoria y no se envia correo. |
+| **A3** GPS no informa ubicacion | Si. Ocurre dentro del loop del paso 7. | `alt A3` dentro del loop. El bolsin queda registrado como "sin ubicacion" y el loop sigue con el resto. Si ninguno tiene ubicacion, la sesion queda abierta con `marcadores: []` y todos los bolsines en `sinUbicacion` (ver `docs/07-api-rest.md` §4). |
+| **A4** EB cancela | Si. Puede ocurrir en pasos interactivos (9 a 11). | `alt A4` despues de la seleccion. Se modela como `DELETE /seguimiento-bolsines/{idCU}`. El gestor se descarta del registro en memoria y no se envia correo. |
 | **A5** EB no confirma el correo | Si. Ocurre despues del paso 11. | `alt A5` en la confirmacion. No se llama a `enviarMailGCM`; el CU termina sin notificacion. |
 
 ## 6. Decisiones de diseno de esta vista

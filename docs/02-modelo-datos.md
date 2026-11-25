@@ -98,6 +98,7 @@ Metodos:
 | Metodo | Visibilidad | Retorno |
 |---|---|---|
 | `esGCM()` | publica | `bool` |
+| `esEncargadoBolsines()` | publica | `bool` |
 
 ### Empleado (`backend/models/empleado.py`)
 

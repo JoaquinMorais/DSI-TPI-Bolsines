@@ -59,7 +59,7 @@ class UbicacionNoDisponibleError(Exception)
 Reglas:
 - Un adaptador lanza `UbicacionNoDisponibleError` cuando el GPS no informa ubicacion para un bolsin (A3 del CU 36), o cuando la respuesta es invalida.
 - Error de red o autenticacion: tambien se traduce a `UbicacionNoDisponibleError` para ese bolsin, con el motivo correspondiente. El gestor no ve excepciones HTTP.
-- El gestor captura `UbicacionNoDisponibleError` por bolsin, registra el bolsin como sin ubicacion y sigue con el resto. Si ninguno tiene ubicacion, informa a la pantalla y termina el CU (ver `docs/05-vista-dinamica.md` §5, A3).
+- El gestor captura `UbicacionNoDisponibleError` por bolsin, registra el bolsin como sin ubicacion y sigue con el resto. Si ninguno tiene ubicacion, la sesion queda abierta con `marcadores` vacios y todos los bolsines en `sinUbicacion` (ver `docs/05-vista-dinamica.md` §5 y `docs/07-api-rest.md` §4).
 - `routes` no captura esta excepcion: solo ve el resultado del gestor.
 
 ## 3. Google Maps

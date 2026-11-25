@@ -16,7 +16,7 @@ flowchart TD
   end
 
   subgraph Services
-    GA["backend/services/gestores_activos.py<br/>registro en memoria por idCasoUso"]
+    GA["backend/services/gestores_activos.py<br/>registro en memoria por idCU"]
     S["backend/services/gestor_buscar_bolsines.py<br/>GestorBuscarBolsines (IAgregado)"]
   end
 
@@ -107,22 +107,22 @@ Puntos clave:
 
 **Problema:** el gestor guarda estado (`seleccionBolsin`, `bolsines`, `ubicaciones`) entre pasos del CU, pero HTTP es stateless. Cada request crea un proceso nuevo.
 
-**Solucion propuesta:** un diccionario en memoria en `backend/services/gestores_activos.py`, indexado por `idCasoUso` (UUID4). Cada gestor vive mientras dura su caso de uso.
+**Solucion propuesta:** un diccionario en memoria en `backend/services/gestores_activos.py`, indexado por `idCU` (UUID4). Cada gestor vive mientras dura su caso de uso.
 
 Flujo de endpoints (rutas orientativas, se definen al implementar):
 
-1. `POST /seguimiento-bolsines` (opcionSeguirBolsines). Crea el gestor, ejecuta `buscarUsuarioLogueado`, `getCMUsuarioLogueado`, `obtenerCodigoBolsinesEnviados`, consulta el GPS y devuelve `idCasoUso`, la CM y las ubicaciones.
-2. `POST /seguimiento-bolsines/{idCasoUso}/seleccion` (tomarSeleccionBolsin). Guarda `seleccionBolsin`.
-3. `POST /seguimiento-bolsines/{idCasoUso}/confirmacion-correo` (tomarConfirmacionEnvioCorreo). Ejecuta `enviarMailGCM` y finaliza el caso de uso.
-4. `DELETE /seguimiento-bolsines/{idCasoUso}` (A4, cancelar). Elimina el gestor del diccionario.
+1. `POST /seguimiento-bolsines` (opcionSeguirBolsines, pasos 2 a 9). Crea el gestor, ejecuta `buscarUsuarioLogueado`, `getCMUsuarioLogueado`, `obtenerCodigoBolsinesEnviados`, consulta el GPS, arma el mapa y devuelve `idCU`. Detalle en `docs/07-api-rest.md`.
+2. `POST /seguimiento-bolsines/{idCU}/seleccion` (tomarSeleccionBolsin, paso 10). Guarda `seleccionBolsin`.
+3. `POST /seguimiento-bolsines/{idCU}/confirmacion-correo` (pasos 11 a 13). Ejecuta `enviarMailGCM` y finaliza el caso de uso.
+4. `DELETE /seguimiento-bolsines/{idCU}` (A4, cancelar). Elimina el gestor del diccionario.
 
 **Reglas de implementacion:**
 - El gestor guarda **datos planos** (numero de bolsin, precinto, codigo de CM destino, `UbicacionBolsin`), no instancias de SQLModel ligadas a una sesion. Asi no hay errores de sesion cerrada entre requests.
 - Cada gestor tiene un `tiempoExpiracion` (por ejemplo, 15 minutos). Al acceder se eliminan los vencidos.
-- Un `idCasoUso` inexistente o vencido devuelve 404 desde `routes`.
+- Un `idCU` inexistente o vencido devuelve 404 desde `routes`.
 
 **Limitaciones (documentar en el informe):**
-- **Un solo proceso.** Con varios workers de uvicorn o gunicorn, cada worker tiene su propio diccionario y el `idCasoUso` no siempre se encuentra. Hay que ejecutar un unico worker.
+- **Un solo proceso.** Con varios workers de uvicorn o gunicorn, cada worker tiene su propio diccionario y el `idCU` no siempre se encuentra. Hay que ejecutar un unico worker.
 - **No persiste.** Un reinicio pierde los casos de uso en curso. Es aceptable porque el CU es corto.
 - **Memoria sin tope.** Si no se limpia, crece con cada caso abandonado. El TTL lo mitiga pero no lo elimina.
 - **No escala horizontalmente.** Para escalar haria falta guardar el estado en Redis o en la base. Fuera del alcance del TP.
@@ -220,7 +220,7 @@ backend/
   backend/services/
     __init__.py
     gestor_buscar_bolsines.py          # GestorBuscarBolsines (IAgregado)
-    gestores_activos.py                # registro en memoria por idCasoUso (TTL + Lock)
+    gestores_activos.py                # registro en memoria por idCU (TTL + Lock)
   backend/utils/
     __init__.py
     auth.py                            # cookies, authenticate_user, issue_tokens, get_current_user, user_dependency

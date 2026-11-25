@@ -248,6 +248,7 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 |---|---|---|---|
 | - | `nombre` | `str` | |
 | + | `esGCM` | | `bool` |
+| + | `esEncargadoBolsines` | | `bool` |
 
 **Usuario** (`backend/models/usuario.py`, SQLModel, entidad de login)
 

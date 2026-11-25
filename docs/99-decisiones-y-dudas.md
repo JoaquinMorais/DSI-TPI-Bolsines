@@ -62,3 +62,11 @@
 | 2026-11-25 | Errores del GPS (A3). | Excepcion propia `UbicacionNoDisponibleError`; el gestor la traduce a A3 por bolsin. |
 | 2026-11-25 | Google Maps. | El backend devuelve `MapaBolsines` (centro, zoom, marcadores). El frontend renderiza con la libreria de Google Maps; no hay llamadas a Maps desde el servidor. |
 | 2026-11-25 | Correo (CU 31). | `InterfazCorreo` con implementacion simulada (log/archivo) y fake para tests. Microsoft Graph documentado, no implementado. |
+| 2026-11-25 | Reparto de pasos entre endpoints del CU 36. Proponia pasos 2 a 6 en el POST inicial. | El POST inicial ejecuta pasos **2 a 9** (el mapa va en la misma respuesta). `/seleccion` ejecuta paso 10 y `/confirmacion-correo` pasos 11 a 13. Detalle en `docs/07-api-rest.md`. |
+| 2026-11-25 | Autenticacion en desarrollo: token fijo por header o login real. | **Login real** con JWT (`user_dependency`) y usuario de seed con rol Encargado de Bolsines. Sin bypass. |
+| 2026-11-25 | A1 (sin bolsines Enviados): 200 sin sesion o 201 con sesion vacia. | **200** `SinBolsinesResponse` con `idCU: null`. No hay sesion. |
+| 2026-11-25 | A2 (filtro por precinto). | Se hace en el **frontend** sobre `bolsines` y `marcadores`. Sin endpoint ni metodo nuevo en el gestor. |
+| 2026-11-25 | A3 cuando ningun bolsin tiene ubicacion. | La sesion **queda abierta** con `marcadores: []` y todos los bolsines en `sinUbicacion`. Corrige la version de `06-integraciones` §2 y `05-vista-dinamica` §5. |
+| 2026-11-25 | Nombre del parametro de ruta: `{idCasoUso}` o `{idCU}`. | **`{idCU}`** (UUID4). Se actualiza `docs/01-arquitectura.md`. |
+| 2026-11-25 | Validacion de rol en la API. | En `routes`: si el `Empleado` no es Encargado de Bolsines, `403`. Requiere `Rol.esEncargadoBolsines()`. |
+| 2026-11-25 | Email del GCM en la respuesta. | Solo `destinatarioEnmascarado` (ej. `g***@dominio.gob`). La direccion completa no sale de la API. |
