@@ -150,3 +150,6 @@
 | 2026-11-25 | `routes` importaba modelos (`Bolsin`, `MapaBolsines`, `UbicacionBolsin`, `Usuario`). | Se eliminan esos imports runtime; el mapeo usa atributos (duck typing). `routes` ya no importa `models`. |
 | 2026-11-25 | `docs/01` §5 prohibia a `routes` importar `config` y `services`, pero necesita sesion, fabrica y registro. | Se actualiza §5: `routes` puede importar `config.database`, `config.composicion`, `services.registro_casos_uso`/`services.errores` y `utils` solo para wiring; sigue sin logica de negocio. |
 | 2026-11-25 | Cobertura de tests. | Se agrega **`pytest-cov==7.1.0`**. Cobertura del codigo de la app: **89%**; suite 101 passed, 4 skipped. |
+| 2026-11-25 | Mapa del frontend: Google Maps JS vs Leaflet/OpenStreetMap. | Se usa **Leaflet + react-leaflet (OSM)**: libre y sin API key. El backend entrega `centro`, `zoom` y `marcadores`; cambiar a Google Maps JS es reemplazar solo el componente de mapa. |
+| 2026-11-25 | Login del frontend: JWT real vs simulado. | El frontend usa **login simulado** (selector de usuario); el backend del CU 36 resuelve `USUARIO_DEV`. El login JWT existe en `routes/auth.py` pero no lo usan estas rutas. |
+| 2026-11-25 | Artefactos de UX (empatia, journey, board) no estan en el repo. | Se dejan **placeholders** en `docs/10-frontend.md` apuntando a `docs/imagenes/`; el equipo pega las imagenes. |

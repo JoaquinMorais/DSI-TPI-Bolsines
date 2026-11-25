@@ -18,6 +18,7 @@ Este directorio reune el analisis, el diseno y el plan de implementacion del cas
 | `07-api-rest.md` | Endpoints FastAPI del CU 36, schemas Pydantic, autenticacion, alternativos -> respuestas y ejemplos JSON. |
 | `08-datos-semilla.md` | Set de datos para la defensa: estados, roles, CM, usuarios, bolsines, historial de estados y procedimiento de carga. |
 | `09-implementacion-y-pruebas.md` | Detalles de implementacion, criterios -> evidencia, integracion GPS real, plan pytest, checklist y orden de implementacion. |
+| `10-frontend.md` | Stack del frontend, mapeo a PantallaBuscarBolsines, pantallas, estados de UI, patrones de GUI, UX y arbol de archivos. |
 | `99-decisiones-y-dudas.md` | Bitacora de decisiones y dudas (fecha / duda / decision tomada). |
 | `diagramas/clases-diseno.puml` | Diagrama de clases de diseno (PlantUML). |
 | `diagramas/secuencia-cu36-iterator.puml` | Secuencia de la parte rediseñada por el Iterator. |
@@ -41,6 +42,7 @@ Implementacion:
 8. `07-api-rest.md`
 9. `08-datos-semilla.md`
 10. `09-implementacion-y-pruebas.md`
+11. `10-frontend.md`
 
 Consulta permanente: `99-decisiones-y-dudas.md` (toda duda resuelta o pendiente esta ahi).
 
