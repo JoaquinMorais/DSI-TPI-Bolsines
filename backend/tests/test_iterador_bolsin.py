@@ -118,6 +118,15 @@ def test_todos_no_validos() -> None:
     assert iterador.haFinalizado() is True
 
 
+def test_todos_cumplen() -> None:
+    todos_validos = [
+        _Bolsin(101, "CM-CBA-01", "CM-ROS-02", True),
+        _Bolsin(111, "CM-CBA-01", "CM-MDZ-03", True),
+    ]
+    iterador = IteradorBolsin(todos_validos, FILTRO_CBA)
+    assert _codigos(iterador) == [101, 111]
+
+
 def test_elemento_actual_sin_elemento() -> None:
     iterador = IteradorBolsin([], FILTRO_CBA)
     iterador.primero()
