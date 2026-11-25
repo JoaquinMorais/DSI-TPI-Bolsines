@@ -81,7 +81,7 @@ class Empleado {
   + sosGCM(): bool
   + getCM(): ComisionMedica
   + getUsuario(): Usuario
-  + obtenerGCMDeCM(codigoCM: str): Empleado
+  + obtenerGCMDeCM(db: AsyncSession, codigoCM: str): Empleado
 }
 
 class Rol {

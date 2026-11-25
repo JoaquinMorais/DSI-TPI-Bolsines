@@ -90,7 +90,7 @@ class Empleado {
   + sosGCM(): bool
   + getCM(): ComisionMedica
   + getUsuario(): Usuario
-  + obtenerGCMDeCM(codigoCM: str): Empleado
+  + obtenerGCMDeCM(db: AsyncSession, codigoCM: str): Empleado
 }
 
 class Rol {
@@ -267,7 +267,7 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | + | `sosGCM` | | `bool` |
 | + | `getCM` | | `ComisionMedica` |
 | + | `getUsuario` | | `Usuario` |
-| + | `obtenerGCMDeCM` | `codigoCM: str` | `Empleado` |
+| + | `obtenerGCMDeCM` | `db: AsyncSession, codigoCM: str` | `Empleado \| None` |
 
 **Rol** (`backend/models/rol.py`, SQLModel)
 

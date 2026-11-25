@@ -124,7 +124,7 @@ Metodos:
 | `sosGCM()` | publica | `bool` | `self.rol.esGCM()` |
 | `getCM()` | publica | `ComisionMedica` | |
 | `getUsuario()` | publica | `Usuario` | |
-| `obtenerGCMDeCM(codigoCM: str)` | publica | `Empleado` | Consulta simple del GCM de la CM destino (paso 12) | |
+| `obtenerGCMDeCM(db, codigoCM: str)` | publica (classmethod async) | `Empleado \| None` | Consulta simple del GCM de la CM destino (paso 12) | |
 
 ### Usuario (`backend/models/usuario.py`, entidad de login)
 

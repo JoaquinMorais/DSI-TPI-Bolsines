@@ -104,3 +104,5 @@
 | 2026-11-25 | Visibilidad `-` de atributos en SQLModel. | Pydantic trata los nombres con `_` como privados y no los mapea a columnas, asi que las entidades usan atributos publicos (`nombre`, `codigo`) y exponen getters. La privacidad queda documental (ver 04 decision 2). |
 | 2026-11-25 | Tests de `Estado`, `ComisionMedica` y `Rol` no tenian archivo en 09 §4.2. | Se agregan en `backend/tests/test_entidades.py`. |
 | 2026-11-25 | `from __future__ import annotations` con `Relationship` rompe la resolucion del target (`"Clase | None"`). | Los modelos usan `Optional["Clase"]` / `List["Clase"]` sin future annotations, patron de SQLModel; las relaciones llevan `lazy="selectin"`. |
+| 2026-11-25 | `Empleado.obtenerGCMDeCM(codigoCM)` en 04 no recibe sesion, pero consultar la base la necesita. | Se implementa como `@classmethod async obtenerGCMDeCM(db, codigoCM)`. Se actualiza 02, 04 y el `.puml`. |
+| 2026-11-25 | SQLModel `table=True` no ejecuta validadores pydantic en `__init__`. | `Usuario.__init__` normaliza `mail` a minusculas (strip + lower). Se usa la `AsyncSession` de `sqlmodel.ext.asyncio.session` (tiene `.exec`) en `config/database.py`. |
