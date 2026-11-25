@@ -251,6 +251,7 @@ backend/
     conftest.py                        # base en memoria, reset de gestores_activos
     test_bolsin.py
     test_cambio_estado.py
+    test_entidades.py
     test_iterador_bolsin.py
     test_gestor_buscar_bolsines.py     # flujo principal y A1, A3, A4, A5
     test_gps_tracker_xtr4500l.py       # parseo de getBolsinLocation (A3)

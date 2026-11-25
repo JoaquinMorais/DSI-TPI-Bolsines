@@ -101,3 +101,5 @@
 | 2026-11-25 | Formato de `filtros` en `IteradorBolsin` (la 03 lo mostraba como `[codigoCM, ESTADO_ENVIADO]`), necesario para reutilizar el iterador en el CU 28 (filtro por CM destino). | `filtros = [tipoCM, codigoCM]`, con `tipoCM` en `{"origen", "destino"}`. `comprobarFiltro` exige ademas `sosEnviado()`. CU 36: `["origen", codigoCM]`; CU 28: `["destino", codigoDestino]`. |
 | 2026-11-25 | `init`/`new` del diagrama en Python. | Es **`__init__`**: constructor de la clase. Los diagramas lo abrevian como `init`/`new`. |
 | 2026-11-25 | `comprobarFiltro(filtros)` no recibe el elemento; evalua el elemento en la posicion actual. | Se mantiene la firma de 04. El test unitario del predicado fija `_posicionActual` (prueba de caja blanca). |
+| 2026-11-25 | Visibilidad `-` de atributos en SQLModel. | Pydantic trata los nombres con `_` como privados y no los mapea a columnas, asi que las entidades usan atributos publicos (`nombre`, `codigo`) y exponen getters. La privacidad queda documental (ver 04 decision 2). |
+| 2026-11-25 | Tests de `Estado`, `ComisionMedica` y `Rol` no tenian archivo en 09 §4.2. | Se agregan en `backend/tests/test_entidades.py`. |
