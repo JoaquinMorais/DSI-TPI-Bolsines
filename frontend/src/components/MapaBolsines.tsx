@@ -5,7 +5,7 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import icono from "leaflet/dist/images/marker-icon.png";
 import icono2x from "leaflet/dist/images/marker-icon-2x.png";
 import sombra from "leaflet/dist/images/marker-shadow.png";
-import type { Mapa } from "../types/seguimiento";
+import type { MapaBolsinesOut } from "../types/seguimiento";
 
 L.Icon.Default.mergeOptions({
   iconUrl: icono,
@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: sombra,
 });
 
-export function MapaBolsines({ mapa }: { mapa: Mapa }) {
+export function MapaBolsines({ mapa }: { mapa: MapaBolsinesOut }) {
   return (
     <MapContainer
       center={[mapa.centro.latitud, mapa.centro.longitud]}

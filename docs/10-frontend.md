@@ -138,8 +138,11 @@ frontend/
     index.css                   # Tailwind
     vite-env.d.ts
     api/
-      cliente.ts                # fetch a VITE_API_URL
+      client.ts                 # fetch a VITE_API_URL + ApiError tipada
       auth.ts                   # GET /auth/me
+      seguimiento.ts            # iniciar/seleccionar/confirmar/cancelar
+      client.test.ts
+      seguimiento.test.ts
     components/
       AppShell.tsx              # layout base: header + contenido
       Header.tsx                # nombre del sistema + usuario (/auth/me)
@@ -152,12 +155,19 @@ frontend/
         index.ts                # punto de entrada de la feature (placeholder)
     hooks/
       useUsuarioActual.ts       # useQuery('/auth/me')
+      useIniciarSeguimiento.ts  # useMutation POST /seguimiento-bolsines
+      useSeleccionarBolsin.ts   # useMutation POST .../seleccion
+      useConfirmarCorreo.ts     # useMutation POST .../confirmacion-correo
+      useCancelarSeguimiento.ts # useMutation DELETE .../{idCU}
     pages/
       HomePage.tsx
       SeguimientoPage.tsx       # placeholder de la pantalla del CU 36
     types/
-      auth.ts                   # UsuarioActual
-      seguimiento.ts            # Seguimiento, Mapa, Marcador, Bolsin
+      auth.ts                   # TokenResponse, UsuarioActualOut, EmpleadoMeOut
+      seguimiento.ts            # nombres iguales a los schemas del backend
+                                # (SeguimientoCreadoResponse, MapaBolsinesOut,
+                                #  MarcadorOut, SeleccionBolsinRequest/Response,
+                                #  ConfirmacionCorreoRequest/Response, ErrorResponse)
     lib/
       formato.ts
     test/

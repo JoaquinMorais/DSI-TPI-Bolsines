@@ -1,6 +1,6 @@
-import type { UsuarioActual } from "../types/auth";
-import { pedir } from "./cliente";
+import type { EmpleadoMeOut } from "../types/auth";
+import { pedir } from "./client";
 
-export function getMe(): Promise<UsuarioActual> {
-  return pedir<UsuarioActual>("/auth/me");
+export function getMe(): Promise<EmpleadoMeOut> {
+  return pedir<EmpleadoMeOut>("/auth/me");
 }

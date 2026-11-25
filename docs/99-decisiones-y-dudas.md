@@ -158,3 +158,6 @@
 | 2026-11-25 | Estructura del frontend. | Se sigue la pedida: `api/`, `components/`, `features/seguimiento/`, `pages/`, `hooks/`, `types/`, mas `lib/` y `test/`. |
 | 2026-11-25 | Header y usuario logueado. | `AppShell` + `Header` consultan **`GET /auth/me`** con TanStack Query; el backend resuelve `USUARIO_DEV`. |
 | 2026-11-25 | Tests del frontend. | **Vitest + Testing Library** (`jsdom`); test del Header con `fetch` mockeado. |
+| 2026-11-25 | Tipos del frontend: nombres cortos vs nombres de los schemas. | Se usan los **mismos nombres que `backend/schemas/`** (`SeguimientoCreadoResponse`, `MapaBolsinesOut`, `MarcadorOut`, `SeleccionBolsinRequest/Response`, `ConfirmacionCorreoRequest/Response`, `EmpleadoMeOut`, etc.). |
+| 2026-11-25 | Manejo de errores HTTP en el frontend. | `api/client.ts` lanza **`ApiError`** tipada con `codigo`, `mensaje` y `status`; parsea `{codigo, mensaje}` y usa `ERROR_HTTP`/`ERROR_DE_RED` cuando no hay JSON o falla la red. |
+| 2026-11-25 | Hooks de mutacion del CU 36. | `useIniciarSeguimiento`, `useSeleccionarBolsin` (`{idCU, numeroBolsin}`), `useConfirmarCorreo` (`{idCU, confirma}`) y `useCancelarSeguimiento` (`idCU`). |
