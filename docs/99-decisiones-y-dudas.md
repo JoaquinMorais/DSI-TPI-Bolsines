@@ -56,3 +56,9 @@
 | 2026-11-25 | Usuario logueado en `buscarUsuarioLogueado`: E1 usa `Sesion`. | Sin `Sesion`: el usuario llega por `user_dependency` (JWT) -> `Usuario` -> `Empleado`. |
 | 2026-11-25 | Nombre del estado en secuencias: `CambioEstadoBolsin` (pedido) vs `CambioEstado`. | Se usa **`CambioEstado`** en los diagramas. |
 | 2026-11-25 | CU 31 en la secuencia completa. | Se modela como `<<include>>` del CU 36 (paso 13), segun el diagrama de casos de uso de la ERS. |
+| 2026-11-25 | Guia de la API simulada del GPS (`docs/referencias/api-gps-guia.md`) no existe en el repo. | Seccion 1 de `docs/06-integraciones.md` queda **pendiente**. No se inventan endpoints ni formatos. |
+| 2026-11-25 | Modelo de GPS usado contra la API de la catedra. | Pendiente de la guia. `GPS_MODELO` en `config/settings.py` elige el adaptador. |
+| 2026-11-25 | Metodo de la interfaz GPS: `getBolsinLocation` por bolsin (diagrama) u `obtenerUbicaciones` por lote. | Pendiente de confirmar. |
+| 2026-11-25 | Errores del GPS (A3). | Excepcion propia `UbicacionNoDisponibleError`; el gestor la traduce a A3 por bolsin. |
+| 2026-11-25 | Google Maps. | El backend devuelve `MapaBolsines` (centro, zoom, marcadores). El frontend renderiza con la libreria de Google Maps; no hay llamadas a Maps desde el servidor. |
+| 2026-11-25 | Correo (CU 31). | `InterfazCorreo` con implementacion simulada (log/archivo) y fake para tests. Microsoft Graph documentado, no implementado. |
