@@ -52,7 +52,7 @@ GestorBuscarBolsines.obtenerBolsinesEnviados():
 
 ```
 GestorBuscarBolsines.obtenerCodigoBolsinesEnviados():
-    iterador = crearIterador(bolsines, filtros=[codigoCMUsuario, ESTADO_ENVIADO])
+    iterador = crearIterador(bolsines, filtros=["origen", codigoCMUsuario])
     codigos = []
     iterador.primero()
     mientras no iterador.haFinalizado():
@@ -61,7 +61,12 @@ GestorBuscarBolsines.obtenerCodigoBolsinesEnviados():
     devolver codigos
 
 IteradorBolsin.comprobarFiltro(filtros):
-    devolver bolsin.esTuCMOrigen(filtros[0]) y bolsin.sosEnviado()
+    tipoCM, codigoCM = filtros
+    si tipoCM == "destino":
+        cmOk = bolsin.obtenerCMDestino().getCodigo() == codigoCM
+    si no:
+        cmOk = bolsin.esTuCMOrigen(codigoCM)
+    devolver cmOk y bolsin.sosEnviado()
 ```
 
 El gestor ya no llama a `esTuCMOrigen` ni a `sosEnviado`, y tampoco recorre la lista. Esa es la diferencia que hay que poder mostrar en la defensa.

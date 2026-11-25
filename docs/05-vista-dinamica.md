@@ -50,7 +50,7 @@ El gestor no recorre ni filtra la coleccion. Pide un iterador y consume sus elem
 
 1. `gestor.obtenerCodigoBolsinesEnviados()`: metodo del agregado concreto. Devuelve los codigos de bolsin en estado Enviado de la CM del usuario logueado.
 2. `gestor.crearIterador(elementos)`: `IAgregado.crearIterador`. Devuelve un `IIterador`.
-3. `IteradorBolsin.init(elementos, filtros)`: el constructor recibe la coleccion de `Bolsin` y los filtros (`codigoCM` del usuario y estado Enviado).
+3. `IteradorBolsin.init(elementos, filtros)`: el constructor recibe la coleccion de `Bolsin` y los filtros (`["origen", codigoCM]` del usuario).
 4. `iterador.primero()`: se posiciona en el primer elemento que cumple `comprobarFiltro`.
 5. `posicionarEnValido()`: recorre internamente la coleccion. Para cada `Bolsin` llama a `comprobarFiltro(filtros)`, que evalua:
    - `bolsin.esTuCMOrigen(codigoCM)`.

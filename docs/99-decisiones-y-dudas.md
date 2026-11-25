@@ -98,3 +98,6 @@
 | 2026-11-25 | La guia de la API GPS no estaba en el repo. | La fuente es el repositorio **`LiberaeMentis/dsi-api-bolsines`**. `06-integraciones` §1 completo. |
 | 2026-11-25 | SQLAlchemy async requiere `greenlet`; SQLModel no lo trae. | Se agrega `sqlalchemy[asyncio]` a `backend/requirements.txt` (instala `greenlet`). |
 | 2026-11-25 | `crearIterador` recibe `filtros` (texto de 03) o solo `elementos` (04 y 05). | Se implementa per **04**: `crearIterador(elementos: list[Bolsin]) -> IIterador`. Los `filtros` los recibe `IteradorBolsin.init`. |
+| 2026-11-25 | Formato de `filtros` en `IteradorBolsin` (la 03 lo mostraba como `[codigoCM, ESTADO_ENVIADO]`), necesario para reutilizar el iterador en el CU 28 (filtro por CM destino). | `filtros = [tipoCM, codigoCM]`, con `tipoCM` en `{"origen", "destino"}`. `comprobarFiltro` exige ademas `sosEnviado()`. CU 36: `["origen", codigoCM]`; CU 28: `["destino", codigoDestino]`. |
+| 2026-11-25 | `init`/`new` del diagrama en Python. | Es **`__init__`**: constructor de la clase. Los diagramas lo abrevian como `init`/`new`. |
+| 2026-11-25 | `comprobarFiltro(filtros)` no recibe el elemento; evalua el elemento en la posicion actual. | Se mantiene la firma de 04. El test unitario del predicado fija `_posicionActual` (prueba de caja blanca). |
