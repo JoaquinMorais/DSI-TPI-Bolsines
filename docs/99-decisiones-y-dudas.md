@@ -96,3 +96,4 @@
 | 2026-11-25 | Relacion `Usuario`–`Empleado` en 02: `user`/`USER` en relacion y diagrama ER. | Se unifica a **`usuario`/`USUARIO`**, igual que el nombre de la entidad. |
 | 2026-11-25 | Metodo de la interfaz GPS por bolsin o por lote. | **Por bolsin** (`getBolsinLocation`): el gestor consulta un bolsin por llamada. |
 | 2026-11-25 | La guia de la API GPS no estaba en el repo. | La fuente es el repositorio **`LiberaeMentis/dsi-api-bolsines`**. `06-integraciones` §1 completo. |
+| 2026-11-25 | SQLAlchemy async requiere `greenlet`; SQLModel no lo trae. | Se agrega `sqlalchemy[asyncio]` a `backend/requirements.txt` (instala `greenlet`). |
