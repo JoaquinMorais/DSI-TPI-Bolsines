@@ -33,6 +33,12 @@ if (-not (Test-Path (Join-Path $Root "frontend/node_modules"))) {
   Pop-Location
 }
 
+$EnvFile = Join-Path $Root "backend\.env"
+if (-not (Test-Path $EnvFile)) {
+  Write-Host "Creando backend\.env desde backend\.env.example..."
+  Copy-Item (Join-Path $Root "backend\.env.example") $EnvFile
+}
+
 Write-Host "Sembrando datos..."
 $env:DATABASE_URL = $DatabaseUrl
 & $VenvPython -m backend.data.seed --reset

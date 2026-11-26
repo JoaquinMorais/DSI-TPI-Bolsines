@@ -45,6 +45,11 @@ if [ ! -d frontend/node_modules ]; then
   (cd frontend && npm install --no-audit --no-fund)
 fi
 
+if [ ! -f backend/.env ]; then
+  echo "Creando backend/.env desde backend/.env.example..."
+  cp backend/.env.example backend/.env
+fi
+
 echo "Sembrando datos..."
 DATABASE_URL="$DATABASE_URL" python -m backend.data.seed --reset
 

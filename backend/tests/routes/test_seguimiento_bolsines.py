@@ -228,6 +228,28 @@ async def test_a3_gps_sin_ubicacion(entorno) -> None:
 
 
 @pytest.mark.asyncio
+async def test_gps_api_key_invalida_da_502(entorno, monkeypatch) -> None:
+    """Sin GPS_API_KEY la API de la catedra responde 401: antes daba 500."""
+    import httpx
+
+    from integrations.gps_tracker.gps_tracker_xtr4500l import GpsTrackerXtr4500l
+
+    def responder(request: httpx.Request) -> httpx.Response:
+        assert request.headers["X-API-Key"] == ""
+        return httpx.Response(401, json={"error": "API_KEY_INVALIDA"})
+
+    cliente = httpx.AsyncClient(transport=httpx.MockTransport(responder))
+    gps = GpsTrackerXtr4500l("http://gps.test", "", cliente)
+    monkeypatch.setattr(composicion, "crear_gps", lambda: gps)
+
+    client, cargar, _ = entorno
+    await _usar(cargar, "eb.cba02@example.test")
+    respuesta = client.post("/seguimiento-bolsines")
+    assert respuesta.status_code == 502
+    assert _auth_codigo(respuesta) == "GPS_NO_DISPONIBLE"
+
+
+@pytest.mark.asyncio
 async def test_a4_cancelar(entorno) -> None:
     client, cargar, _ = entorno
     await _usar(cargar, "eb.cba02@example.test")

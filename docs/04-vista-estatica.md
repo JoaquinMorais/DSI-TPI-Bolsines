@@ -23,7 +23,7 @@ interface IIterador {
   + primero(): void
   + siguiente(): void
   + haFinalizado(): bool
-  + elementoActual(): Bolsin
+  + elementoActual(): Bolsin | null
   + comprobarFiltro(filtros: str[]): bool
 }
 
@@ -41,7 +41,7 @@ class GestorBuscarBolsines {
   + buscarUsuarioLogueado(): Empleado
   + getCMUsuarioLogueado(): ComisionMedica
   + opcionSeguirBolsines(): void
-  + obtenerBolsinesEnviados(): Bolsin[]
+  + obtenerCodigoBolsinesEnviados(): int[]
   + crearIterador(elementos: Bolsin[]): IIterador
   + obtenerUbicacionBolsin(): void
   + obtenerMapa(): MapaBolsines
@@ -61,9 +61,8 @@ class IteradorBolsin {
   + primero(): void
   + siguiente(): void
   + haFinalizado(): bool
-  + elementoActual(): Bolsin
+  + elementoActual(): Bolsin | null
   + comprobarFiltro(filtros: str[]): bool
-  - posicionarEnValido(): void
 }
 
 class Bolsin {
@@ -229,7 +228,7 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | + | `primero` | - | `void` |
 | + | `siguiente` | - | `void` |
 | + | `haFinalizado` | - | `bool` |
-| + | `elementoActual` | - | `Bolsin` |
+| + | `elementoActual` | - | `Bolsin \| None` |
 | + | `comprobarFiltro` | `filtros: str[]` | `bool` |
 
 **GestorBuscarBolsines** (agregado concreto, `backend/services/gestor_buscar_bolsines.py`). Realiza `IAgregado`.
@@ -249,7 +248,7 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | + | `buscarUsuarioLogueado` | | `Empleado` |
 | + | `getCMUsuarioLogueado` | | `ComisionMedica` |
 | + | `opcionSeguirBolsines` | | `void` |
-| + | `obtenerBolsinesEnviados` | | `Bolsin[]` |
+| + | `obtenerCodigoBolsinesEnviados` | | `int[]` |
 | + | `crearIterador` | `elementos: Bolsin[]` | `IIterador` |
 | + | `obtenerUbicacionBolsin` | | `void` |
 | + | `obtenerMapa` | | `MapaBolsines` |
@@ -271,9 +270,8 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 | + | `primero` | | `void` |
 | + | `siguiente` | | `void` |
 | + | `haFinalizado` | | `bool` |
-| + | `elementoActual` | | `Bolsin` |
+| + | `elementoActual` | | `Bolsin \| None` |
 | + | `comprobarFiltro` | `filtros: str[]` | `bool` |
-| - | `posicionarEnValido` | | `void` |
 
 ### 2.2 Dominio
 
@@ -385,6 +383,6 @@ Atributos privados (`-`): se acceden con funciones `get`/`set` cuando hace falta
 9. **Tipos de la Entrega 2 ajustados.** `IteradorBolsin.filtros` y `comprobarFiltro` usan `str[]`; `elementoActual()` devuelve `Bolsin`; `crearIterador` recibe `Bolsin[]`. La Entrega 2 usaba `Object[]` y `Object`. Registrado en `docs/99-decisiones-y-dudas.md`.
 10. **`Bolsin`–`CambioEstado` como composicion (`*--`).** El historial de estados pertenece al bolsin y se elimina con el. La Entrega 2 lo muestra como asociacion simple.
 11. **`obtenerMapa` devuelve `MapaBolsines`.** El backend arma centro, zoom y marcadores; el frontend dibuja con Google Maps.
-12. **`obtenerBolsinesEnviados`** reemplaza a `obtenerCodigoBolsinesEnviados` (docs/99).
+12. **`obtenerCodigoBolsinesEnviados(): int[]`**, como en la Entrega 2 (docs/99).
 13. **Atributos publicos tratados como privados:** en Python no hay `_`; el `-` del diagrama es documental.
 14. **A1** lanza `SinBolsinesEnviadosError`; **A2** en `filtrarPorPrecinto`; **mail** con loop `esTuCM`/`sosGCM`.

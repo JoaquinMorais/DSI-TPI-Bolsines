@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from models.bolsin import Bolsin
@@ -18,7 +18,7 @@ class IIterador(ABC):
     def haFinalizado(self) -> bool: ...
 
     @abstractmethod
-    def elementoActual(self) -> Bolsin: ...
+    def elementoActual(self) -> Optional[Bolsin]: ...
 
     @abstractmethod
     def comprobarFiltro(self, filtros: list[str]) -> bool: ...

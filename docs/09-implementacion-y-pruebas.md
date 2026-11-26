@@ -83,7 +83,7 @@ Ubicacion: `backend/tests/` (`pytest.ini` apunta a esa carpeta y se ejecuta desd
 
 | Caso | Entrada | Resultado esperado |
 |---|---|---|
-| Flujo principal | EB Cordoba 2, GPS fake con 110 ubicado | `obtenerBolsinesEnviados()` = [110]. Un marcador. Un correo al GCM Rosario. |
+| Flujo principal | EB Cordoba 2, GPS fake con 110 ubicado | `obtenerCodigoBolsinesEnviados()` = [110]. Un marcador. Un correo al GCM Rosario. |
 | A1 | EB Tucuman | Lista vacia. Sin llamadas al GPS. Sin correos. |
 | A3 | EB Cordoba 1, GPS fake lanza `UbicacionNoDisponibleError` para 111 | 111 en `sinUbicacion`, 101 con marcador. Sesion abierta. |
 | A3 total | GPS fake lanza para todos | `marcadores` vacio, todos en `sinUbicacion`. Sesion abierta. |
@@ -128,8 +128,8 @@ Orden sugerido (unos 15 minutos):
 
 1. **Modelo:** `docs/diagramas/clases-diseno.puml`. Senalar `IAgregado`, `IIterador`, `IteradorBolsin` y `GestorBuscarBolsines`.
 2. **Interfaces:** `backend/models/iterator/i_agregado.py` e `i_iterador.py`. Mostrar que `crearIterador` devuelve `IIterador`.
-3. **Iterator concreto:** abrir `backend/models/iterator/iterador_bolsin.py`. Mostrar `init(elementos, filtros)`, `posicionarEnValido()` y `comprobarFiltro()`, con las llamadas a `esTuCMOrigen` y `sosEnviado`.
-4. **Llamada desde el gestor:** abrir `backend/services/gestor_buscar_bolsines.py`. Mostrar `obtenerBolsinesEnviados()`: `crearIterador`, `primero`, `haFinalizado`, `elementoActual`, `getNumeroBolsin`, `siguiente`. Senalar que no hay `for` sobre la lista.
+3. **Iterator concreto:** abrir `backend/models/iterator/iterador_bolsin.py`. Mostrar `init(elementos, filtros)`, `elementoActual()` (llama a `comprobarFiltro()`) y `comprobarFiltro()`, con las llamadas a `esTuCMOrigen` y `sosEnviado`.
+4. **Llamada desde el gestor:** abrir `backend/services/gestor_buscar_bolsines.py`. Mostrar `obtenerCodigoBolsinesEnviados()`: `crearIterador`, `primero`, `haFinalizado`, `elementoActual`, `getNumeroBolsin`, `siguiente`. Senalar que no hay `for` sobre la lista.
 5. **Entidades:** `Bolsin.esTuCMOrigen` y `sosEnviado`, y la cadena hasta `Estado.esEnviado`.
 6. **Boundary:** `backend/routes/seguimiento_bolsines.py`. Mostrar que solo traduce HTTP.
 7. **Pruebas:** `pytest -k iterador -v` y luego `pytest -v`. Mostrar un caso de reutilizacion (CU 28).
@@ -139,7 +139,7 @@ Orden sugerido (unos 15 minutos):
 
 Preguntas probables y respuesta corta:
 - *Por que Iterator y no un loop?* Desacopla el gestor de la coleccion y deja el filtro reutilizable (CU 28).
-- *Por que `comprobarFiltro` dentro de `primero`/`siguiente`?* Asi `elementoActual` siempre devuelve un valido y el gestor no filtra.
+- *¿Por qué `comprobarFiltro` dentro de `elementoActual`?* Así está en la secuencia de la Entrega 2: el iterador decide si el elemento cumple el filtro y devuelve `None` si no; el gestor no conoce el criterio.
 - *Que pasa con varios workers?* El estado en memoria se pierde. Se documenta como limitacion.
 
 ## 6. Orden de implementacion
