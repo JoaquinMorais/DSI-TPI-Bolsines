@@ -177,3 +177,4 @@
 | 2026-11-25 | Foco y contraste. | Se agrega **`:focus-visible` global** y se sube el contraste de textos chicos (`slate-600`). |
 | 2026-11-25 | Mensajes de error tecnicos. | Se traducen con **`lib/errores.ts`** a mensajes claros para el EB (red, vencimiento, correo, etc.). |
 | 2026-11-25 | Evidencia de UX. | Se agrega la seccion en `docs/10` con placeholders (`docs/imagenes/ux-*.png`) y tabla pantalla -> patron -> decision. |
+| 2026-11-25 | Claude Code busca `CLAUDE.md`, no `AGENTS.md`. | Se agrega **`CLAUDE.md`** en la raiz que solo redirige a `AGENTS.md` (fuente unica), sin duplicar reglas. Documentado en `AGENTS.md` §3 y `README.md`. |

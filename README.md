@@ -130,6 +130,7 @@ scripts/        dev.sh / dev.ps1 (entorno de desarrollo)
 docker-compose.yml
 pytest.ini
 AGENTS.md       reglas permanentes del proyecto
+CLAUDE.md       redirige a AGENTS.md (compatibilidad con Claude Code)
 ```
 
 ## Documentación

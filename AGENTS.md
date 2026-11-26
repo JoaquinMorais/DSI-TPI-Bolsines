@@ -29,6 +29,8 @@ Estructura: monorepo. Backend en `backend/`, frontend en `frontend/`, documentac
 ```
 docs/                     documentacion del TP (raiz, no dentro de backend/)
 docs/referencias/         documentos fuente (solo lectura)
+AGENTS.md                 reglas permanentes del proyecto (fuente unica)
+CLAUDE.md                 redirige a AGENTS.md (compatibilidad con Claude Code)
 docker-compose.yml        levanta backend y frontend
 .env.example              plantilla de variables (.env no se commitea)
 pytest.ini                pythonpath = backend, testpaths = backend/tests
