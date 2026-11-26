@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../lib/errores";
 import { useUsuarioActual } from "../hooks/useUsuarioActual";
 import { EstadoCarga } from "./EstadoCarga";
 import { EstadoError } from "./EstadoError";
@@ -12,7 +13,7 @@ export function Header() {
         {isLoading && <EstadoCarga mensaje="Cargando usuario..." />}
         {isError && (
           <EstadoError
-            mensaje={(error as Error).message}
+            mensaje={mensajeDeError(error)}
             onReintentar={() => refetch()}
           />
         )}
@@ -24,7 +25,7 @@ export function Header() {
             <p className="text-xs text-slate-600">
               {data.rol} · {data.codigoCM}
             </p>
-            <p className="text-xs text-slate-400">{data.mail}</p>
+            <p className="text-xs text-slate-600">{data.mail}</p>
           </div>
         )}
       </div>

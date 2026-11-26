@@ -37,31 +37,39 @@ export function MapaBolsines({
   onSeleccionar?: (numeroBolsin: number) => void;
 }) {
   return (
-    <MapContainer
-      center={[mapa.centro.latitud, mapa.centro.longitud]}
-      zoom={mapa.zoom}
-      className="h-96 w-full rounded-lg"
-    >
-      <TileLayer
-        attribution="&copy; OpenStreetMap"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {mapa.marcadores.map((marcador) => (
-        <Marker
-          key={marcador.numeroBolsin}
-          position={[marcador.latitud, marcador.longitud]}
-          icon={
-            seleccionado === marcador.numeroBolsin
-              ? iconoSeleccionado
-              : iconoBase
-          }
-          eventHandlers={{
-            click: () => onSeleccionar?.(marcador.numeroBolsin),
-          }}
-        >
-          <Popup>Bolsin {marcador.numeroBolsin}</Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <div role="region" aria-label="Mapa de bolsines">
+      <p className="sr-only">
+        El mapa es complementario. Usa la lista de bolsines para navegar con el
+        teclado.
+      </p>
+      <MapContainer
+        center={[mapa.centro.latitud, mapa.centro.longitud]}
+        zoom={mapa.zoom}
+        className="h-96 w-full rounded-lg"
+      >
+        <TileLayer
+          attribution="&copy; OpenStreetMap"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {mapa.marcadores.map((marcador) => (
+          <Marker
+            key={marcador.numeroBolsin}
+            position={[marcador.latitud, marcador.longitud]}
+            title={`Bolsin ${marcador.numeroBolsin}`}
+            alt={`Bolsin ${marcador.numeroBolsin}`}
+            icon={
+              seleccionado === marcador.numeroBolsin
+                ? iconoSeleccionado
+                : iconoBase
+            }
+            eventHandlers={{
+              click: () => onSeleccionar?.(marcador.numeroBolsin),
+            }}
+          >
+            <Popup>Bolsin {marcador.numeroBolsin}</Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
   );
 }

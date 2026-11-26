@@ -172,3 +172,8 @@
 | 2026-11-25 | A5 (no enviar correo). | Se mantiene la pagina con el resultado "No se envio el correo" y un toast; no se envia mail. |
 | 2026-11-25 | "Correo enviado el `<fecha>`". | Se usa la fecha/hora del **cliente** (`new Date().toLocaleString("es-AR")`); el backend no devuelve timestamp de envio. |
 | 2026-11-25 | Dialogo de confirmacion. | Un componente **generico** `DialogoConfirmacion` reutilizado para notificar (confirmar/no enviar/cancelar) y para cancelar la consulta. |
+| 2026-11-25 | Toast de exito con email enmascarado. | Se simplifica a **"Correo enviado."**; la fecha queda en el panel ("Correo enviado el ..."). |
+| 2026-11-25 | Responsive del seguimiento. | En movil se usan **pestanas Lista/Mapa** (Tabs accesibles); en escritorio dos columnas. |
+| 2026-11-25 | Foco y contraste. | Se agrega **`:focus-visible` global** y se sube el contraste de textos chicos (`slate-600`). |
+| 2026-11-25 | Mensajes de error tecnicos. | Se traducen con **`lib/errores.ts`** a mensajes claros para el EB (red, vencimiento, correo, etc.). |
+| 2026-11-25 | Evidencia de UX. | Se agrega la seccion en `docs/10` con placeholders (`docs/imagenes/ux-*.png`) y tabla pantalla -> patron -> decision. |

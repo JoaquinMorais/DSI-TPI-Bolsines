@@ -146,6 +146,14 @@ describe("SeguimientoPage", () => {
     expect(screen.getByTestId("mapa")).toBeInTheDocument();
   });
 
+  it("cambia entre Lista y Mapa en la vista movil", async () => {
+    configurar({ data: DATA });
+    renderPage();
+    const tabMapa = screen.getByRole("tab", { name: "Mapa" });
+    await userEvent.click(tabMapa);
+    expect(tabMapa).toHaveAttribute("aria-selected", "true");
+  });
+
   it("seleccionar llama a tomarSeleccionBolsin y muestra el detalle", async () => {
     configurar({ data: DATA });
     renderPage();
@@ -190,9 +198,8 @@ describe("SeguimientoPage", () => {
         destinatarioEnmascarado: "g***@example.test",
       }),
     );
-    expect(
-      screen.getByText("Correo enviado a g***@example.test"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Correo enviado.")).toBeInTheDocument();
+    expect(screen.getByText(/Correo enviado el/)).toBeInTheDocument();
   });
 
   it("A5 no envia correo", async () => {

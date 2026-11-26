@@ -97,7 +97,7 @@ flowchart TD
 | Carga | Skeleton de lista y spinner del mapa | `Skeleton` |
 | Error de red | Mensaje de error con boton "Reintentar" | `ErrorState` |
 
-El exito del correo muestra un Toast con el destinatario enmascarado (`g***@dominio`).
+El exito del correo muestra el Toast "Correo enviado." y el panel indica "Correo enviado el `<fecha>`".
 
 ## 5. Patrones de diseno de GUI
 
@@ -110,12 +110,13 @@ El exito del correo muestra un Toast con el destinatario enmascarado (`g***@domi
 | **Toast/Feedback** | Confirmar el resultado de una accion | Correo enviado/no enviado, errores |
 | **Breadcrumbs** | Ubicar al usuario en la jerarquia | Inicio > Consultar seguimiento |
 | **Skeleton Loading** | Reducir la sensacion de espera | Carga inicial de la lista/mapa |
+| **Tabs (responsive)** | Alternar lista y mapa en pantallas angostas | Pestanas Lista/Mapa en movil |
 
 ## 6. Lineamientos de UX
 
-- **Accesibilidad basica:** contraste AA, foco visible, `label` en todos los inputs, navegacion por teclado y `aria-*` en dialogos y en el mapa.
-- **Responsive:** una columna en movil (mapa arriba, lista y detalle abajo) y dos columnas en escritorio (lista/detalle + mapa).
-- **Textos en espanol rioplatense neutro:** sin voseo marcado ni regionalismos; mensajes claros y directos.
+- **Accesibilidad basica:** contraste AA (textos chicos en `slate-600` o mas oscuro), **foco visible global** (`:focus-visible` con outline), `label` en todos los inputs, navegacion por teclado y `aria-*` en dialogos (con *focus trap*) y en el mapa (region con `aria-label`; la lista es la alternativa por teclado).
+- **Responsive:** en movil se muestran **pestanas Lista / Mapa** (una vista por vez; el detalle del bolsin aparece debajo del mapa) y en escritorio dos columnas (lista/detalle + mapa).
+- **Textos en espanol rioplatense neutro:** sin voseo marcado ni regionalismos; mensajes claros y directos. Los errores tecnicos se traducen a mensajes de usuario (`lib/errores.ts`).
 - **Estados explicitos:** nunca dejar la pantalla "en blanco": siempre carga, vacio, error o contenido.
 
 ## 7. Arbol de archivos de `frontend/`
@@ -152,12 +153,14 @@ frontend/
       SkeletonLista.tsx         # carga
       MapaBolsines.tsx          # Leaflet/OSM + fix de iconos para Vite
       Breadcrumbs.tsx           # Inicio > Seguimiento de bolsines
-      DialogoConfirmacion.tsx   # confirmar / no enviar / cancelar
-      Toast.tsx                 # feedback de exito/error
+      DialogoConfirmacion.tsx   # confirmar / no enviar / cancelar + focus trap
+      Toast.tsx                 # feedback de exito/error (aria-live)
+      Tabs.tsx                  # pestanas Lista / Mapa (movil)
       Header.test.tsx
       EstadoVacio.test.tsx
       EstadoError.test.tsx
       DialogoConfirmacion.test.tsx
+      Tabs.test.tsx
     features/
       seguimiento/
         index.ts
@@ -185,8 +188,36 @@ frontend/
                                 #  ConfirmacionCorreoRequest/Response, ErrorResponse)
     lib/
       formato.ts
+      errores.ts                # mensajes de error para el usuario
+      errores.test.ts
     test/
       setup.ts                  # jest-dom
 ```
 
 El layout base (`AppShell` + `Header`) muestra el nombre del sistema y los datos del usuario logueado consultando `GET /auth/me` con TanStack Query (con estado de carga y error).
+
+## 8. Evidencia de UX
+
+Placeholders para las imagenes del equipo (copiar en `docs/imagenes/` con esos nombres o ajustar las rutas):
+
+![Login](imagenes/ux-login.png)
+
+![Seguimiento de bolsines](imagenes/ux-seguimiento.png)
+
+![Dialogo de notificacion](imagenes/ux-dialogo.png)
+
+![Vista movil con pestanas](imagenes/ux-movil.png)
+
+| Pantalla | Patron | Decision de diseno |
+|---|---|---|
+| Inicio | Breadcrumbs / navegacion | Encabezado simple y acceso directo a "Consultar seguimiento". |
+| Seguimiento (escritorio) | Master-Detail | Lista a la izquierda; mapa y detalle a la derecha; seleccion sincronizada. |
+| Seguimiento (movil) | Tabs (responsive) | Pestanas Lista/Mapa, una vista por vez, conservando la seleccion. |
+| Filtros | Filter/Search | Precinto (texto) y CM destino (select), aplicados a la lista y a los marcadores (A2). |
+| Carga | Skeleton Loading | Esqueleto de la lista y estado accesible "Cargando seguimiento". |
+| A1 / A2 | Empty State | Mensaje claro y accion para limpiar filtros o volver. |
+| A3 | Aviso / Feedback | Banner con la lista de bolsines sin ubicacion. |
+| Notificar ubicacion | Confirmation Dialog | Confirmar / No enviar / Cancelar, con foco atrapado y Esc. |
+| Resultado del envio | Toast / Feedback | "Correo enviado." o mensaje de error, y fecha en el panel. |
+| Cancelar consulta | Confirmation Dialog | Confirmacion y vuelta a Inicio. |
+| Lista de bolsines | Teclado | Cada fila es un boton (`aria-pressed`); Tab y Enter/Espacio. |

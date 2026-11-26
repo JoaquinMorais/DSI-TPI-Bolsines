@@ -8,8 +8,10 @@ import { EstadoError } from "../components/EstadoError";
 import { EstadoVacio } from "../components/EstadoVacio";
 import { MapaBolsines } from "../components/MapaBolsines";
 import { SkeletonLista } from "../components/SkeletonLista";
+import { Tabs } from "../components/Tabs";
 import { Toast } from "../components/Toast";
 import type { TipoToast } from "../components/Toast";
+import { mensajeDeError } from "../lib/errores";
 import { AvisoSinUbicacion } from "../features/seguimiento/AvisoSinUbicacion";
 import { DetalleBolsin } from "../features/seguimiento/DetalleBolsin";
 import { FiltrosBolsines } from "../features/seguimiento/FiltrosBolsines";
@@ -38,6 +40,7 @@ export function SeguimientoPage() {
   const [precinto, setPrecinto] = useState("");
   const [cmDestino, setCmDestino] = useState("");
   const [seleccionado, setSeleccionado] = useState<number | null>(null);
+  const [vista, setVista] = useState<"lista" | "mapa">("lista");
   const [detalle, setDetalle] = useState<SeleccionBolsinResponse | null>(null);
   const [dialogoCorreo, setDialogoCorreo] = useState(false);
   const [dialogoCancelar, setDialogoCancelar] = useState(false);
@@ -121,7 +124,7 @@ export function SeguimientoPage() {
       {
         onSuccess: (respuesta) => setDetalle(respuesta),
         onError: (error) =>
-          setToast({ mensaje: (error as Error).message, tipo: "error" }),
+          setToast({ mensaje: mensajeDeError(error), tipo: "error" }),
       },
     );
   }
@@ -137,16 +140,11 @@ export function SeguimientoPage() {
           setDialogoCorreo(false);
           setFinalizado(true);
           setCorreoEnviadoEn(new Date().toLocaleString("es-AR"));
-          setToast({
-            mensaje: respuesta.destinatarioEnmascarado
-              ? `Correo enviado a ${respuesta.destinatarioEnmascarado}`
-              : "Correo enviado",
-            tipo: "exito",
-          });
+          setToast({ mensaje: "Correo enviado.", tipo: "exito" });
         },
         onError: (error) => {
           setDialogoCorreo(false);
-          setToast({ mensaje: (error as Error).message, tipo: "error" });
+          setToast({ mensaje: mensajeDeError(error), tipo: "error" });
         },
       },
     );
@@ -167,7 +165,7 @@ export function SeguimientoPage() {
         },
         onError: (error) => {
           setDialogoCorreo(false);
-          setToast({ mensaje: (error as Error).message, tipo: "error" });
+          setToast({ mensaje: mensajeDeError(error), tipo: "error" });
         },
       },
     );
@@ -198,7 +196,7 @@ export function SeguimientoPage() {
           navigate("/");
           return;
         }
-        setToast({ mensaje: (error as Error).message, tipo: "error" });
+        setToast({ mensaje: mensajeDeError(error), tipo: "error" });
       },
     });
   }
@@ -242,7 +240,7 @@ export function SeguimientoPage() {
 
       {!iniciar.isPending && iniciar.error && !esA1 && (
         <EstadoError
-          mensaje={iniciar.error.message}
+          mensaje={mensajeDeError(iniciar.error)}
           onReintentar={() => iniciar.mutate()}
         />
       )}
@@ -258,12 +256,23 @@ export function SeguimientoPage() {
             onCMDestino={setCmDestino}
             onLimpiar={limpiarFiltros}
           />
+          <div className="md:hidden">
+            <Tabs
+              etiqueta="Vista de resultados"
+              opciones={[
+                { id: "lista", etiqueta: "Lista" },
+                { id: "mapa", etiqueta: "Mapa" },
+              ]}
+              activa={vista}
+              onCambiar={(id) => setVista(id as "lista" | "mapa")}
+            />
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <div>
+            <div className={vista === "mapa" ? "hidden md:block" : "block"}>
               {filasFiltradas.length === 0 ? (
                 <EstadoVacio
                   titulo="No hay bolsines que coincidan con los filtros"
-                  descripcion="Probá con otro precinto o CM destino."
+                  descripcion="Prueba con otro precinto o CM destino."
                   accion={
                     <button
                       type="button"
@@ -283,7 +292,11 @@ export function SeguimientoPage() {
                 />
               )}
             </div>
-            <div className="space-y-4">
+            <div
+              className={`space-y-4 ${
+                vista === "lista" ? "hidden md:block" : "block"
+              }`}
+            >
               {mapaFiltrado && (
                 <MapaBolsines
                   mapa={mapaFiltrado}

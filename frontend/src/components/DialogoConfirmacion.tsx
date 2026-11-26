@@ -23,6 +23,7 @@ export function DialogoConfirmacion({
   cargando?: boolean;
 }) {
   const cancelarRef = useRef<HTMLButtonElement>(null);
+  const dialogoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (abierto) {
@@ -37,6 +38,27 @@ export function DialogoConfirmacion({
     function alPresionar(evento: KeyboardEvent) {
       if (evento.key === "Escape" && !cargando) {
         onCancelar();
+        return;
+      }
+      if (evento.key !== "Tab" || !dialogoRef.current) {
+        return;
+      }
+      const botones = Array.from(
+        dialogoRef.current.querySelectorAll<HTMLButtonElement>(
+          "button:not([disabled])",
+        ),
+      );
+      if (botones.length === 0) {
+        return;
+      }
+      const primero = botones[0];
+      const ultimo = botones[botones.length - 1];
+      if (evento.shiftKey && document.activeElement === primero) {
+        evento.preventDefault();
+        ultimo.focus();
+      } else if (!evento.shiftKey && document.activeElement === ultimo) {
+        evento.preventDefault();
+        primero.focus();
       }
     }
     document.addEventListener("keydown", alPresionar);
@@ -50,15 +72,19 @@ export function DialogoConfirmacion({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div
+        ref={dialogoRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialogo-titulo"
+        aria-describedby="dialogo-descripcion"
         className="w-full max-w-md rounded bg-white p-5 shadow-lg"
       >
         <h2 id="dialogo-titulo" className="text-lg font-semibold">
           {titulo}
         </h2>
-        <div className="mt-2 text-sm text-slate-700">{children}</div>
+        <div id="dialogo-descripcion" className="mt-2 text-sm text-slate-700">
+          {children}
+        </div>
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             ref={cancelarRef}
