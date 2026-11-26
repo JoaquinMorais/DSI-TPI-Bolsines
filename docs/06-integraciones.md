@@ -10,6 +10,8 @@ Estado de esta version:
 
 Fuente: repositorio `LiberaeMentis/dsi-api-bolsines` (Spring Boot, datos en memoria, sin base). Guia local adaptada: `docs/referencias/api-gps-guia.md` (endpoints, formatos, errores y datos mock). Contacto de la catedra: Ing. Sol Vega.
 
+**Vendorizacion:** la fuente se copio en `gps-api/` (commit `bd457ed`, procedencia en `gps-api/README.md`). En Docker Compose corre como el servicio `gps-api` y el backend la consume en `http://gps-api:8080` dentro de la red de Compose.
+
 Estado: **completo**. La seccion 1.3 detalla lo que la API valida y devuelve.
 
 ### 1.1 Interfaz comun
@@ -50,7 +52,7 @@ La API expone los tres modelos de la ERS. Cada uno tiene su propia API key (head
 
 **Parseo:** cada adaptador tiene una funcion de parseo pura (sin red). XTR toma `items[0]` (JSON); NavTrack separa el CSV por comas; GeoPulse toma la unica fila de la matriz. Las tres validan el numero de bolsin devuelto. Las fechas de la API vienen **sin zona horaria** (`2026-03-07T12:30:00`, o `2026-03-07T12:30` si los segundos son cero, porque la API usa `LocalDateTime.toString()`). Se parsean con `datetime.fromisoformat`, que acepta ambas formas.
 
-**Base URL:** `GPS_BASE_URL`, default `http://localhost:8080`.
+**Base URL:** `GPS_BASE_URL`. Default `http://localhost:8080` para ejecucion manual; con Docker Compose se usa `http://gps-api:8080` (nombre del servicio).
 
 ### 1.3 Comportamiento de la API (verificado en el repositorio)
 
@@ -68,7 +70,9 @@ Validacion de codigo: la API compara `codigoComisionMedicaOrigen` con el origen 
 
 ### 1.4 Datos de la API y del set de datos
 
-La API tiene 10 bolsines fijos (101 a 110). El set de datos (`docs/08-datos-semilla.md`) usa 101, 102, 103, 104 y 110 con origen y destino iguales a la API. El 111 no existe en la API, y es el caso A3 de la defensa.
+La API original tiene 10 bolsines fijos (101 a 110). El mock vendorizado en `gps-api/` agrega 120, 121, 123 y 124 para el TP; los 101 a 110 no se modifican. El set de datos (`docs/08-datos-semilla.md`) usa 101, 102, 103, 104, 110, 120, 121, 123 y 124 con origen y destino iguales a la API. Los numeros 111, 122, 125, 126 y 127 no existen en la API: 111 y 122 son el caso A3 parcial, y 125 a 127 el caso A3 total.
+
+La guia original `docs/referencias/api-gps-guia.md` sigue describiendo solo los 101 a 110; la extension vive en `gps-api/src/main/java/ar/edu/dsi/gpstracker/repository/InMemoryBolsinRepository.java`.
 
 ## 2. Manejo de errores (A3)
 
@@ -151,7 +155,7 @@ Todas las variables se leen en `backend/config/settings.py` y se cargan desde `b
 | Variable | Uso | Default |
 |---|---|---|
 | `GPS_MODELO` | Modelo de dispositivo: `xtr4500l`, `navtrack`, `geopulse` | `xtr4500l` |
-| `GPS_BASE_URL` | URL base de la API GPS | `http://localhost:8080` |
+| `GPS_BASE_URL` | URL base de la API GPS (`http://gps-api:8080` en Docker Compose) | `http://localhost:8080` |
 | `GPS_API_KEY` | API key del modelo elegido (header `X-API-Key`) | vacio en el repo. Valor en `.env`. |
 | `CORREO_MODO` | `simulado` o `graph` | `simulado` |
 | `CORREO_ARCHIVO` | Archivo donde el correo simulado guarda los mensajes | vacio (solo log) |

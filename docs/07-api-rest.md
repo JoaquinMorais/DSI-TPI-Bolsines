@@ -69,16 +69,24 @@ Response 201 (usuario EB Córdoba 1, escenario de `08-datos-semilla.md` §7):
   "codigoCM": "CM-CBA-01",
   "bolsines": [
     { "numeroBolsin": 101, "numeroPrecinto": "P-0101", "codigoCMDestino": "CM-ROS-02" },
-    { "numeroBolsin": 111, "numeroPrecinto": "P-0111", "codigoCMDestino": "CM-MDZ-03" }
+    { "numeroBolsin": 111, "numeroPrecinto": "P-0111", "codigoCMDestino": "CM-MDZ-03" },
+    { "numeroBolsin": 120, "numeroPrecinto": "P-0120", "codigoCMDestino": "CM-BA-01" },
+    { "numeroBolsin": 121, "numeroPrecinto": "P-0121", "codigoCMDestino": "CM-ROS-02" },
+    { "numeroBolsin": 122, "numeroPrecinto": "P-0122", "codigoCMDestino": "CM-TUC-01" }
   ],
   "mapa": {
-    "centro": { "latitud": -31.4201, "longitud": -64.1888 },
+    "centro": { "latitud": -31.7518, "longitud": -63.1703 },
     "zoom": 6,
     "marcadores": [
-      { "numeroBolsin": 101, "latitud": -31.4201, "longitud": -64.1888, "fechaHoraUltimaActualizacion": "2026-03-07T12:30:00" }
+      { "numeroBolsin": 101, "latitud": -31.4201, "longitud": -64.1888, "fechaHoraUltimaActualizacion": "2026-03-07T12:30:00" },
+      { "numeroBolsin": 120, "latitud": -32.4075, "longitud": -63.2402, "fechaHoraUltimaActualizacion": "2026-03-07T13:00:00" },
+      { "numeroBolsin": 121, "latitud": -31.4279, "longitud": -62.0820, "fechaHoraUltimaActualizacion": "2026-03-07T13:05:00" }
     ]
   },
-  "sinUbicacion": [ { "numeroBolsin": 111, "motivo": "El GPS no informo ubicacion" } ]
+  "sinUbicacion": [
+    { "numeroBolsin": 111, "motivo": "El GPS no informo ubicacion" },
+    { "numeroBolsin": 122, "motivo": "El GPS no informo ubicacion" }
+  ]
 }
 ```
 
@@ -122,7 +130,7 @@ No hay sesion abierta, ni GPS, mapa o correo.
 
 ### 5.3 A3: GPS sin ubicacion para un bolsin
 
-POST `/seguimiento-bolsines`, response 201 (fragmento; es el caso de la defensa: 101 con ubicacion y 111 sin ubicacion):
+POST `/seguimiento-bolsines`, response 201 (usuario EB Córdoba 1: 101, 120 y 121 con ubicacion; 111 y 122 sin ubicacion):
 
 ```json
 {
@@ -130,20 +138,28 @@ POST `/seguimiento-bolsines`, response 201 (fragmento; es el caso de la defensa:
   "codigoCM": "CM-CBA-01",
   "bolsines": [
     { "numeroBolsin": 101, "numeroPrecinto": "P-0101", "codigoCMDestino": "CM-ROS-02" },
-    { "numeroBolsin": 111, "numeroPrecinto": "P-0111", "codigoCMDestino": "CM-MDZ-03" }
+    { "numeroBolsin": 111, "numeroPrecinto": "P-0111", "codigoCMDestino": "CM-MDZ-03" },
+    { "numeroBolsin": 120, "numeroPrecinto": "P-0120", "codigoCMDestino": "CM-BA-01" },
+    { "numeroBolsin": 121, "numeroPrecinto": "P-0121", "codigoCMDestino": "CM-ROS-02" },
+    { "numeroBolsin": 122, "numeroPrecinto": "P-0122", "codigoCMDestino": "CM-TUC-01" }
   ],
   "mapa": {
-    "centro": { "latitud": -31.4201, "longitud": -64.1888 },
+    "centro": { "latitud": -31.7518, "longitud": -63.1703 },
     "zoom": 6,
     "marcadores": [
-      { "numeroBolsin": 101, "latitud": -31.4201, "longitud": -64.1888, "fechaHoraUltimaActualizacion": "2026-03-07T12:30:00" }
+      { "numeroBolsin": 101, "latitud": -31.4201, "longitud": -64.1888, "fechaHoraUltimaActualizacion": "2026-03-07T12:30:00" },
+      { "numeroBolsin": 120, "latitud": -32.4075, "longitud": -63.2402, "fechaHoraUltimaActualizacion": "2026-03-07T13:00:00" },
+      { "numeroBolsin": 121, "latitud": -31.4279, "longitud": -62.0820, "fechaHoraUltimaActualizacion": "2026-03-07T13:05:00" }
     ]
   },
-  "sinUbicacion": [ { "numeroBolsin": 111, "motivo": "El GPS no informo ubicacion" } ]
+  "sinUbicacion": [
+    { "numeroBolsin": 111, "motivo": "El GPS no informo ubicacion" },
+    { "numeroBolsin": 122, "motivo": "El GPS no informo ubicacion" }
+  ]
 }
 ```
 
-Si ningun bolsin tuviera ubicacion, `marcadores` seria `[]` y todos irian a `sinUbicacion`. En ese caso el `centro` toma el valor por defecto del backend (`docs/06-integraciones.md` §7).
+A3 total: con EB Córdoba 3 (bolsines 125, 126 y 127) todos quedan en `sinUbicacion`, `marcadores` es `[]` y el `centro` toma el valor por defecto del backend (`docs/06-integraciones.md` §7).
 
 ### 5.4 A5: EB no confirma el correo
 

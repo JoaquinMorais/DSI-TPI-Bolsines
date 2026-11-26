@@ -1,6 +1,26 @@
 services:
+  gps-api:
+    build: ./gps-api
+    ports:
+      - "8080:8080"
+
+  # Carga la semilla solo si la base esta vacia (sin --reset) y termina.
+  # El backend espera a que este servicio complete antes de arrancar.
+  seed:
+    build: ./backend
+    image: dsi-tpi-bolsines-backend
+    command: ["python", "-m", "data.seed"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////app/db/bolsines.db
+    volumes:
+      - bolsines-data:/app/db
+
   backend:
     build: ./backend
+    image: dsi-tpi-bolsines-backend
     ports:
       - "8020:8020"
     env_file:
@@ -9,9 +29,13 @@ services:
     environment:
       CORS_ORIGINS: http://localhost:3020
       DATABASE_URL: sqlite+aiosqlite:////app/db/bolsines.db
-      # Dentro del contenedor, localhost es el propio contenedor: la API GPS
-      # de la catedra corre en el host.
-      GPS_BASE_URL: ${GPS_BASE_URL:-http://host.docker.internal:8080}
+      # La API GPS corre como servicio de esta misma red de Compose.
+      GPS_BASE_URL: ${GPS_BASE_URL:-http://gps-api:8080}
+    depends_on:
+      gps-api:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -24,8 +48,7 @@ services:
     ports:
       - "3020:3020"
     environment:
-      # Lo usa el navegador, por eso localhost y no el nombre del servicio.
-      VITE_API_URL: http://localhost:8020
+      PROXY_TARGET: http://backend:8020
     depends_on:
       - backend
 

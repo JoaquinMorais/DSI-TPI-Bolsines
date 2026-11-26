@@ -9,7 +9,7 @@ Estructura: monorepo. Backend en `backend/`, frontend en `frontend/`, documentac
 - Backend: Python 3.12, FastAPI, SQLModel con SQLAlchemy async y aiosqlite, SQLite, pytest y pytest-asyncio. Dependencias en `backend/requirements.txt`.
 - Frontend: Vite + React + TypeScript (`frontend/`).
 - Docker: `docker-compose.yml` en la raiz levanta backend y frontend.
-- Puertos: backend `8020`, frontend `3020`. El frontend llama al backend por `http://localhost:8020` (`VITE_API_URL`). CORS permite `http://localhost:3020`.
+- Puertos: backend `8020`, frontend `3020`. El frontend usa rutas relativas y el dev server de Vite proxya `/auth` y `/seguimiento-bolsines` al backend (`PROXY_TARGET`; en Docker `http://backend:8020`). `VITE_API_URL` puede fijar una URL absoluta. CORS permite `http://localhost:3020`.
 - Variables de entorno: `.env` (no se commitea), con plantilla en `.env.example`.
 
 ## 2. Alcance
@@ -31,7 +31,7 @@ docs/                     documentacion del TP (raiz, no dentro de backend/)
 docs/referencias/         documentos fuente (solo lectura)
 AGENTS.md                 reglas permanentes del proyecto (fuente unica)
 CLAUDE.md                 redirige a AGENTS.md (compatibilidad con Claude Code)
-docker-compose.yml        levanta backend y frontend
+docker-compose.yml        levanta frontend, backend y API GPS
 .env.example              plantilla de variables (.env no se commitea)
 pytest.ini                pythonpath = backend, testpaths = backend/tests
 backend/
@@ -52,6 +52,9 @@ backend/
 frontend/
   Dockerfile
   package.json, vite.config.ts, src/
+gps-api/
+  Dockerfile
+  pom.xml, src/           API GPS simulada de la catedra (Spring Boot, vendorizada)
 ```
 
 ## 4. Reglas de arquitectura
@@ -93,7 +96,7 @@ frontend/
 
 ## 8. Integraciones externas
 
-- GPS Tracker: API simulada de la catedra, repositorio `LiberaeMentis/dsi-api-bolsines`. Modelo XTR-4500L (endpoint `getBolsinLocation`). Base por defecto `http://localhost:8080` (`GPS_BASE_URL`). Modelo con `GPS_MODELO` y key con `GPS_API_KEY` (la key mock publica del XTR esta en `.env.example`; los scripts `dev` crean `backend/.env` desde ahi). Sin key la API responde 401 y el backend devuelve 502 `GPS_NO_DISPONIBLE`. Detalle en `docs/06-integraciones.md`.
+- GPS Tracker: API simulada de la catedra, repositorio `LiberaeMentis/dsi-api-bolsines`, vendorizada en `gps-api/` (commit `bd457ed`). Modelo XTR-4500L (endpoint `getBolsinLocation`). Base por defecto `http://localhost:8080` (`GPS_BASE_URL`) fuera de Docker; en Docker Compose corre como servicio `gps-api` y se usa `http://gps-api:8080`. Modelo con `GPS_MODELO` y key con `GPS_API_KEY` (la key mock publica del XTR esta en `.env.example`; los scripts `dev` crean `backend/.env` desde ahi). Sin key la API responde 401 y el backend devuelve 502 `GPS_NO_DISPONIBLE`. Detalle en `docs/06-integraciones.md`.
 - Google Maps: la visualizacion vive en el frontend (`VITE_GOOGLE_MAPS_API_KEY`). El backend no llama a la API de Maps.
 - Servidor de correo: implementacion simulada (log/archivo) por defecto; Microsoft Graph documentado, sin implementar. Detalle en `docs/06-integraciones.md`.
 

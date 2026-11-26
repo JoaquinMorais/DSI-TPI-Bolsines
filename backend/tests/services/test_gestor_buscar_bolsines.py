@@ -230,6 +230,19 @@ async def test_a3_gps_sin_ubicacion(session: AsyncSession) -> None:
 
 
 @pytest.mark.asyncio
+async def test_a3_total_sin_ubicacion(session: AsyncSession) -> None:
+    gestor = _gestor(
+        session,
+        await _usuario(session, "eb.cba01@example.test"),
+        GpsTrackerFake(sin_ubicacion={101, 111}),
+        CorreoFake(),
+    )
+    await gestor.opcionSeguirBolsines()
+    assert gestor.mapa.marcadores == []
+    assert [s.numeroBolsin for s in gestor.sinUbicacion] == [101, 111]
+
+
+@pytest.mark.asyncio
 async def test_a4_cancelar(session: AsyncSession) -> None:
     gestor = _gestor(
         session,

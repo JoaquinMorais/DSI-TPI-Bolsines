@@ -34,7 +34,8 @@ Cambiar a Google Maps JS implica reemplazar **solo el componente de mapa** (`Map
 
 Variables del frontend:
 
-- `VITE_API_URL=http://localhost:8020`.
+- `VITE_API_URL`: vacio = mismo origen. El dev server de Vite proxya `/auth` y `/seguimiento-bolsines` a `PROXY_TARGET` (default `http://localhost:8020`; en Docker `http://backend:8020`). Una URL absoluta sigue siendo valida si se necesita.
+- `server.allowedHosts` en `vite.config.ts` incluye el host de ngrok (`synodal-leora-unvolcanically.ngrok-free.dev`) para permitir el acceso remoto por un tunel al puerto `3020`.
 - No requiere clave de mapas con Leaflet/OSM.
 
 ## 2. Mapeo del frontend al diseno

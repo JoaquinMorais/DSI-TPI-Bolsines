@@ -45,10 +45,10 @@ async def test_seed_idempotente(session: AsyncSession) -> None:
     primero = await _conteos(session)
     assert primero["estado"] == 5
     assert primero["rol"] == 4
-    assert primero["cm"] == 6
-    assert primero["usuario"] == 9
-    assert primero["empleado"] == 9
-    assert primero["bolsin"] == 12
+    assert primero["cm"] == 7
+    assert primero["usuario"] == 11
+    assert primero["empleado"] == 11
+    assert primero["bolsin"] == 20
 
     assert await sembrar(session) is False
     assert await _conteos(session) == primero
@@ -74,6 +74,14 @@ async def test_origenes_coinciden_con_la_api(session: AsyncSession) -> None:
     assert por_numero[102].origen.getCodigo() == "CM-ROS-02"
     assert por_numero[103].origen.getCodigo() == "CM-MDZ-03"
     assert por_numero[104].origen.getCodigo() == "CM-BA-01"
+    assert por_numero[120].origen.getCodigo() == "CM-CBA-01"
+    assert por_numero[120].destino.getCodigo() == "CM-BA-01"
+    assert por_numero[121].origen.getCodigo() == "CM-CBA-01"
+    assert por_numero[121].destino.getCodigo() == "CM-ROS-02"
+    assert por_numero[123].origen.getCodigo() == "CM-CBA-02"
+    assert por_numero[123].destino.getCodigo() == "CM-MDZ-03"
+    assert por_numero[124].origen.getCodigo() == "CM-CBA-02"
+    assert por_numero[124].destino.getCodigo() == "CM-BA-01"
 
 
 @pytest.mark.asyncio
@@ -81,5 +89,5 @@ async def test_reset_recarga(session: AsyncSession) -> None:
     await sembrar(session)
     assert await sembrar(session, reset=True) is True
     conteos = await _conteos(session)
-    assert conteos["bolsin"] == 12
-    assert conteos["usuario"] == 9
+    assert conteos["bolsin"] == 20
+    assert conteos["usuario"] == 11

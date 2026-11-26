@@ -51,6 +51,7 @@ ROLES = [
 COMISIONES = [
     ("CM-CBA-01", "Comisión Médica Córdoba"),
     ("CM-CBA-02", "Comisión Médica Córdoba 2"),
+    ("CM-CBA-03", "Comisión Médica Córdoba 3"),
     ("CM-ROS-02", "Comisión Médica Rosario"),
     ("CM-MDZ-03", "Comisión Médica Mendoza"),
     ("CM-TUC-01", "Comisión Médica Tucumán"),
@@ -60,9 +61,11 @@ COMISIONES = [
 EMPLEADOS = [
     ("eb.cba01@example.test", "Encargado", NOMBRE_ENCARGADO_BOLSINES, "CM-CBA-01"),
     ("eb.cba02@example.test", "Encargado", NOMBRE_ENCARGADO_BOLSINES, "CM-CBA-02"),
+    ("eb.cba03@example.test", "Encargado", NOMBRE_ENCARGADO_BOLSINES, "CM-CBA-03"),
     ("eb.tuc01@example.test", "Encargado", NOMBRE_ENCARGADO_BOLSINES, "CM-TUC-01"),
     ("gcm.cba-01@example.test", "Gerente", NOMBRE_GCM, "CM-CBA-01"),
     ("gcm.cba-02@example.test", "Gerente", NOMBRE_GCM, "CM-CBA-02"),
+    ("gcm.cba-03@example.test", "Gerente", NOMBRE_GCM, "CM-CBA-03"),
     ("gcm.ros-02@example.test", "Gerente", NOMBRE_GCM, "CM-ROS-02"),
     ("gcm.mdz-03@example.test", "Gerente", NOMBRE_GCM, "CM-MDZ-03"),
     ("gcm.tuc-01@example.test", "Gerente", NOMBRE_GCM, "CM-TUC-01"),
@@ -83,6 +86,14 @@ BOLSINES = [
     (102, "CM-ROS-02", "CM-MDZ-03", "P-0102", 1500, ENVIADO),
     (103, "CM-MDZ-03", "CM-BA-01", "P-0103", 2100, ENVIADO),
     (104, "CM-BA-01", "CM-CBA-01", "P-0104", 900, ENVIADO),
+    (120, "CM-CBA-01", "CM-BA-01", "P-0120", 3300, ENVIADO),
+    (121, "CM-CBA-01", "CM-ROS-02", "P-0121", 2700, ENVIADO),
+    (122, "CM-CBA-01", "CM-TUC-01", "P-0122", 1900, ENVIADO),
+    (123, "CM-CBA-02", "CM-MDZ-03", "P-0123", 3100, ENVIADO),
+    (124, "CM-CBA-02", "CM-BA-01", "P-0124", 2400, ENVIADO),
+    (125, "CM-CBA-03", "CM-ROS-02", "P-0125", 1700, ENVIADO),
+    (126, "CM-CBA-03", "CM-BA-01", "P-0126", 2200, ENVIADO),
+    (127, "CM-CBA-03", "CM-MDZ-03", "P-0127", 1800, ENVIADO),
     (114, "CM-CBA-01", "CM-BA-01", "P-0114", 2600,
      (("Creado", D20, D20_1730), ("Cerrado", D20_1730, None))),
     (113, "CM-CBA-01", "CM-ROS-02", None, 1200,
@@ -170,6 +181,10 @@ async def _verificar(session: AsyncSession) -> None:
         103: ("CM-MDZ-03", "CM-BA-01"),
         104: ("CM-BA-01", "CM-CBA-01"),
         110: ("CM-CBA-02", "CM-ROS-02"),
+        120: ("CM-CBA-01", "CM-BA-01"),
+        121: ("CM-CBA-01", "CM-ROS-02"),
+        123: ("CM-CBA-02", "CM-MDZ-03"),
+        124: ("CM-CBA-02", "CM-BA-01"),
     }
     por_numero = {bolsin.numeroBolsin: bolsin for bolsin in bolsines}
     for numero, (origen, destino) in esperados.items():

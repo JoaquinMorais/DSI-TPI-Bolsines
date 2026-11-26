@@ -300,6 +300,7 @@ frontend/
   - `backend`: build de `./backend`, puerto `8020`, un solo worker de uvicorn, volumen `bolsines-data` para la base.
   - `frontend`: build de `./frontend`, dev server de Vite en `3020`, `depends_on: backend`.
 - Variables del backend por `env_file: .env` (opcional). `.env.example` lista las claves sin secretos.
-- El frontend usa `VITE_API_URL=http://localhost:8020`: el navegador llama al backend, por eso no se usa el nombre del servicio.
-- CORS: default en settings `http://localhost:5173`; `docker-compose.yml` fija `CORS_ORIGINS=http://localhost:3020` para el frontend.
+- El frontend usa rutas relativas por defecto: el dev server de Vite proxya `/auth` y `/seguimiento-bolsines` a `PROXY_TARGET` (`http://backend:8020` en Docker). `VITE_API_URL` permite fijar una URL absoluta si hiciera falta.
+- CORS: default en settings `http://localhost:5173`; `docker-compose.yml` fija `CORS_ORIGINS=http://localhost:3020` para el frontend. Con el proxy, el navegador ve un unico origen y no hay CORS entre frontend y backend.
+- Acceso remoto: `server.allowedHosts` en `vite.config.ts` permite el host de ngrok y el proxy evita exponer el backend o configurar CORS adicional.
 - Sin Docker: `uvicorn main:app --app-dir backend --port 8020` desde la raiz, y `npm run dev` dentro de `frontend/`.

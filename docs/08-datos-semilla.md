@@ -1,6 +1,6 @@
 # 08 - Datos semilla (CU 36)
 
-Set de datos que permite demostrar el flujo principal y los alternativos A1 a A5 en la defensa. Los numeros de bolsin, los codigos de CM y las ubicaciones coinciden con la API simulada del GPS de la catedra (repositorio `LiberaeMentis/dsi-api-bolsines`, datos precargados en `InMemoryBolsinRepository.init()`).
+Set de datos que permite demostrar el flujo principal y los alternativos A1 a A5 en la defensa. Los numeros de bolsin, los codigos de CM y las ubicaciones coinciden con la API simulada del GPS de la catedra (repositorio `LiberaeMentis/dsi-api-bolsines`, datos precargados en `InMemoryBolsinRepository.init()`), ampliada para el TP con los bolsines 120, 121, 123 y 124. Los numeros 122, 125, 126 y 127 no existen en la API y se usan para A3.
 
 El script `backend/data/seed.py` se implementa en una tarea posterior. Este documento define el contenido y el procedimiento.
 
@@ -31,12 +31,13 @@ Solo `Enviado` importa para el CU 36 (`Estado.esEnviado()` compara `nombre == "E
 
 ## 3. Comisiones Médicas
 
-Codigos iguales a los de la API del GPS. Son 6 CM: 5 CMJ y la CMC.
+Codigos iguales a los de la API del GPS. Son 7 CM: 6 CMJ y la CMC.
 
 | codigo | nombre | Tipo |
 |---|---|---|
 | CM-CBA-01 | Comisión Médica Córdoba | CMJ |
 | CM-CBA-02 | Comisión Médica Córdoba 2 | CMJ |
+| CM-CBA-03 | Comisión Médica Córdoba 3 | CMJ |
 | CM-ROS-02 | Comisión Médica Rosario | CMJ |
 | CM-MDZ-03 | Comisión Médica Mendoza | CMJ |
 | CM-TUC-01 | Comisión Médica Tucumán | CMJ |
@@ -50,11 +51,13 @@ Cada `Empleado` tiene un `Usuario` (relacion 1 a 1, `idUser` unico). El correo d
 
 | Empleado | CM | Rol | mail (`Usuario.mail`) | Uso en la defensa |
 |---|---|---|---|---|
-| EB Córdoba 1 | CM-CBA-01 | Encargado de Bolsines | eb.cba01@example.test | Principal (con A3) |
+| EB Córdoba 1 | CM-CBA-01 | Encargado de Bolsines | eb.cba01@example.test | Principal (con A3 parcial) |
 | EB Córdoba 2 | CM-CBA-02 | Encargado de Bolsines | eb.cba02@example.test | Principal limpio |
+| EB Córdoba 3 | CM-CBA-03 | Encargado de Bolsines | eb.cba03@example.test | A3 total |
 | EB Tucumán | CM-TUC-01 | Encargado de Bolsines | eb.tuc01@example.test | A1 |
 | GCM Córdoba | CM-CBA-01 | Gerente de Comisión Médica | gcm.cba-01@example.test | Destino de correo |
 | GCM Córdoba 2 | CM-CBA-02 | Gerente de Comisión Médica | gcm.cba-02@example.test | Destino de correo |
+| GCM Córdoba 3 | CM-CBA-03 | Gerente de Comisión Médica | gcm.cba-03@example.test | Destino de correo |
 | GCM Rosario | CM-ROS-02 | Gerente de Comisión Médica | gcm.ros-02@example.test | Destino de correo |
 | GCM Mendoza | CM-MDZ-03 | Gerente de Comisión Médica | gcm.mdz-03@example.test | Destino de correo |
 | GCM Tucumán | CM-TUC-01 | Gerente de Comisión Médica | gcm.tuc-01@example.test | Destino de correo |
@@ -76,10 +79,18 @@ Precinto `null` mientras el bolsin esta en `Creado`. Peso en gramos. La columna 
 |---|---|---|---|---|---|---|
 | 101 | CM-CBA-01 → CM-ROS-02 | Enviado | P-0101 | 4200 | Si, coincide | Principal, con ubicacion |
 | 110 | CM-CBA-02 → CM-ROS-02 | Enviado | P-0110 | 3800 | Si, coincide | Principal limpio |
-| 111 | CM-CBA-01 → CM-MDZ-03 | Enviado | P-0111 | 2950 | No (404) | **A3**: sin ubicacion |
+| 111 | CM-CBA-01 → CM-MDZ-03 | Enviado | P-0111 | 2950 | No (404) | **A3 parcial**: sin ubicacion |
 | 102 | CM-ROS-02 → CM-MDZ-03 | Enviado | P-0102 | 1500 | Si, coincide | Enviado de otra CM, excluido |
 | 103 | CM-MDZ-03 → CM-BA-01 | Enviado | P-0103 | 2100 | Si, coincide | Enviado de otra CM, excluido |
 | 104 | CM-BA-01 → CM-CBA-01 | Enviado | P-0104 | 900 | Si, coincide | Enviado de la CMC, excluido |
+| 120 | CM-CBA-01 → CM-BA-01 | Enviado | P-0120 | 3300 | Si, coincide | CBA-01 con ubicacion |
+| 121 | CM-CBA-01 → CM-ROS-02 | Enviado | P-0121 | 2700 | Si, coincide | CBA-01 con ubicacion |
+| 122 | CM-CBA-01 → CM-TUC-01 | Enviado | P-0122 | 1900 | No (404) | **A3 parcial** |
+| 123 | CM-CBA-02 → CM-MDZ-03 | Enviado | P-0123 | 3100 | Si, coincide | CBA-02 limpio |
+| 124 | CM-CBA-02 → CM-BA-01 | Enviado | P-0124 | 2400 | Si, coincide | CBA-02 limpio |
+| 125 | CM-CBA-03 → CM-ROS-02 | Enviado | P-0125 | 1700 | No (404) | **A3 total** |
+| 126 | CM-CBA-03 → CM-BA-01 | Enviado | P-0126 | 2200 | No (404) | **A3 total** |
+| 127 | CM-CBA-03 → CM-MDZ-03 | Enviado | P-0127 | 1800 | No (404) | **A3 total** |
 | 114 | CM-CBA-01 → CM-BA-01 | Cerrado | P-0114 | 2600 | No | Cerrado, excluido |
 | 113 | CM-CBA-01 → CM-ROS-02 | Creado | null | 1200 | No | Creado, excluido |
 | 115 | CM-CBA-01 → CM-MDZ-03 | Recibido | P-0115 | 1800 | No | Recibido, excluido |
@@ -89,9 +100,9 @@ Precinto `null` mientras el bolsin esta en `Creado`. Peso en gramos. La columna 
 
 Notas:
 - Los numeros 105 a 109 de la API no se cargan. El 105 sale de CM-TUC-01 y, si se cargara como Enviado, rompería A1.
-- Los bolsines 101, 102, 103, 104 y 110 tienen origen y destino iguales a la API. Si no coincidieran, la API responderia 404 y el sistema lo tomaria como A3 por error.
-- El numero 111 no existe en la API. Es el unico caso de A3 de la defensa.
-- Los numeros 112 y 119 en adelante quedan libres.
+- Los bolsines 101, 102, 103, 104, 110, 120, 121, 123 y 124 tienen origen y destino iguales a la API. Si no coincidieran, la API responderia 404 y el sistema lo tomaria como A3 por error.
+- Los numeros 111, 122, 125, 126 y 127 no existen en la API. 111 y 122 son el caso de A3 parcial; 125, 126 y 127 son el caso de A3 total (EB Córdoba 3).
+- Los numeros 105-109, 112, 119 y 128 en adelante quedan libres.
 
 ### Ubicaciones de referencia (API simulada)
 
@@ -99,6 +110,10 @@ Notas:
 |---|---|---|---|
 | 101 | -31.4201 | -64.1888 | 2026-03-07T12:30:00 |
 | 110 | -31.4167 | -64.1833 | 2026-03-07T12:52:09 |
+| 120 | -32.4075 | -63.2402 | 2026-03-07T13:00:00 |
+| 121 | -31.4279 | -62.0820 | 2026-03-07T13:05:00 |
+| 123 | -32.8895 | -68.8458 | 2026-03-07T13:10:00 |
+| 124 | -34.6037 | -58.3816 | 2026-03-07T13:15:00 |
 
 Las ubicaciones no se guardan en la base. Las devuelve la API en cada consulta.
 
@@ -110,7 +125,7 @@ Fechas en 2026.
 
 | Bolsin | Cadena (estado, fechaHoraInicio → fechaHoraFin) |
 |---|---|
-| 101, 102, 103, 104, 110, 111 | Creado (20/11 09:00 → 20/11 17:30), Cerrado (20/11 17:30 → 21/11 08:05), Enviado (21/11 08:05 → actual) |
+| 101, 102, 103, 104, 110, 111, 120, 121, 122, 123, 124, 125, 126, 127 | Creado (20/11 09:00 → 20/11 17:30), Cerrado (20/11 17:30 → 21/11 08:05), Enviado (21/11 08:05 → actual) |
 | 114 | Creado (20/11 09:00 → 20/11 17:30), Cerrado (20/11 17:30 → actual) |
 | 115 | Creado (20/11 09:00 → 20/11 17:30), Cerrado (20/11 17:30 → 21/11 08:05), Enviado (21/11 08:05 → 22/11 10:00), Recibido (22/11 10:00 → actual) |
 | 113 | Creado (24/11 09:00 → actual) |
@@ -124,11 +139,12 @@ Regla de carga: `fechaHoraInicio` del cambio siguiente es igual a `fechaHoraFin`
 
 | Escenario | Usuario | Accion | Resultado esperado |
 |---|---|---|---|
-| Principal | EB Córdoba 1 | Seguimiento completo | Enviados 101 y 111. Marcador para 101. 111 en `sinUbicacion` (A3). |
-| Principal limpio | EB Córdoba 2 | Seguimiento completo, hasta el correo | Solo 110, con ubicacion. Correo a GCM Rosario. |
+| Principal (con A3 parcial) | EB Córdoba 1 | Seguimiento completo | Enviados 101, 111, 120, 121 y 122. Marcadores 101, 120 y 121. 111 y 122 en `sinUbicacion` (A3). |
+| Principal limpio | EB Córdoba 2 | Seguimiento completo, hasta el correo | Enviados 110, 123 y 124, todos con ubicacion. Correo al GCM de la CM destino. |
 | A1 | EB Tucumán | Seguimiento | 404 `{codigo: "SIN_BOLSINES_ENVIADOS"}`. No hay Enviados de CM-TUC-01. |
-| A2 | EB Córdoba 1 | Filtro por precinto `P-0111` en el frontend | Muestra solo 111. Sin llamada al backend. Con `P-9999`, sin resultados. |
-| A3 | EB Córdoba 1 | Seleccionar 111 | Sin marcador. La sesion queda abierta. |
+| A2 | EB Córdoba 1 | Filtro por precinto `P-0120` en el frontend | Muestra solo 120. Con `P-0111`, solo 111. Con `P-9999`, sin resultados. Sin llamada al backend. |
+| A3 parcial | EB Córdoba 1 | Seleccionar 111 o 122 | Sin marcador. La sesion queda abierta. |
+| A3 total | EB Córdoba 3 | Seguimiento | Enviados 125, 126 y 127, todos en `sinUbicacion`. `marcadores: []`; la sesion queda abierta. |
 | A4 | Cualquiera | DELETE del caso de uso | 204. No se envia correo. |
 | A5 | Cualquiera | Confirmacion con `confirma: false` | 200, `notificado: false`. No se llama a `enviarMailGCM`. |
 | Filtro de exclusion | EB Córdoba 1 | Seguimiento | No aparecen 102, 103, 104 (Enviados de otras CM) ni 113, 114, 115, 117, 118 (otros estados). |
@@ -139,6 +155,7 @@ Regla de carga: `fechaHoraInicio` del cambio siguiente es igual a `fechaHoraFin`
 2. **Nombre de CM-CBA-02:** "Comisión Médica Córdoba 2". Aprobado, sujeto a cambio por el equipo.
 3. **CM-BA-01 como CMC:** supuesto a partir del codigo, aprobado.
 4. **Emails y contrasenas:** dominio `example.test`, contrasena en `.env` (`SEED_PASSWORD_DEV`). Aprobado.
+5. **Set ampliado (2026-11-26):** se agregan 120, 121, 122, 123, 124, 125, 126 y 127; la CM-CBA-03 con EB/GCM Córdoba 3; y los datos 120, 121, 123 y 124 al mock GPS vendorizado. Los 101-110 originales no se modifican.
 
 ## 9. Procedimiento de carga (`backend/data/seed.py`)
 
@@ -147,9 +164,9 @@ Regla de carga: `fechaHoraInicio` del cambio siguiente es igual a `fechaHoraFin`
 3. Insertar en este orden: `Estado`, `Rol`, `ComisionMedica`, `Usuario` (con hash de `SEED_PASSWORD_DEV`), `Empleado`, `Bolsin`, `CambioEstado`. Los bolsines referencian las CM por codigo, que el script resuelve a id.
 4. Verificaciones al final:
    - Un solo `CambioEstado` con `fechaHoraFin` nula por bolsin.
-   - Origen y destino de 101, 102, 103, 104 y 110 iguales a la API.
-   - 111 no tiene equivalente en la API (escenario A3).
+   - Origen y destino de 101, 102, 103, 104, 110, 120, 121, 123 y 124 iguales a la API.
+   - 111, 122, 125, 126 y 127 no tienen equivalente en la API (A3 parcial y total).
 5. Ejecucion:
    - Desde la raiz: `python -m backend.data.seed` (el script agrega `backend/` al `sys.path`). Con `--reset` para recargar.
-   - En Docker: `docker compose run --rm backend python -m data.seed` (o `docker compose exec backend ...` con el contenedor arriba).
+   - En Docker: el servicio one-shot `seed` de `docker-compose.yml` corre `python -m data.seed` en cada `docker compose up`; si la base ya tiene datos no hace nada. El backend espera a que termine (`service_completed_successfully`). Para recargar a mano: `docker compose run --rm backend python -m data.seed --reset`.
    - Al terminar imprime el resumen de bolsines Enviados por CM.

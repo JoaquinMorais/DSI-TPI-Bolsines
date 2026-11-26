@@ -42,9 +42,38 @@ async def test_bolsin_101_ubicado() -> None:
 
 
 @pytest.mark.asyncio
-async def test_bolsin_111_no_existe_en_la_api() -> None:
+@pytest.mark.parametrize(
+    ("numero", "origen", "latitud", "longitud"),
+    [
+        (120, "CM-CBA-01", -32.4075, -63.2402),
+        (121, "CM-CBA-01", -31.4279, -62.0820),
+        (123, "CM-CBA-02", -32.8895, -68.8458),
+        (124, "CM-CBA-02", -34.6037, -58.3816),
+    ],
+)
+async def test_bolsines_nuevos_ubicados(
+    numero: int, origen: str, latitud: float, longitud: float
+) -> None:
+    ubicacion = await _adaptador().getBolsinLocation(numero, origen)
+    assert ubicacion.numeroBolsin == numero
+    assert round(ubicacion.latitud, 4) == latitud
+    assert round(ubicacion.longitud, 4) == longitud
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("numero", "origen"),
+    [
+        (111, "CM-CBA-01"),
+        (122, "CM-CBA-01"),
+        (125, "CM-CBA-03"),
+        (126, "CM-CBA-03"),
+        (127, "CM-CBA-03"),
+    ],
+)
+async def test_bolsines_ausentes_en_la_api(numero: int, origen: str) -> None:
     with pytest.raises(UbicacionNoDisponibleError):
-        await _adaptador().getBolsinLocation(111, "CM-CBA-01")
+        await _adaptador().getBolsinLocation(numero, origen)
 
 
 @pytest.mark.asyncio

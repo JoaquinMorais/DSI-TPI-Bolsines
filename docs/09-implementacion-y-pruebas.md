@@ -1,6 +1,6 @@
 # 09 - Implementacion y pruebas (CU 36)
 
-Estado: **implementado** (pasos 1 a 16 del orden de implementacion). La suite pytest da **73 passed, 4 skipped** (los 4 skipped son los tests de integracion, que requieren la API GPS). El chequeo en vivo con `docker compose up` respondio login y seguimiento (A3 por GPS inalcanzable) y el frontend sirvio en `3020`.
+Estado: **implementado** (pasos 1 a 17 del orden de implementacion). La suite completa en Docker da **116 passed** con la API GPS corriendo; los tests de integracion se saltan si la API no responde. El chequeo en vivo con `docker compose up` responde login, seguimiento, A3 parcial (101/120/121 con ubicacion; 111/122 sin ubicacion) y A3 total (EB Cordoba 3); el frontend sirve en `3020`.
 
 ## 1. Detalles de implementacion
 
@@ -26,7 +26,7 @@ Restricciones de ejecucion (`AGENTS.md` §9, `docs/07-api-rest.md`):
 | Iterator visible y usado por el gestor | Revision de codigo: `GestorBuscarBolsines` implementa `IAgregado` y solo llama a `primero`, `haFinalizado`, `elementoActual`, `siguiente`. Un test verifica que el gestor no accede a la lista. | Cumplido (`test_obtener_codigos_usa_iterador` y revision) |
 | Filtro dentro de `comprobarFiltro()` | Tests unitarios del iterador (§4.1). | Cumplido (`tests/test_iterador_bolsin.py`) |
 | Consistencia con el modelado | Nombres de clases y metodos iguales a `docs/04-vista-estatica.md`. Revision cruzada con `docs/02-modelo-datos.md` y `docs/07-api-rest.md`. | Cumplido (nombres iguales a `docs/04`; revision cruzada) |
-| Persistencia en DB | Test de integracion: el seed carga una SQLite temporal y la consulta del gestor devuelve los bolsines esperados (101, 110 y 111 segun el escenario). Verifica un solo `CambioEstado` vigente por bolsin. | Cumplido (`tests/test_seed.py` y chequeo en vivo con SQLite) |
+| Persistencia en DB | Test de integracion: el seed carga una SQLite temporal y la consulta del gestor devuelve los bolsines esperados (101, 110 y 111 para los escenarios base; 120-127 en el set ampliado). Verifica un solo `CambioEstado` vigente por bolsin. | Cumplido (`tests/test_seed.py` y chequeo en vivo con SQLite) |
 | Defensa del patron | Checklist de §5. | Pendiente (defensa oral) |
 
 ## 3. Integracion contra la API real del GPS Tracker
@@ -37,7 +37,8 @@ Pruebas de integracion en `backend/tests/integracion/test_gps_tracker_xtr4500l_r
 - Marcadas como `integracion`. Se saltan si la API no responde en `GPS_BASE_URL`. La suite normal corre sin la API.
 - Casos:
   - Bolsin 101 con `codigoComisionMedicaOrigen=CM-CBA-01`: devuelve `UbicacionBolsin` con latitud -31.4201 y longitud -64.1888.
-  - Bolsin 111 (no existe en la API): 404, el adaptador lanza `UbicacionNoDisponibleError`.
+  - Bolsines 120, 121, 123 y 124 (agregados al mock): devuelven las coordenadas esperadas.
+  - Bolsines 111, 122, 125, 126 y 127 (no existen en la API): 404, el adaptador lanza `UbicacionNoDisponibleError`.
   - Bolsin 101 con codigo `CM-ROS-02` (no es su origen): 404, lanza `UbicacionNoDisponibleError`.
   - API key incorrecta: 401, se propaga como error de configuracion, no como A3.
 - Las fechas se parsean sin zona horaria, tambien el caso sin segundos (`2026-03-07T12:30`).
@@ -85,8 +86,8 @@ Ubicacion: `backend/tests/` (`pytest.ini` apunta a esa carpeta y se ejecuta desd
 |---|---|---|
 | Flujo principal | EB Cordoba 2, GPS fake con 110 ubicado | `obtenerCodigoBolsinesEnviados()` = [110]. Un marcador. Un correo al GCM Rosario. |
 | A1 | EB Tucuman | Lista vacia. Sin llamadas al GPS. Sin correos. |
-| A3 | EB Cordoba 1, GPS fake lanza `UbicacionNoDisponibleError` para 111 | 111 en `sinUbicacion`, 101 con marcador. Sesion abierta. |
-| A3 total | GPS fake lanza para todos | `marcadores` vacio, todos en `sinUbicacion`. Sesion abierta. |
+| A3 parcial | EB Cordoba 1, GPS fake lanza `UbicacionNoDisponibleError` para 111 | 111 en `sinUbicacion`, 101 con marcador. Sesion abierta. |
+| A3 total | GPS fake lanza para todos (101 y 111) | `marcadores` vacio, todos en `sinUbicacion`. Sesion abierta (`test_a3_total_sin_ubicacion`). |
 | A5 | `confirma: false` | `enviarMailGCM` no se llama. Correo fake sin envios. |
 | Gestor no recorre lista | Inyeccion de una lista espia | El gestor solo usa los metodos del iterador. |
 
@@ -98,7 +99,8 @@ Ubicacion: `backend/tests/` (`pytest.ini` apunta a esa carpeta y se ejecuta desd
 | POST con usuario sin rol EB | JWT de un GCM | 403 |
 | POST flujo principal | JWT de EB Cordoba 2 | 201 con `idCU` y `bolsines` |
 | POST A1 | usuario dev EB Tucuman | 404 `codigo: SIN_BOLSINES_ENVIADOS` |
-| POST A3 | JWT de EB Cordoba 1 | 201, 111 en `sinUbicacion` |
+| POST A3 parcial | JWT de EB Cordoba 1 | 201, 111 (y en el seed 122) en `sinUbicacion` |
+| POST A3 total | JWT de EB Cordoba 3 (seed) | 201, 125, 126 y 127 en `sinUbicacion`, `marcadores: []` |
 | POST seleccion | `numeroBolsin: 0` | 422 |
 | POST seleccion con `idCU` vencido | UUID inexistente | 404 `CASO_USO_NO_ENCONTRADO` |
 | POST confirmacion A5 | `confirma: false` | 200, `notificado: false` |
@@ -133,7 +135,7 @@ Orden sugerido (unos 15 minutos):
 5. **Entidades:** `Bolsin.esTuCMOrigen` y `sosEnviado`, y la cadena hasta `Estado.esEnviado`.
 6. **Boundary:** `backend/routes/seguimiento_bolsines.py`. Mostrar que solo traduce HTTP.
 7. **Pruebas:** `pytest -k iterador -v` y luego `pytest -v`. Mostrar un caso de reutilizacion (CU 28).
-8. **Flujo en vivo:** `docker compose up` con la API de la catedra corriendo. Login como EB Cordoba 1 y mostrar A3 (111 en `sinUbicacion`). Despues EB Tucuman y mostrar A1.
+8. **Flujo en vivo:** `docker compose up` con la API de la catedra corriendo. Login como EB Cordoba 1 y mostrar A3 parcial (111 y 122 en `sinUbicacion`). Despues EB Cordoba 3 y mostrar A3 total; EB Tucuman y mostrar A1.
 9. **Persistencia:** abrir la base y mostrar el `CambioEstado` vigente de un bolsin.
 10. **Decisiones:** `docs/99-decisiones-y-dudas.md`. Mencionar `CambioEstado` vs `CambioEstadoBolsin`, `primero`/`siguiente` que avanzan a un valido, y el centro del mapa pendiente.
 
@@ -170,6 +172,6 @@ Pendientes y decisiones distintas: ver `docs/99-decisiones-y-dudas.md` (Microsof
 
 ## 7. Decisiones tomadas para esta fase
 
-1. **Escenario A3 en la defensa:** bolsin 111 con EB Cordoba 1, como en `docs/08-datos-semilla.md`.
+1. **Escenario A3 en la defensa:** A3 parcial con 111 y 122 (EB Cordoba 1); A3 total con 125-127 (EB Cordoba 3), como en `docs/08-datos-semilla.md`.
 2. **Tests de integracion:** marcados como `integracion` y se saltan si la API no responde. No bloquean la suite normal.
 3. **Frontend:** paso 16, despues del backend.

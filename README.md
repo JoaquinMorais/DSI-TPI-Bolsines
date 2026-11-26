@@ -47,12 +47,31 @@ Variables que aceptan los scripts (opcionales): `BACKEND_PORT`, `FRONTEND_PORT`,
 docker compose up --build
 ```
 
+Levanta frontend, backend y la API GPS simulada (`gps-api/`). Antes de arrancar el
+backend, un servicio `seed` carga los datos solo si la base está vacía (no sobrescribe
+datos existentes).
+
 - Backend: `http://localhost:8020` (`/docs`).
 - Frontend: `http://localhost:3020`.
-- Sembrar datos:
+- API GPS: `http://localhost:8080` (`/health`).
+- Recargar la semilla manualmente (borra y vuelve a cargar):
   ```
-  docker compose exec backend python -m data.seed --reset
+  docker compose run --rm backend python -m data.seed --reset
   ```
+
+#### Acceso por ngrok
+
+El dev server de Vite acepta el host `synodal-leora-unvolcanically.ngrok-free.dev`
+y proxya `/auth` y `/seguimiento-bolsines` al backend (`PROXY_TARGET`, en Docker
+`http://backend:8020`). Con un túnel al puerto `3020` se puede usar la app desde
+otro dispositivo:
+
+```
+ngrok http 3020
+```
+
+Si cambia la URL de ngrok, actualizar `server.allowedHosts` en
+`frontend/vite.config.ts`.
 
 ### Opción 3: manual
 
@@ -72,13 +91,17 @@ npm install
 VITE_API_URL=http://localhost:8000 npm run dev -- --port 5173
 ```
 
-### API GPS de la cátedra (opcional)
+### API GPS de la cátedra
 
-Repositorio: `LiberaeMentis/dsi-api-bolsines`. Levanta en `http://localhost:8080`:
+Es el repositorio `LiberaeMentis/dsi-api-bolsines`, vendorizado en `gps-api/` (ver
+`gps-api/README.md` para la procedencia). Con Docker Compose se levanta como el servicio
+`gps-api` en `http://localhost:8080`; el backend lo consume por `http://gps-api:8080`
+dentro de la red de Compose.
+
+Para ejecutarla fuera de Docker (por ejemplo con el backend manual):
 
 ```
-git clone https://github.com/LiberaeMentis/dsi-api-bolsines /tmp/dsi-api-bolsines
-cd /tmp/dsi-api-bolsines
+cd gps-api
 ./mvnw spring-boot:run
 ```
 
@@ -97,7 +120,8 @@ Plantilla del backend: `backend/.env.example`. Para Docker: `.env.example` en la
 - `USUARIO_DEV`: usuario de desarrollo para las rutas del CU 36.
 - `GPS_MODELO`: `xtr4500l` | `navtrack` | `geopulse`.
 - `GPS_BASE_URL`, `GPS_API_KEY`.
-- `VITE_API_URL` (frontend): URL del backend.
+- `VITE_API_URL` (frontend): vacío = mismo origen (el dev server de Vite proxya la API).
+- `PROXY_TARGET` (frontend): destino del proxy; default `http://localhost:8020`, en Docker `http://backend:8020`.
 
 ## Pruebas
 
@@ -125,6 +149,7 @@ pytest --cov=config --cov=models --cov=services --cov=routes --cov=schemas --cov
 ```
 backend/        FastAPI + SQLModel (models, services, routes, integrations, utils, tests)
 frontend/       Vite + React + TypeScript (Tailwind, TanStack Query, Leaflet)
+gps-api/        API GPS simulada de la cátedra (Spring Boot, vendorizada)
 docs/           documentación del TP (00 a 10, 99, diagramas y referencias)
 scripts/        dev.sh / dev.ps1 (entorno de desarrollo)
 docker-compose.yml
