@@ -166,3 +166,9 @@
 | 2026-11-25 | Filtros de la pantalla. | Precinto **contiene (case-insensitive)** y CM destino **exacta**; se aplican a la lista y a los marcadores del mapa. |
 | 2026-11-25 | A3: alcance del banner. | Muestra **todos** los bolsines de `sinUbicacion` del caso de uso. |
 | 2026-11-25 | Verificacion de A1/A3 en el navegador. | Se cambia `USUARIO_DEV` del backend y se reinicia: `eb.cba02` (principal), `eb.cba01` (A3) y `eb.tuc01` (A1 404). |
+| 2026-11-25 | Paso 7: seleccionar en la lista/mapa. | Ademas del resaltado, se llama **`POST /{idCU}/seleccion`** y el panel de detalle usa la respuesta (coordenadas y fecha/hora). |
+| 2026-11-25 | Destinatario en el dialogo de correo. | El backend no devuelve nombre/email del GCM antes de enviar; el dialogo muestra **"Gerente de la CM `<codigoCMDestino>`"**. El email enmascarado aparece en el toast y el panel tras el envio. |
+| 2026-11-25 | Tras confirmar (exito o A5). | El backend elimina el `idCU`; se deshabilitan seleccion y "Notificar". "Cancelar consulta" navega a Inicio **sin** llamar al backend si el caso ya finalizo. |
+| 2026-11-25 | A5 (no enviar correo). | Se mantiene la pagina con el resultado "No se envio el correo" y un toast; no se envia mail. |
+| 2026-11-25 | "Correo enviado el `<fecha>`". | Se usa la fecha/hora del **cliente** (`new Date().toLocaleString("es-AR")`); el backend no devuelve timestamp de envio. |
+| 2026-11-25 | Dialogo de confirmacion. | Un componente **generico** `DialogoConfirmacion` reutilizado para notificar (confirmar/no enviar/cancelar) y para cancelar la consulta. |

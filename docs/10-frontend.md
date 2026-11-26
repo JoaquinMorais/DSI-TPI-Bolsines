@@ -151,15 +151,20 @@ frontend/
       EstadoVacio.tsx           # Empty State (A1/A2)
       SkeletonLista.tsx         # carga
       MapaBolsines.tsx          # Leaflet/OSM + fix de iconos para Vite
+      Breadcrumbs.tsx           # Inicio > Seguimiento de bolsines
+      DialogoConfirmacion.tsx   # confirmar / no enviar / cancelar
+      Toast.tsx                 # feedback de exito/error
       Header.test.tsx
       EstadoVacio.test.tsx
       EstadoError.test.tsx
+      DialogoConfirmacion.test.tsx
     features/
       seguimiento/
         index.ts
         ListaBolsines.tsx       # lista accesible (botones, aria-pressed)
         FiltrosBolsines.tsx     # precinto + CM destino
         AvisoSinUbicacion.tsx   # banner A3
+        DetalleBolsin.tsx       # panel del bolsin (paso 7) + notificar
         ListaBolsines.test.tsx
         FiltrosBolsines.test.tsx
     hooks/
@@ -170,7 +175,7 @@ frontend/
       useCancelarSeguimiento.ts # useMutation DELETE .../{idCU}
     pages/
       HomePage.tsx
-      SeguimientoPage.tsx       # Master-Detail, filtros, mapa y estados A1-A3
+      SeguimientoPage.tsx       # Master-Detail, filtros, mapa, pasos 7-11, A1-A5
       SeguimientoPage.test.tsx
     types/
       auth.ts                   # TokenResponse, UsuarioActualOut, EmpleadoMeOut

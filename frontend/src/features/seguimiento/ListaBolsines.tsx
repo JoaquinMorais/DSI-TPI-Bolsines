@@ -7,10 +7,12 @@ export function ListaBolsines({
   filas,
   seleccionado,
   onSeleccionar,
+  deshabilitado = false,
 }: {
   filas: FilaBolsin[];
   seleccionado: number | null;
   onSeleccionar: (numeroBolsin: number) => void;
+  deshabilitado?: boolean;
 }) {
   return (
     <ul className="space-y-2" aria-label="Bolsines enviados">
@@ -21,8 +23,9 @@ export function ListaBolsines({
             <button
               type="button"
               aria-pressed={activo}
+              disabled={deshabilitado}
               onClick={() => onSeleccionar(fila.numeroBolsin)}
-              className={`w-full rounded border p-3 text-left ${
+              className={`w-full rounded border p-3 text-left disabled:opacity-60 ${
                 activo
                   ? "border-slate-900 bg-amber-50"
                   : "border-slate-200 bg-white hover:bg-slate-50"
