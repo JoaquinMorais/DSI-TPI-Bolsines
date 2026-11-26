@@ -167,3 +167,5 @@ Preguntas probables:
 - *¿Por qué Iterator y no un loop?* Desacopla el gestor de la colección y deja el filtro reutilizable (CU 28).
 - *¿Por qué `comprobarFiltro` dentro de `primero`/`siguiente`?* Así `elementoActual` siempre devuelve un válido y el gestor no filtra.
 - *¿Qué pasa con varios workers?* El estado en memoria se pierde; se documenta como limitación (un solo worker).
+
+
