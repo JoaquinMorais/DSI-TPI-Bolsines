@@ -9,6 +9,11 @@ services:
     environment:
       CORS_ORIGINS: http://localhost:3020
       DATABASE_URL: sqlite+aiosqlite:////app/db/bolsines.db
+      # Dentro del contenedor, localhost es el propio contenedor: la API GPS
+      # de la catedra corre en el host.
+      GPS_BASE_URL: ${GPS_BASE_URL:-http://host.docker.internal:8080}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       # La base SQLite persiste fuera del contenedor, en un subdirectorio propio
       # para no tapar el codigo de backend/data (seed.py).

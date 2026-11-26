@@ -53,7 +53,9 @@ def _codigos(iterador: IteradorBolsin) -> list[int]:
     codigos: list[int] = []
     iterador.primero()
     while not iterador.haFinalizado():
-        codigos.append(iterador.elementoActual().getNumeroBolsin())
+        bolsin = iterador.elementoActual()
+        if bolsin is not None:
+            codigos.append(bolsin.getNumeroBolsin())
         iterador.siguiente()
     return codigos
 
@@ -64,23 +66,34 @@ def test_primero_con_coleccion_vacia() -> None:
     assert iterador.haFinalizado() is True
 
 
-def test_primero_posiciona_en_primer_valido() -> None:
+def test_primero_posiciona_en_el_primer_elemento() -> None:
     iterador = IteradorBolsin(_bolsines(), FILTRO_CBA)
     iterador.primero()
+    # 102 es de Rosario: no cumple el filtro, elementoActual devuelve None.
+    assert iterador.elementoActual() is None
+
+
+def test_elemento_actual_devuelve_el_bolsin_si_cumple_filtro() -> None:
+    iterador = IteradorBolsin(_bolsines(), FILTRO_CBA)
+    iterador.primero()
+    iterador.siguiente()
     assert iterador.elementoActual().getNumeroBolsin() == 101
 
 
-def test_siguiente_salta_no_validos() -> None:
+def test_siguiente_avanza_de_a_uno() -> None:
     iterador = IteradorBolsin(_bolsines(), FILTRO_CBA)
     iterador.primero()
-    iterador.siguiente()
+    for _ in range(3):
+        iterador.siguiente()
     assert iterador.elementoActual().getNumeroBolsin() == 111
 
 
-def test_ha_finalizado_tras_ultimo_valido() -> None:
-    iterador = IteradorBolsin(_bolsines(), FILTRO_CBA)
+def test_ha_finalizado_tras_el_ultimo_elemento() -> None:
+    bolsines = _bolsines()
+    iterador = IteradorBolsin(bolsines, FILTRO_CBA)
     iterador.primero()
-    iterador.siguiente()
+    for _ in range(len(bolsines) - 1):
+        iterador.siguiente()
     assert iterador.haFinalizado() is False
     iterador.siguiente()
     assert iterador.haFinalizado() is True
@@ -114,8 +127,7 @@ def test_todos_no_validos() -> None:
         _Bolsin(117, "CM-TUC-01", "CM-CBA-01", False),
     ]
     iterador = IteradorBolsin(no_validos, FILTRO_CBA)
-    iterador.primero()
-    assert iterador.haFinalizado() is True
+    assert _codigos(iterador) == []
 
 
 def test_todos_cumplen() -> None:

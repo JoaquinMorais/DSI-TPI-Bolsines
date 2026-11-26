@@ -4,7 +4,10 @@ from sqlmodel import select
 
 from integrations.correo.interfaz_correo import InterfazCorreo
 from integrations.google_maps.interfaz_google_maps import InterfazGoogleMaps
-from integrations.gps_tracker.errores import UbicacionNoDisponibleError
+from integrations.gps_tracker.errores import (
+    ErrorIntegracionGPS,
+    UbicacionNoDisponibleError,
+)
 from integrations.gps_tracker.interfaz_gps_tracker import InterfazGPSTracker
 from models.bolsin import Bolsin
 from models.comision_medica import ComisionMedica
@@ -19,7 +22,7 @@ from models.resultados import (
     SinUbicacion,
 )
 from models.ubicacion_bolsin import UbicacionBolsin
-from services.errores import SinBolsinesEnviadosError
+from services.errores import GPSNoDisponibleError, SinBolsinesEnviadosError
 
 
 class GestorBuscarBolsines(IAgregado):
@@ -62,8 +65,8 @@ class GestorBuscarBolsines(IAgregado):
     async def opcionSeguirBolsines(self) -> None:
         self.getCMUsuarioLogueado()
         self.bolsines = await self._cargarBolsines()
-        enviados = self.obtenerBolsinesEnviados()
-        if not enviados:
+        codigos = self.obtenerCodigoBolsinesEnviados()
+        if not codigos:
             raise SinBolsinesEnviadosError(self._codigoCM)
         await self.obtenerUbicacionBolsin()
         self.obtenerMapa()
@@ -71,19 +74,26 @@ class GestorBuscarBolsines(IAgregado):
     def crearIterador(self, elementos: list[Bolsin]) -> IIterador:
         return IteradorBolsin(elementos, ["origen", self._codigoCM])
 
-    def obtenerBolsinesEnviados(self) -> list[Bolsin]:
+    def obtenerCodigoBolsinesEnviados(self) -> list[int]:
+        """Paso 6 del CU 36 con el patron Iterator (secuencia de la Entrega 2).
+
+        El gestor solo usa primero(), haFinalizado(), elementoActual() y
+        siguiente(). elementoActual() devuelve None si el bolsin no cumple
+        comprobarFiltro().
+        """
         iterador = self.crearIterador(self.bolsines)
         enviados: list[Bolsin] = []
         codigos: list[int] = []
         iterador.primero()
         while not iterador.haFinalizado():
             bolsin = iterador.elementoActual()
-            enviados.append(bolsin)
-            codigos.append(bolsin.getNumeroBolsin())
+            if bolsin is not None:
+                enviados.append(bolsin)
+                codigos.append(bolsin.getNumeroBolsin())
             iterador.siguiente()
         self.bolsinesEnviados = enviados
         self.codigoBolsin = codigos
-        return enviados
+        return codigos
 
     async def obtenerUbicacionBolsin(self) -> None:
         self.ubicacionesBolsines = []
@@ -101,6 +111,8 @@ class GestorBuscarBolsines(IAgregado):
                 self.advertencias.append(
                     f"Bolsin {exc.numeroBolsin} sin ubicacion: {exc.motivo}"
                 )
+            except ErrorIntegracionGPS as exc:
+                raise GPSNoDisponibleError(exc.motivo) from exc
             else:
                 self.ubicacionesBolsines.append(ubicacion)
 

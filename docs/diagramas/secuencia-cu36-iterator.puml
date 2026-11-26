@@ -2,9 +2,9 @@
 title CU 36 - Busqueda de bolsines Enviados con patron Iterator (Entrega 2)
 skinparam sequenceMessageAlign center
 
-' Decision: primero() y siguiente() avanzan internamente hasta el proximo
-' elemento que cumple comprobarFiltro(). elementoActual() siempre devuelve
-' un bolsin valido y el gestor no filtra nada.
+' Igual que el diagrama de secuencia de la Entrega 2: elementoActual() llama a
+' comprobarFiltro(); devuelve el bolsin si cumple el filtro o null si no.
+' primero() y siguiente() solo mueven la posicion.
 ' Decision: "new" del diagrama se implementa como init (constructor).
 
 participant "gestor:GestorBuscarBolsines" as G
@@ -17,22 +17,18 @@ G -> G : obtenerCodigoBolsinesEnviados()
 G -> G : crearIterador(elementos)
 G -> IT : init(elementos, filtros)
 G -> IT : primero()
-IT -> IT : posicionarEnValido()
-loop mientras comprobarFiltro() no cumple
-  IT -> IT : comprobarFiltro(filtros)
-  IT -> B : esTuCMOrigen(codigoCM)
-  IT -> B : sosEnviado()
-  B -> CE : sosActual()
-  B -> CE : sosEnviado()
-  CE -> ES : esEnviado()
-  IT -> IT : siguiente interno
-end
 
 loop mientras haFinalizado() = false
   G -> IT : haFinalizado()
   G -> IT : elementoActual()
+  IT -> IT : comprobarFiltro(filtros)
+  IT -> B : esTuCMOrigen(codigoCM)
+  IT -> B : sosEnviado()
+  B -> CE : *sosActual()
+  B -> CE : sosEnviado()
+  CE -> ES : esEnviado()
   G -> B : getNumeroBolsin()
+  note right of G : solo si elementoActual() no es null
   G -> IT : siguiente()
-  IT -> IT : posicionarEnValido()
 end
 @enduml

@@ -121,7 +121,7 @@ Puntos clave:
 
 Flujo de endpoints (rutas orientativas, se definen al implementar):
 
-1. `POST /seguimiento-bolsines` (opcionSeguirBolsines, pasos 2 a 9). Crea el gestor, inyecta el usuario, ejecuta `buscarUsuarioLogueado`, `getCMUsuarioLogueado`, `obtenerBolsinesEnviados`, consulta el GPS, arma el mapa y devuelve `idCU`. Detalle en `docs/07-api-rest.md`.
+1. `POST /seguimiento-bolsines` (opcionSeguirBolsines, pasos 2 a 9). Crea el gestor, inyecta el usuario, ejecuta `buscarUsuarioLogueado`, `getCMUsuarioLogueado`, `obtenerCodigoBolsinesEnviados`, consulta el GPS, arma el mapa y devuelve `idCU`. Detalle en `docs/07-api-rest.md`.
 2. `POST /seguimiento-bolsines/{idCU}/seleccion` (tomarSeleccionBolsin, paso 10). Guarda `seleccionBolsin`.
 3. `POST /seguimiento-bolsines/{idCU}/confirmacion-correo` (pasos 11 a 13). Ejecuta `enviarMailGCM` y finaliza el caso de uso.
 4. `DELETE /seguimiento-bolsines/{idCU}` (A4, cancelar). Elimina el gestor del diccionario.

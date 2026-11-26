@@ -40,18 +40,19 @@ group Entrega 2: reemplaza el loop de obtenerBolsinesEnviados() de E1 #LightYell
   G -> G : crearIterador(elementos)
   G -> IT : init(elementos, filtros)
   G -> IT : primero()
-  IT -> IT : posicionarEnValido()
   loop mientras haFinalizado() = false
     G -> IT : haFinalizado()
     G -> IT : elementoActual()
+    IT -> IT : comprobarFiltro(filtros)
+    IT -> B : esTuCMOrigen(codigoCM)
+    IT -> B : sosEnviado()
+    B -> CE : *sosActual()
+    B -> CE : sosEnviado()
+    CE -> ES : esEnviado()
     G -> B : getNumeroBolsin()
+    note right of G : solo si elementoActual() no es null
     G -> IT : siguiente()
-    IT -> IT : posicionarEnValido()
   end
-  note over IT
-    posicionarEnValido() usa comprobarFiltro(filtros):
-    esTuCMOrigen(codigoCM), sosEnviado() -> sosActual() -> sosEnviado() -> Estado.esEnviado()
-  end note
 end
 note over G
   Entrega 1 (reemplazado): el gestor recorria bolsines con

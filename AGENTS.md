@@ -79,7 +79,7 @@ frontend/
 - El Iterator debe ser **claramente visible** y **usado por el gestor**.
 - Jerarquia obligatoria: `IAgregado` (implementado por `GestorBuscarBolsines`, expone `crearIterador`), `IIterador` (`primero`, `siguiente`, `haFinalizado`, `elementoActual`, `comprobarFiltro`), `IteradorBolsin` (concreto, en `backend/models/iterator/`).
 - El nombre de la interfaz es siempre **`IIterador`**. `IIterator` (texto de la Entrega 2) es un error de escritura; no usarlo.
-- El constructor de `IteradorBolsin` es **`init(elementos, filtros)`**, equivalente al `new` del diagrama. `primero()` y `siguiente()` avanzan hasta el proximo elemento que cumple `comprobarFiltro()`.
+- El constructor de `IteradorBolsin` es **`init(elementos, filtros)`**, equivalente al `new` del diagrama. Como en la secuencia de la Entrega 2: `primero()` y `siguiente()` solo mueven la posicion; `elementoActual()` llama a `comprobarFiltro()` y devuelve el bolsin si cumple o `None` si no. El gestor descarta los `None`.
 - El gestor recorre los bolsines **solo** con `primero()`, `haFinalizado()`, `elementoActual()`, `siguiente()`. No recorre listas ni consulta bolsines en bucles propios.
 - El filtrado (CM origen = CM del usuario logueado y estado Enviado) vive en `comprobarFiltro()` del iterador.
 - **Prohibido** agregar otros patrones que oculten al Iterator: repositorios genericos, fabricas adicionales, query builders, `Specification`, `Strategy` de filtros, mapeos intermedios, etc. Si la base se consulta para cargar bolsines, la consulta debe ser simple y el recorrido sigue siendo el del iterador.
@@ -93,7 +93,7 @@ frontend/
 
 ## 8. Integraciones externas
 
-- GPS Tracker: API simulada de la catedra, repositorio `LiberaeMentis/dsi-api-bolsines`. Modelo XTR-4500L (endpoint `getBolsinLocation`). Base por defecto `http://localhost:8080` (`GPS_BASE_URL`). Una API key por modelo por variable de entorno (`GPS_API_KEY_XTR4500L`, `GPS_API_KEY_NAVTRACK`, `GPS_API_KEY_GEOPULSE`); nunca en el codigo ni en el repo. Detalle en `docs/06-integraciones.md`.
+- GPS Tracker: API simulada de la catedra, repositorio `LiberaeMentis/dsi-api-bolsines`. Modelo XTR-4500L (endpoint `getBolsinLocation`). Base por defecto `http://localhost:8080` (`GPS_BASE_URL`). Modelo con `GPS_MODELO` y key con `GPS_API_KEY` (la key mock publica del XTR esta en `.env.example`; los scripts `dev` crean `backend/.env` desde ahi). Sin key la API responde 401 y el backend devuelve 502 `GPS_NO_DISPONIBLE`. Detalle en `docs/06-integraciones.md`.
 - Google Maps: la visualizacion vive en el frontend (`VITE_GOOGLE_MAPS_API_KEY`). El backend no llama a la API de Maps.
 - Servidor de correo: implementacion simulada (log/archivo) por defecto; Microsoft Graph documentado, sin implementar. Detalle en `docs/06-integraciones.md`.
 

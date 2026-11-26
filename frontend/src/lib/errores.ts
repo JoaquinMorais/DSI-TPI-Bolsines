@@ -11,6 +11,8 @@ const MENSAJES: Record<string, string> = {
     "Ese bolsín ya no está disponible. Elige otro.",
   CORREO_NO_ENVIADO:
     "No se pudo enviar el correo. Intenta nuevamente.",
+  GPS_NO_DISPONIBLE:
+    "No se pudo consultar el GPS de los bolsines. Revisa la configuración del GPS (API key) e intenta de nuevo.",
   ROL_INSUFICIENTE: "No tienes permiso para consultar el seguimiento.",
   SOLICITUD_INVALIDA:
     "Los datos enviados no son válidos. Intenta nuevamente.",

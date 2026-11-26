@@ -25,7 +25,8 @@ class _IteradorFake:
 
     def elementoActual(self):
         self.llamadas.append("elementoActual")
-        return self._elementos[self._posicion]
+        elemento = self._elementos[self._posicion]
+        return elemento if self.comprobarFiltro([]) and elemento is not None else None
 
     def siguiente(self) -> None:
         self.llamadas.append("siguiente")
@@ -35,18 +36,20 @@ class _IteradorFake:
         return True
 
 
-def test_obtener_bolsines_enviados_usa_el_iterador() -> None:
+def test_obtener_codigo_bolsines_enviados_usa_el_iterador() -> None:
     gestor = object.__new__(GestorBuscarBolsines)
-    gestor.bolsines = [_BolsinStub(101), _BolsinStub(111)]
+    # None simula un bolsin que no cumple comprobarFiltro().
+    gestor.bolsines = [_BolsinStub(101), None, _BolsinStub(111)]
     gestor.bolsinesEnviados = []
     gestor.codigoBolsin = []
 
     fake = _IteradorFake(gestor.bolsines)
     gestor.crearIterador = lambda elementos: fake
 
-    resultado = gestor.obtenerBolsinesEnviados()
+    resultado = gestor.obtenerCodigoBolsinesEnviados()
 
-    assert [b.getNumeroBolsin() for b in resultado] == [101, 111]
+    assert resultado == [101, 111]
+    assert [b.getNumeroBolsin() for b in gestor.bolsinesEnviados] == [101, 111]
     assert gestor.codigoBolsin == [101, 111]
     assert "primero" in fake.llamadas
     assert "haFinalizado" in fake.llamadas

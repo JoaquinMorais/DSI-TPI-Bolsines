@@ -18,7 +18,7 @@ from schemas.seguimiento import (
     SinUbicacionOut,
 )
 from services import registro_casos_uso
-from services.errores import SinBolsinesEnviadosError
+from services.errores import GPSNoDisponibleError, SinBolsinesEnviadosError
 from utils.auth import encargado_bolsines_dependency
 from utils.errores import ErrorDeApi
 
@@ -81,6 +81,10 @@ async def iniciar(
     except SinBolsinesEnviadosError as exc:
         raise ErrorDeApi(
             status.HTTP_404_NOT_FOUND, "SIN_BOLSINES_ENVIADOS", str(exc)
+        ) from exc
+    except GPSNoDisponibleError as exc:
+        raise ErrorDeApi(
+            status.HTTP_502_BAD_GATEWAY, "GPS_NO_DISPONIBLE", str(exc)
         ) from exc
 
     idCU = registro_casos_uso.crear(gestor)

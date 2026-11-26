@@ -14,7 +14,7 @@ interface IIterador {
   + primero(): void
   + siguiente(): void
   + haFinalizado(): bool
-  + elementoActual(): Bolsin
+  + elementoActual(): Bolsin | null
   + comprobarFiltro(filtros: str[]): bool
 }
 
@@ -32,7 +32,7 @@ class GestorBuscarBolsines {
   + buscarUsuarioLogueado(): Empleado
   + getCMUsuarioLogueado(): ComisionMedica
   + opcionSeguirBolsines(): void
-  + obtenerBolsinesEnviados(): Bolsin[]
+  + obtenerCodigoBolsinesEnviados(): int[]
   + crearIterador(elementos: Bolsin[]): IIterador
   + obtenerUbicacionBolsin(): void
   + obtenerMapa(): MapaBolsines
@@ -52,9 +52,8 @@ class IteradorBolsin {
   + primero(): void
   + siguiente(): void
   + haFinalizado(): bool
-  + elementoActual(): Bolsin
+  + elementoActual(): Bolsin | null
   + comprobarFiltro(filtros: str[]): bool
-  - posicionarEnValido(): void
 }
 
 class Bolsin {
