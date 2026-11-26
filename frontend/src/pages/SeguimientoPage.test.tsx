@@ -141,7 +141,7 @@ describe("SeguimientoPage", () => {
   it("flujo principal muestra CM, lista y mapa", () => {
     configurar({ data: DATA });
     renderPage();
-    expect(screen.getByText("CM CM-CBA-01")).toBeInTheDocument();
+    expect(screen.getByText("Mi CM: CM-CBA-01")).toBeInTheDocument();
     expect(screen.getByText("Bolsin 101")).toBeInTheDocument();
     expect(screen.getByTestId("mapa")).toBeInTheDocument();
   });

@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 
-export type OpcionTab = { id: string; etiqueta: string };
+export type OpcionTab = { id: string; etiqueta: string; icono?: ReactNode };
 
 export function Tabs({
   opciones,
@@ -37,7 +37,11 @@ export function Tabs({
   }
 
   return (
-    <div role="tablist" aria-label={etiqueta} className="flex gap-2">
+    <div
+      role="tablist"
+      aria-label={etiqueta}
+      className="inline-flex gap-1 rounded-full border border-slate-200 bg-slate-100 p-1"
+    >
       {opciones.map((opcion, indice) => {
         const seleccionada = opcion.id === activa;
         return (
@@ -52,12 +56,13 @@ export function Tabs({
             tabIndex={seleccionada ? 0 : -1}
             onClick={() => onCambiar(opcion.id)}
             onKeyDown={(evento) => alTeclear(evento, indice)}
-            className={`rounded border px-4 py-2 text-sm ${
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
               seleccionada
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-300 bg-white text-slate-700"
+                ? "bg-white text-ink-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
+            {opcion.icono}
             {opcion.etiqueta}
           </button>
         );

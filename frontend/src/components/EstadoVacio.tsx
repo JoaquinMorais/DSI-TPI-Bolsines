@@ -1,3 +1,4 @@
+import { PackageOpen } from "lucide-react";
 import type { ReactNode } from "react";
 
 export function EstadoVacio({
@@ -10,10 +11,15 @@ export function EstadoVacio({
   accion?: ReactNode;
 }) {
   return (
-    <div className="rounded border border-dashed border-slate-300 bg-white p-6 text-center">
-      <p className="text-lg font-medium text-slate-800">{titulo}</p>
-      {descripcion && <p className="mt-1 text-sm text-slate-600">{descripcion}</p>}
-      {accion && <div className="mt-4">{accion}</div>}
+    <div className="card flex flex-col items-center gap-3 p-8 text-center">
+      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 text-brand-700">
+        <PackageOpen className="h-6 w-6" aria-hidden="true" />
+      </span>
+      <p className="text-base font-semibold text-ink-900">{titulo}</p>
+      {descripcion && (
+        <p className="max-w-md text-sm text-slate-600">{descripcion}</p>
+      )}
+      {accion && <div className="mt-1">{accion}</div>}
     </div>
   );
 }

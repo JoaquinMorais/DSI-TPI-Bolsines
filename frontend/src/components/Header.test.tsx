@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Header } from "./Header";
@@ -11,7 +12,9 @@ function renderConQuery(ui: ReactElement) {
     defaultOptions: { queries: { retry: false } },
   });
   return render(
-    <QueryClientProvider client={cliente}>{ui}</QueryClientProvider>,
+    <MemoryRouter>
+      <QueryClientProvider client={cliente}>{ui}</QueryClientProvider>
+    </MemoryRouter>,
   );
 }
 

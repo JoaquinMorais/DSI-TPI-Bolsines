@@ -1,3 +1,4 @@
+import { BellRing } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
@@ -11,6 +12,8 @@ export function DialogoConfirmacion({
   onRechazar,
   onCancelar,
   cargando = false,
+  varianteConfirmar = "primario",
+  icono,
 }: {
   abierto: boolean;
   titulo: string;
@@ -21,6 +24,8 @@ export function DialogoConfirmacion({
   onRechazar?: () => void;
   onCancelar: () => void;
   cargando?: boolean;
+  varianteConfirmar?: "primario" | "peligro";
+  icono?: ReactNode;
 }) {
   const cancelarRef = useRef<HTMLButtonElement>(null);
   const dialogoRef = useRef<HTMLDivElement>(null);
@@ -69,20 +74,36 @@ export function DialogoConfirmacion({
     return null;
   }
 
+  const claseConfirmar =
+    varianteConfirmar === "peligro"
+      ? "bg-red-600 text-white hover:bg-red-700"
+      : "bg-ink-900 text-white hover:bg-ink-800";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/40 p-4 backdrop-blur-sm">
       <div
         ref={dialogoRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialogo-titulo"
         aria-describedby="dialogo-descripcion"
-        className="w-full max-w-md rounded bg-white p-5 shadow-lg"
+        className="w-full max-w-md animate-slide-up rounded-2xl border border-slate-200 bg-white p-5 shadow-card-hover"
       >
-        <h2 id="dialogo-titulo" className="text-lg font-semibold">
-          {titulo}
-        </h2>
-        <div id="dialogo-descripcion" className="mt-2 text-sm text-slate-700">
+        <div className="flex items-start gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700">
+            {icono ?? <BellRing className="h-5 w-5" aria-hidden="true" />}
+          </span>
+          <h2
+            id="dialogo-titulo"
+            className="mt-1 text-lg font-semibold tracking-tight text-ink-900"
+          >
+            {titulo}
+          </h2>
+        </div>
+        <div
+          id="dialogo-descripcion"
+          className="mt-3 text-sm leading-relaxed text-slate-600"
+        >
           {children}
         </div>
         <div className="mt-5 flex flex-wrap justify-end gap-2">
@@ -91,7 +112,7 @@ export function DialogoConfirmacion({
             type="button"
             onClick={onCancelar}
             disabled={cargando}
-            className="rounded border border-slate-300 px-3 py-2 text-sm"
+            className="btn btn-ghost"
           >
             Cancelar
           </button>
@@ -100,7 +121,7 @@ export function DialogoConfirmacion({
               type="button"
               onClick={onRechazar}
               disabled={cargando}
-              className="rounded border border-slate-300 px-3 py-2 text-sm"
+              className="btn btn-secondary"
             >
               {textoRechazar ?? "No enviar"}
             </button>
@@ -109,7 +130,7 @@ export function DialogoConfirmacion({
             type="button"
             onClick={onConfirmar}
             disabled={cargando}
-            className="rounded bg-slate-900 px-3 py-2 text-sm text-white disabled:opacity-50"
+            className={`btn ${claseConfirmar}`}
           >
             {cargando ? "Enviando..." : textoConfirmar}
           </button>

@@ -25,6 +25,7 @@ La consigna de UX del TP se trabajo en clase (mapa de empatia, customer journey 
 | TanStack Query | Estado de servidor | Maneja carga, error, cache e invalidacion por `idCU` sin boilerplate. |
 | Leaflet + react-leaflet | Mapa | Libre, sin API key, suficiente para mostrar marcadores sobre OpenStreetMap. |
 | Tailwind CSS | Estilos | Utilitarios consistentes, responsive y faciles de auditar en accesibilidad. |
+| lucide-react | Iconografia | Set de iconos SVG consistente para navegacion, estados y acciones. |
 
 ### Mapa y backend
 
@@ -119,6 +120,21 @@ El exito del correo muestra el Toast "Correo enviado." y el panel indica "Correo
 - **Responsive:** en movil se muestran **pestanas Lista / Mapa** (una vista por vez; el detalle del bolsin aparece debajo del mapa) y en escritorio dos columnas (lista/detalle + mapa).
 - **Textos en espanol rioplatense neutro:** sin voseo marcado ni regionalismos; mensajes claros y directos. Los errores tecnicos se traducen a mensajes de usuario (`lib/errores.ts`).
 - **Estados explicitos:** nunca dejar la pantalla "en blanco": siempre carga, vacio, error o contenido.
+
+## 6.1 Sistema visual
+
+Rediseno "institucional moderno" para dar jerarquia y consistencia sin cambiar la logica del CU.
+
+- **Paleta:** `ink` (navy `#0f2a43`) para titulos y acciones principales, `brand` (teal `#0f766e`) para acentos y estados positivos, ambar para A3 y alertas.
+- **Superficies:** fondo `slate-50` con gradientes radiales sutiles; cards `rounded-2xl`, borde suave y `shadow-card`. Hover con elevacion leve en la lista.
+- **Tipografia:** sistema/Inter, titulos `tracking-tight`, subtitulos y metadatos en `slate-500/600`.
+- **Header:** sticky con blur, logo en tile navy→teal, navegacion Inicio/Seguimiento y chip de usuario con avatar de iniciales, rol y CM.
+- **Inicio:** hero navy→teal con CTA, tarjeta de acceso rapido, datos de la comision y badges de flujos A1–A5.
+- **Seguimiento:** stat cards (enviados, con ubicacion, sin ubicacion), filtros en card, lista tipo tarjetas con estado, mapa en card con leyenda y detalle con badge de ubicacion.
+- **Mapa:** tiles de OpenStreetMap con un filtro sutil para atenuar el color y marcadores circulares con el numero de bolsin; el seleccionado se agranda y cambia a navy.
+- **Componentes base:** clases `.card`, `.btn-*`, `.input`, `.badge`, `.page-title`, `.section-title` en `index.css`.
+- **Movimiento:** `fade-in` y `slide-up` suaves; se desactivan con `prefers-reduced-motion`.
+- **Accesibilidad:** contraste AA, foco visible, iconos decorativos con `aria-hidden`, labels y nombres accesibles conservados.
 
 ## 7. Arbol de archivos de `frontend/`
 
